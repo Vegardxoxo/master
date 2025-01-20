@@ -1,0 +1,34 @@
+name: Checkout issues
+
+on:
+  workflow_dispatch:
+
+# We need 'issues: read' so the GITHUB_TOKEN can fetch issues
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+
+      - name: Fetch and list local repo issues
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 'github' is an authenticated octokit client
+            // 'context' gives us the current owner/repo
+            const { data: issues } = await github.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            })
+            
+            console.log("Open issues in this repo:")
+            issues.forEach(issue => {
+              console.log(`#${issue.number}: ${issue.title}`)
+            })
