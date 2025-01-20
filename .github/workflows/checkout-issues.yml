@@ -3,7 +3,6 @@ name: Checkout issues
 on:
   workflow_dispatch:
 
-# We need 'issues: read' so the GITHUB_TOKEN can fetch issues
 permissions:
   contents: read
   issues: read
@@ -20,9 +19,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // 'github' is an authenticated octokit client
+            // 'github' is an authenticated Octokit client
             // 'context' gives us the current owner/repo
-            const { data: issues } = await github.issues.listForRepo({
+            const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open'
