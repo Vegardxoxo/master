@@ -1,1 +1,5 @@
-// This file contains type definitions for the data
+interface repositoryOverview {
+    name: string,
+    contributors: string[] | undefined,
+    openIssues: number,
+}
