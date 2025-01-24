@@ -1,8 +1,9 @@
-interface repositoryOverview {
+export type repositoryOverview = {
   name: string;
-  contributors: string[] | undefined;
+  contributors: string[];
   openIssues: number;
-}
+  url: string;
+};
 
 export type Payment = {
   id: string;
