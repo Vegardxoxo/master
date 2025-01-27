@@ -24,20 +24,18 @@ import { ChevronRight, Home, Plus, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { PowerIcon } from "@heroicons/react/24/outline";
 import AcmeLogo from "@/app/ui/acme-logo";
+import { Button } from "@/components/ui/button";
 
 function AddCourse() {
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton>
-        <Link
-          href="/dashboard/courses/add"
-          className="flex w-full grow items-center justify-center gap-2 rounded-full bg-blue-600 py-2 px-4 text-sm font-medium
-                     text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2
-                      focus-visible:outline-blue-600"
-        >
-          <span className="hidden md:block">Add Course</span>{" "}
-          <PlusIcon className="h-5 md:ml-4" />
-        </Link>
+      <SidebarMenuButton isActive={false} asChild>
+        <Button asChild variant="default" className={"rounded-xl bg-blue-600 "}>
+          <Link href="/dashboard/courses/add" className={" hover:bg-blue-600 hover:text-white"}>
+            Add Course
+            <PlusIcon className="h-5 w-5 md:ml-2" />
+          </Link>
+        </Button>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -65,7 +63,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <Collapsible className="group/collapsible">
+        <Collapsible defaultOpen={false} className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger>
