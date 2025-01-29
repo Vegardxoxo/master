@@ -30,8 +30,8 @@ function AddCourse() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton isActive={false} asChild>
-        <Button asChild variant="default" className={"rounded-xl bg-blue-600 "}>
-          <Link href="/dashboard/courses/add" className={" hover:bg-blue-600 hover:text-white"}>
+        <Button asChild variant="default" className={"rounded-xl bg-sky-500 "}>
+          <Link href="/dashboard/courses/add" className={" hover:bg-sky-500 hover:text-white"}>
             Add Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
@@ -46,7 +46,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <Link
-          className="mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-40"
+          className="mb-2 flex h-20 items-end justify-start rounded-md bg-sky-500 p-4 md:h-40"
           href="/"
         >
           <div className="w-32 text-white md:w-40">

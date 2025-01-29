@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  PencilIcon,
+  EyeIcon,
   ClipboardIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -13,10 +13,10 @@ export function ViewProject({ repo, owner }: { repo: string; owner: string }) {
   console.log(pathname);
   return (
     <Link
-      href={`${pathname}/${owner}/${repo}/view`}
+      href={`${pathname}/${owner}/${repo}`}
       className="rounded-md border p-2 hover:bg-gray-100"
     >
-      <PencilIcon className="w-5" />
+      <EyeIcon className="w-5" />
     </Link>
   );
 }
