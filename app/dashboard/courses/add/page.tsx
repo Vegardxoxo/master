@@ -2,7 +2,7 @@ import { AddRepository } from "@/app/ui/courses/add/add-repo-manually";
 import { AddRepositoryClassroom } from "@/app/ui/courses/add/add-repo-classrooms";
 
 import { DataTable } from "@/app/ui/courses/table";
-import { columns } from "@/app/ui/courses/columns";
+import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
 import { getDummyRepoData } from "@/app/lib/placeholder-data";
 import { AddCourse } from "@/app/ui/courses/add/add-course";
 

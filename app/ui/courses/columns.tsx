@@ -15,7 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import clsx from "clsx";
-import { DeleteFromList, AddToClipboard } from "@/app/ui/courses/buttons";
+import {
+  DeleteFromList,
+  AddToClipboard,
+  ViewProject,
+} from "@/app/ui/courses/buttons";
 
 /**
  * Columns are where you define the core of what your table will look like.
@@ -113,7 +117,7 @@ export const columns2: ColumnDef<Payment>[] = [
   },
 ];
 
-export const columns: ColumnDef<repositoryOverview>[] = [
+export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -184,6 +188,7 @@ export const columns: ColumnDef<repositoryOverview>[] = [
       const details = row.original;
       return (
         <div className="flex justify-end gap-2">
+          <ViewProject owner={"IT2810-H24"} repo={details.name} />
           <AddToClipboard url={details.url} />
           <DeleteFromList id={details.url} />
         </div>

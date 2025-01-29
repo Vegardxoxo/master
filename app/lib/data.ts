@@ -1,8 +1,10 @@
 import { Octokit } from "octokit";
-import { repositoryOverview } from "@/app/lib/definitions";
+import { _Branches, repositoryOverview } from "@/app/lib/definitions";
+import { formatTimestamp } from "@/app/lib/utils";
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
 
 export async function fetchRepoOverview(
@@ -34,13 +36,107 @@ export async function fetchRepoOverview(
 
     return {
       name: repoInfo.data.name,
-      contributors: contributorsRes.data.map((c) => c.login).filter((login): login is string => !!login),
-      openIssues: issuesRes.data.length, // or issuesRes.data if you need details
+      contributors: contributorsRes.data
+        .map((c) => c.login)
+        .filter((login): login is string => !!login),
+      openIssues: issuesRes.data.length,
+      url: repoInfo.data.html_url,
     };
   } catch (err) {
     console.error("Error fetching repo data via REST:", err);
     throw new Error("Failed to fetch repository overview.");
   }
+}
+
+/**
+ * Lists branches in a repository.
+ * @param owner - GitHub owner/organization
+ * @param repo  - Repository name
+ */
+export async function fetchBranches(owner: string, repo: string) {
+  try {
+    const { data: branchesData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/branches",
+      {
+        owner,
+        repo,
+      },
+    );
+    return branchesData;
+  } catch (e) {
+    console.error("Error fetching branches:", e);
+    throw new Error("Failed to fetch branches.");
+  }
+}
+
+/**
+ * Fetches details for a single branch (including its latest commit info).
+ * @param owner - GitHub owner/organization
+ * @param repo  - Repository name
+ * @param branch - Branch name
+ */
+export async function fetchBranchDetails(
+  owner: string,
+  repo: string,
+  branch: string,
+) {
+  try {
+    const { data: branchData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/branches/{branch}",
+      {
+        owner,
+        repo,
+        branch,
+      },
+    );
+    return branchData;
+  } catch (e) {
+    console.error("Error fetching details for branch:", e);
+    throw new Error("Failed to fetch details for branch.");
+  }
+}
+
+/**
+ * Fetches all branches, determines their "staleness" based on last commit date,
+ * and returns them with an added `status` and `lastUpdate`.
+ * @param owner - GitHub owner/organization
+ * @param repo  - Repository name
+ * @param branches
+ */
+export async function fetchBranchesWithStatus(
+  owner: string,
+  repo: string,
+  branches: _Branches[],
+) {
+  const now = new Date();
+  const staleThresholdDays = 14;
+
+  return await Promise.all(
+    branches.map(async (branch) => {
+      const commitData = await fetchBranchDetails(owner, repo, branch.name);
+
+      // Default to a far-past date if commit info is missing
+      let lastCommitDate = new Date(0);
+      if (commitData.commit?.commit?.author?.date) {
+        lastCommitDate = new Date(commitData.commit.commit.author.date);
+      }
+
+      // Calculate difference in days from now
+      const diffInMs = now.getTime() - lastCommitDate.getTime();
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      let status = "active";
+      if (diffInDays > staleThresholdDays) {
+        status = "stale";
+      }
+
+      return {
+        ...branch,
+        lastUpdate: formatTimestamp(lastCommitDate.toISOString()),
+        status,
+      };
+    }),
+  );
 }
 
 export async function fetchRepoDetails(owner: string, repo: string) {
@@ -71,6 +167,14 @@ export async function fetchRepoDetails(owner: string, repo: string) {
       },
     );
 
+    const { data: branchesData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/branches",
+      {
+        owner,
+        repo,
+      },
+    );
+
     // 4) Languages breakdown
     const { data: languagesData } = await octokit.request(
       "GET /repos/{owner}/{repo}/languages",
@@ -80,8 +184,6 @@ export async function fetchRepoDetails(owner: string, repo: string) {
       },
     );
 
-    // 5) README (Base64-encoded by default, so we need to decode)
-    // If some repos don't have a README, this call can fail with 404. You can wrap it in try/catch.
     let readmeContent = null;
     try {
       const { data: readmeData } = await octokit.request(
@@ -94,23 +196,18 @@ export async function fetchRepoDetails(owner: string, repo: string) {
           },
         },
       );
-      // readmeData might be the raw text if you specify "raw" media type,
-      // or base64-encoded if you use the default. For base64, you need:
-      // import { Buffer } from "buffer";
-      // readmeContent = Buffer.from(readmeData.content, "base64").toString("utf8");
 
-      // If you used `format: "raw"`, you already get plain text/Markdown:
       readmeContent = readmeData;
     } catch (e) {
-      // If the repo has no README, we skip
       console.warn("No README found or error fetching README:", e);
     }
 
     return {
       name: repoData.name,
       description: repoData.description,
-      license: repoData.license?.spdx_id, // e.g. "MIT"
-      topics: repoData.topics, // array of topics
+      license: repoData.license?.spdx_id,
+      topics: repoData.topics,
+      branches: branchesData,
 
       // Stats
       stars: repoData.stargazers_count,
