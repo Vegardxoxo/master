@@ -1,4 +1,4 @@
-import {components} from "@octokit/openapi-types";
+import { components } from "@octokit/openapi-types";
 
 export type repositoryOverview = {
   name: string;
@@ -127,4 +127,33 @@ export type BranchDetails = {
     };
   };
   protection_url: string;
+};
+
+export type ParsedCommit = {
+  date: string;
+  author: string;
+  message: string;
+  messageLength: number;
+  coAuthors: string[];
+  commentCount: number;
+};
+
+export type FrequencyEntry = {
+  day: string;
+  commits: number;
+};
+
+export type ParseCommitDataResult = {
+  dayEntries: DayEntry[];
+  total: number;
+  emailToDisplayName: Record<string, string>;
+};
+
+export type AuthorFrequency = {
+  [authorName: string]: number;
+};
+
+export type DayEntry = {
+  day: string;
+  [authorName: string]: string | number;
 };

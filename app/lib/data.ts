@@ -227,3 +227,38 @@ export async function fetchRepoDetails(owner: string, repo: string) {
     throw new Error("Failed to fetch repository details.");
   }
 }
+
+export async function fetchCommits(owner: string, repo: string) {
+  try {
+    const { data: commitData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/commits",
+      {
+        owner,
+        repo,
+        per_page: 20,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    return commitData;
+  } catch (e) {
+    console.log(e);
+    throw new Error("Failed to fetch commits");
+  }
+}
+
+export async function fetchAllCommits(owner: string, repo: string) {
+  try {
+      return await octokit.paginate(octokit.rest.repos.listCommits, {
+      owner,
+      repo,
+      per_page: 100,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
