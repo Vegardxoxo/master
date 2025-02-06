@@ -7,6 +7,11 @@ const octokit = new Octokit({
   baseUrl: "https://git.ntnu.no/api/v3",
 });
 
+/**
+ * Fetches an overview about the projects. Data is used to render data tables.
+ * @param owner
+ * @param repo
+ */
 export async function fetchRepoOverview(
   owner: string,
   repo: string,
@@ -139,8 +144,40 @@ export async function fetchBranchesWithStatus(
   );
 }
 
-export async function fetchRepoDetails(owner: string, repo: string) {
+/**
+ * Fetches contributors for the contributor card in the dashboard.
+ * @param owner
+ * @param repo
+ */
+export async function fetchContributors(owner: string, repo: string) {
   try {
+    console.log(owner);
+    console.log(repo);
+    const { data: contributorData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/contributors",
+      {
+        owner,
+        repo,
+      },
+    );
+    return {
+      contributors: contributorData.map((c: any) => c.login),
+    };
+  } catch (e) {
+    console.error("Error fetching repo details:", e);
+    throw new Error("Failed to fetch repository details.");
+  }
+}
+
+/**
+ * Fetches general information about the repository.
+ * @param owner
+ * @param repo
+ */
+export async function fetchProjectInfo(owner: string, repo: string) {
+  try {
+    console.log(owner);
+    console.log(repo);
     const { data: repoData } = await octokit.request(
       "GET /repos/{owner}/{repo}",
       {
@@ -148,86 +185,25 @@ export async function fetchRepoDetails(owner: string, repo: string) {
         repo,
       },
     );
-
-    const { data: contributorsData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/contributors",
-      {
-        owner,
-        repo,
-      },
-    );
-
-    // 3) Open issues
-    const { data: issuesData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/issues",
-      {
-        owner,
-        repo,
-        state: "all",
-      },
-    );
-
-    const { data: branchesData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/branches",
-      {
-        owner,
-        repo,
-      },
-    );
-
-    // 4) Languages breakdown
-    const { data: languagesData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/languages",
-      {
-        owner,
-        repo,
-      },
-    );
-
-    let readmeContent = null;
-    try {
-      const { data: readmeData } = await octokit.request(
-        "GET /repos/{owner}/{repo}/readme",
-        {
-          owner,
-          repo,
-          mediaType: {
-            format: "raw",
-          },
-        },
-      );
-
-      readmeContent = readmeData;
-    } catch (e) {
-      console.warn("No README found or error fetching README:", e);
-    }
-
     return {
       name: repoData.name,
-      description: repoData.description,
-      license: repoData.license?.spdx_id,
-      topics: repoData.topics,
-      branches: branchesData,
-
-      // Stats
       stars: repoData.stargazers_count,
       forks: repoData.forks_count,
-      watchers: repoData.watchers_count, // some repos have watchers_count = stargazers_count
-      openIssuesCount: repoData.open_issues_count, // also includes PRs if not separated
-
-      // Detailed calls
-      contributors: contributorsData.map((c: any) => c.login),
-      openIssues: issuesData.length, // or just issuesData if you want the full array
-      languages: languagesData, // object of { "JavaScript": 12345, "CSS": 6789, ... }
-      readme: readmeContent, // raw Markdown or decoded text
+      watchers: repoData.watchers_count,
+      openIssues: repoData.open_issues_count,
       updatedAt: repoData.updated_at,
     };
-  } catch (err) {
-    console.error("Error fetching repo details:", err);
+  } catch (e) {
+    console.error("Error fetching repo details:", e);
     throw new Error("Failed to fetch repository details.");
   }
 }
 
+/**
+ * Fetches commits from a repository
+ * @param owner
+ * @param repo
+ */
 export async function fetchCommits(owner: string, repo: string) {
   try {
     const { data: commitData } = await octokit.request(
@@ -248,9 +224,14 @@ export async function fetchCommits(owner: string, repo: string) {
   }
 }
 
+/**
+ * Fetches all commits for a repository. Uses octokit's built in pagination.
+ * @param owner
+ * @param repo
+ */
 export async function fetchAllCommits(owner: string, repo: string) {
   try {
-      return await octokit.paginate(octokit.rest.repos.listCommits, {
+    return await octokit.paginate(octokit.rest.repos.listCommits, {
       owner,
       repo,
       per_page: 100,

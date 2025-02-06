@@ -1,18 +1,17 @@
+"use client";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
+  SidebarProvider,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import NavLinksCollapse, { NavLinks } from "@/app/ui/dashboard/nav_links";
 import {
@@ -20,18 +19,22 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
-import { ChevronRight, Home, Plus, PlusIcon } from "lucide-react";
+import { ChevronRight, PanelRightOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { PowerIcon } from "@heroicons/react/24/outline";
 import AcmeLogo from "@/app/ui/acme-logo";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils";
 
 function AddCourse() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton isActive={false} asChild>
         <Button asChild variant="default" className={"rounded-xl bg-sky-500 "}>
-          <Link href="/dashboard/courses/add" className={" hover:bg-sky-500 hover:text-white"}>
+          <Link
+            href="/dashboard/courses/add"
+            className={" hover:bg-sky-500 hover:text-white"}
+          >
             Add Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
@@ -41,9 +44,9 @@ function AddCourse() {
   );
 }
 
-export function AppSidebar() {
+function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar collapsible={"offcanvas"}>
       <SidebarHeader>
         <Link
           className="mb-2 flex h-20 items-end justify-start rounded-md bg-sky-500 p-4 md:h-40"
@@ -73,7 +76,11 @@ export function AppSidebar() {
                 <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
               </CollapsibleTrigger>
             </SidebarGroupLabel>
-            <CollapsibleContent>
+            <CollapsibleContent
+              className={cn(
+                "text-popover-foreground outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+              )}
+            >
               <SidebarGroupContent>
                 <SidebarMenu>
                   <NavLinksCollapse />
@@ -94,5 +101,33 @@ export function AppSidebar() {
         </form>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+export function CustomTrigger() {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className=""
+      onClick={toggleSidebar}
+      disabled={false}
+    >
+      <PanelRightOpen className="h-10 w-10" />
+      <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  );
+}
+
+export default function SideBar() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <CustomTrigger />
+      </main>
+    </SidebarProvider>
   );
 }

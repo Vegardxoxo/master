@@ -1,14 +1,11 @@
-import AcmeLogo from '@/app/ui/acme-logo';
-import {ArrowRightIcon} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import clsx from "clsx";
-import {lusitana} from "@/app/ui/fonts";
-import Image from "next/image";
+import { getModels } from "@/app/lib/model";
 
-export default function Page() {
-    return (
-        <main className="flex min-h-screen flex-col p-6">
-            <p>Root</p>
-        </main>
-    );
+export default async function Page() {
+  const models = await getModels();
+  console.log(models);
+  return (
+    <main className="flex min-h-screen flex-col p-6">
+      <p>Root</p>
+    </main>
+  );
 }

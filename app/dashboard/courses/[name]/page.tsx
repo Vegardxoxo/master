@@ -1,14 +1,7 @@
 import { DataTable } from "@/app/ui/courses/table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
-import {
-  getData,
-  getDummyRepoData,
-  studentRepos,
-  getRepos,
-} from "@/app/lib/placeholder-data";
+import { getRepos } from "@/app/lib/placeholder-data";
 import { fetchRepoOverview } from "@/app/lib/data";
-import { AddRepository } from "@/app/ui/courses/add/add-repo-manually";
-import { AddRepositoryClassroom } from "@/app/ui/courses/add/add-repo-classrooms";
 import AddRepos from "@/app/ui/courses/add/add-repos";
 
 interface CoursePageProps {

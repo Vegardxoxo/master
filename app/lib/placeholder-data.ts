@@ -1,7 +1,7 @@
 // placeholder data
 
 import { Home, Settings } from "lucide-react";
-import { Payment, repositoryOverview } from "@/app/lib/definitions";
+import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions";
 
 // export const studentRepos = [
 //   { owner: "Vegardxoxo", repo: "bachelor_project" },
@@ -19,8 +19,6 @@ export const getRepos = () => {
   }
   return repos;
 };
-const a = getRepos();
-console.log(a)
 
 export const studentRepos = [
   { owner: "IT2810-H24", repo: "T01-Project-2" },
@@ -56,6 +54,53 @@ export const links = [
     icon: Settings,
   },
 ];
+
+export async function getDummyModelData(): Promise<LLMResponse[]> {
+  return [
+    {
+      url: "https://github.com/Vegardxoxo/Repo1/commit/abc123",
+      commit_message: "Initial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commit",
+      category: "Excellent",
+      reason: "Well-structured and clear message",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo2/commit/def456",
+      commit_message: "Added new feature",
+      category: "Good",
+      reason: "Descriptive but could be more detailed",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo3/commit/ghi789",
+      commit_message: "Fixed bug",
+      category: "Needs Improvement",
+      reason: "Message is too vague",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo4/commit/jkl012",
+      commit_message: "Refactored code",
+      category: "Good",
+      reason: "Clear message but lacks detail",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo5/commit/mno345",
+      commit_message: "Updated documentation",
+      category: "Excellent",
+      reason: "Very detailed and clear",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo6/commit/pqr678",
+      commit_message: "Improved performance",
+      category: "Good",
+      reason: "Descriptive but could be more specific",
+    },
+    {
+      url: "https://github.com/Vegardxoxo/Repo7/commit/stu901",
+      commit_message: "Fixed typo",
+      category: "Needs Improvement",
+      reason: "Too brief",
+    },
+  ];
+}
 
 export async function getData(): Promise<Payment[]> {
   return [
