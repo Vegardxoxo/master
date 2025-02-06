@@ -1,14 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { fetchContributors } from "@/app/lib/data";
 
-interface ContributorsListProps {
-  contributors: string[];
-}
-
-export function ContributorsList({ contributors }: ContributorsListProps) {
+export default async function ContributorsList({
+  owner,
+  repo,
+}: {
+  owner: string;
+  repo: string;
+}) {
+  const { contributors } = await fetchContributors(owner, repo);
   return (
-    <Card className={"group hover:bg-sky-500"}>
+    <Card className={"group hover:bg-sky-500 md:w-2/3"}>
       <CardHeader>
         <CardTitle className={"group-hover:text-white"}>Contributors</CardTitle>
       </CardHeader>
@@ -24,7 +28,12 @@ export function ContributorsList({ contributors }: ContributorsListProps) {
                 <AvatarFallback>{contributor[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <span className="ml-2  group-hover:text-white">
-                <Link href={`https://git.ntnu.no/${contributor}`}>
+                <Link
+                  className={"hover:underline"}
+                  href={`https://git.ntnu.no/${contributor}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {contributor}
                 </Link>
               </span>
