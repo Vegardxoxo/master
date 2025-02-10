@@ -6,10 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { CommitEval } from "@/app/lib/definitions";
+import type {CommitEval, LLMResponse} from "@/app/lib/definitions";
 import Link from "next/link";
 
-export default function CommitTable({ data }: { data: CommitEval[] }) {
+export default function CommitTable({ data }: { data: LLMResponse[] }) {
   return (
     <Table>
       <TableHeader>

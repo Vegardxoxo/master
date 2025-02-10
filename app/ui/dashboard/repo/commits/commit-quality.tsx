@@ -15,7 +15,7 @@ import {
   Sector,
   Tooltip,
 } from "recharts";
-import type { CommitEval } from "@/app/lib/definitions";
+import type { CommitEval, LLMResponse } from "@/app/lib/definitions";
 import { SetStateAction, useState } from "react";
 import CommitTable from "@/app/ui/dashboard/repo/commits/commit-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +31,7 @@ interface ActiveShape {
   fill: string;
 }
 
-export default function CommitQuality({ data }: { data: CommitEval[] }) {
+export default function CommitQuality({ data }: { data: LLMResponse[] }) {
   if (!data || data.length === 0) {
     return <p>No commit data available.</p>;
   }
@@ -184,7 +184,7 @@ export default function CommitQuality({ data }: { data: CommitEval[] }) {
         </div>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className={"h-1/2 w-full "}>
+            <DialogContent className="h-[50vh] overflow-auto">
               <DialogHeader>
                 <DialogTitle>Commit Details</DialogTitle>
                 <DialogDescription className={"font-bold"}>

@@ -35,6 +35,7 @@ export type MappedCommitMessage = {
 };
 
 export type CommitMessageLong = {
+  sha: string;
   url: string;
   commit_message: string;
 };
@@ -72,4 +73,25 @@ export type LLMResponse = {
   commit_message: string;
   category: "Excellent" | "Good" | "Needs Improvement";
   reason: string;
+};
+
+export interface CommitStats {
+  name: string;
+  total: number;
+  additions: number;
+  deletions: number;
+  commits: number;
+  average_changes: number;
+  biggest_commit: number;
+  biggest_commit_url: string;
+  co_authored_lines: number;
+  additions_deletions_ratio: number;
+  group_average: number;
+}
+
+export type VisibleSections = {
+  overview: boolean;
+  commits: boolean;
+  branches: boolean;
+  pullRequests: boolean;
 };
