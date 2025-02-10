@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
+import {VisibleSections} from "@/app/lib/definitions";
 
 type DashboardProps = {
   owner: string;
@@ -20,11 +21,12 @@ type DashboardProps = {
     projectInfo: React.ReactNode;
     commitQuality: React.ReactNode;
     commitFrequency: React.ReactNode;
+    commitSize: React.ReactNode;
   };
 };
 
 export default function Dashboard({ owner, repo, children }: DashboardProps) {
-  const [visibleSections, setVisibleSections] = React.useState({
+  const [visibleSections, setVisibleSections] = React.useState<VisibleSections>({
     overview: true,
     commits: true,
     branches: true,
@@ -41,7 +43,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
   return (
     <div className=" flex flex-col lg:flex-row md:space-x-10 min-h-screen">
       {/* Dashboard DashboardNavigation */}
-      <div className="static md:sticky top-0 h-1/4 w-72 pt-8 sm:max-md:mx-auto sm:max-md:w-full">
+      <div className="static md:sticky top-0 h-1/4 min-w-fit pt-8 sm:max-md:mx-auto sm:max-md:w-full">
         <DashboardNavigation onToggle={toggleSection} visibleSections={visibleSections} />
       </div>
 
@@ -85,6 +87,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
             <CardContent className="flex flex-col gap-y-10">
               {children.commitQuality}
               {children.commitFrequency}
+              {children.commitSize}
             </CardContent>
           </Card>
         )}

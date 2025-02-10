@@ -4,14 +4,14 @@ import ContributorsList from "@/app/ui/dashboard/repo/project info/contributors"
 import ProjectInfo from "@/app/ui/dashboard/repo/project info/project-info";
 import { CommitQualityChartSkeleton } from "@/app/ui/skeletons";
 import CommitQualityWrapper from "@/app/ui/dashboard/repo/commits/commit-quality-wrapper";
-import CommitFrequency from "@/app/ui/dashboard/repo/commits/commit-frequency";
+import CommitFrequencyWrapper from "@/app/ui/dashboard/repo/commits/commit-frequency-wrapper";
+import CommitSizeWrapper from "@/app/ui/dashboard/repo/commits/commit-size-wrapper";
+import { notFound } from "next/navigation";
 
-export default function Page({
-  params,
-}: {
-  params: { owner: string; repo: string };
-}) {
-  const { owner, repo } = params;
+export default async function Page(props: { params: Promise<{ owner: string, repo: string }> }) {
+  const params = await props.params;
+  const owner = params.owner;
+  const repo = params.repo;
 
   return (
     <Dashboard owner={owner} repo={repo}>
@@ -27,7 +27,8 @@ export default function Page({
             <CommitQualityWrapper owner={owner} repo={repo} />
           </Suspense>
         ),
-        commitFrequency: <CommitFrequency owner={owner} repo={repo} />,
+        commitFrequency: <CommitFrequencyWrapper owner={owner} repo={repo} />,
+        commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
       }}
     </Dashboard>
   );

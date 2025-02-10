@@ -1,6 +1,14 @@
 import { Octokit } from "octokit";
-import { _Branches, repositoryOverview } from "@/app/lib/definitions";
-import { formatTimestamp } from "@/app/lib/utils";
+import {
+  _Branches,
+  CommitMessageLong,
+  repositoryOverview,
+} from "@/app/lib/definitions";
+import {
+  formatTimestamp,
+  parseCommitStats,
+  parseCommitStatsGraphQL,
+} from "@/app/lib/utils";
 
 const octokit = new Octokit({
   auth: process.env.TOKEN,
@@ -151,8 +159,6 @@ export async function fetchBranchesWithStatus(
  */
 export async function fetchContributors(owner: string, repo: string) {
   try {
-    console.log(owner);
-    console.log(repo);
     const { data: contributorData } = await octokit.request(
       "GET /repos/{owner}/{repo}/contributors",
       {
@@ -176,8 +182,6 @@ export async function fetchContributors(owner: string, repo: string) {
  */
 export async function fetchProjectInfo(owner: string, repo: string) {
   try {
-    console.log(owner);
-    console.log(repo);
     const { data: repoData } = await octokit.request(
       "GET /repos/{owner}/{repo}",
       {
@@ -211,7 +215,7 @@ export async function fetchCommits(owner: string, repo: string) {
       {
         owner,
         repo,
-        per_page: 20,
+        per_page: 5,
         headers: {
           "X-GitHub-Api-Version": "2022-11-28",
         },
@@ -241,5 +245,79 @@ export async function fetchAllCommits(owner: string, repo: string) {
     });
   } catch (e) {
     console.log(e);
+    return [];
+  }
+}
+
+export async function fetchCommitStats(
+  owner: string,
+  repo: string,
+  ref: string,
+) {
+  try {
+    const { data: commitData } = await octokit.request(
+      "/repos/{owner}/{repo}/commits/{ref}",
+      {
+        owner,
+        repo,
+        ref,
+
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    return parseCommitStats(commitData);
+  } catch (e) {
+    console.log(e);
+    throw new Error("Failed to fetch details about commit:" + ref);
+  }
+}
+
+export async function fetchCommitStatsGraphQL(
+  owner: string,
+  repo: string,
+  data: CommitMessageLong[],
+) {
+  const shas = data.map((obj) => obj.sha);
+  const query = `
+    query($owner: String!, $repo: String!) {
+      repository(owner: $owner, name: $repo) {
+        ${shas
+          .map(
+            (sha, index) => `
+            commit${index}: object(oid: "${sha}") {
+              ... on Commit {
+                oid
+                committedDate
+                author {
+                  user {
+                    login
+                  }
+                  email
+                  name
+                }
+                additions
+                deletions
+                changedFiles
+                message
+                url
+              }
+            }
+          `,
+          )
+          .join("\n")}
+      }
+    }
+  `;
+
+  try {
+    const response = await octokit.graphql(query, { owner, repo });
+    const commits = Object.values(response.repository);
+    console.log(commits[0]);
+    return parseCommitStatsGraphQL(commits);
+  } catch (e) {
+    console.error("GraphQL Error:", e);
+    throw new Error("Failed to fetch commit details via GraphQL.");
   }
 }

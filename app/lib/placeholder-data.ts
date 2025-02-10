@@ -58,46 +58,49 @@ export const links = [
 export async function getDummyModelData(): Promise<LLMResponse[]> {
   return [
     {
-      url: "https://github.com/Vegardxoxo/Repo1/commit/abc123",
-      commit_message: "Initial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commitInitial commit",
+      url: "https://github.com/IT2810-H24/T01-Project-2/commit/a1b2c3",
+      commit_message:
+        "Set up project structure and added initial configuration",
       category: "Excellent",
-      reason: "Well-structured and clear message",
+      reason: "Clear and descriptive message reflecting the changes made",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo2/commit/def456",
-      commit_message: "Added new feature",
+      url: "https://github.com/IT2810-H24/T02-Project-2/commit/d4e5f6",
+      commit_message: "Implemented user authentication feature",
       category: "Good",
-      reason: "Descriptive but could be more detailed",
+      reason:
+        "Descriptive but could include more specifics about the implementation",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo3/commit/ghi789",
-      commit_message: "Fixed bug",
+      url: "https://github.com/IT2810-H24/T03-Project-2/commit/g7h8i9",
+      commit_message: "Fixed issue with login validation",
       category: "Needs Improvement",
-      reason: "Message is too vague",
+      reason: "Message lacks detail about the specific problem and solution",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo4/commit/jkl012",
-      commit_message: "Refactored code",
+      url: "https://github.com/IT2810-H24/T04-Project-2/commit/j1k2l3",
+      commit_message: "Refactored API calls for better performance",
       category: "Good",
-      reason: "Clear message but lacks detail",
+      reason: "Message is clear but could provide a more detailed context",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo5/commit/mno345",
-      commit_message: "Updated documentation",
+      url: "https://github.com/IT2810-H24/T05-Project-2/commit/m4n5o6",
+      commit_message: "Added detailed contributor guidelines in README",
       category: "Excellent",
-      reason: "Very detailed and clear",
+      reason: "Very clear and helpful for future collaborators",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo6/commit/pqr678",
-      commit_message: "Improved performance",
+      url: "https://github.com/IT2810-H24/T06-Project-2/commit/p7q8r9",
+      commit_message: "Optimized database queries for faster response times",
       category: "Good",
-      reason: "Descriptive but could be more specific",
+      reason:
+        "Message is descriptive but could specify what optimizations were made",
     },
     {
-      url: "https://github.com/Vegardxoxo/Repo7/commit/stu901",
-      commit_message: "Fixed typo",
+      url: "https://github.com/IT2810-H24/T07-Project-2/commit/s1t2u3",
+      commit_message: "Fixed typo in error messages displayed to users",
       category: "Needs Improvement",
-      reason: "Too brief",
+      reason: "Message is accurate but too trivial for a single commit",
     },
   ];
 }
@@ -303,3 +306,36 @@ export async function getDummyRepoData(): Promise<repositoryOverview[]> {
     },
   ];
 }
+
+
+const obj = {
+    "johanndn@stud.ntnu.no": {
+        "total": 12731,
+        "additions": 8362,
+        "deletions": 4369,
+        "commits": 14,
+        "name": "Johanne Dahl Norland"
+    },
+    "mariuwos@stud.ntnu.no": {
+        "total": 29205,
+        "additions": 24629,
+        "deletions": 4576,
+        "commits": 40,
+        "name": "Marius Waag Østro"
+    },
+    "jennystr@stud.ntnu.no": {
+        "total": 17295,
+        "additions": 12646,
+        "deletions": 4649,
+        "commits": 62,
+        "name": "Jenny Straumbotn"
+    },
+    "johannedn00@gmail.com": {
+        "total": 19998,
+        "additions": 16446,
+        "deletions": 3552,
+        "commits": 40,
+        "name": "johannedn"
+    }
+}
+
