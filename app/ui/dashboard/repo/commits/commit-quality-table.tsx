@@ -9,7 +9,7 @@ import {
 import type {CommitEval, LLMResponse} from "@/app/lib/definitions";
 import Link from "next/link";
 
-export default function CommitTable({ data }: { data: LLMResponse[] }) {
+export default function CommitQualityTable({ data }: { data: LLMResponse[] }) {
   return (
     <Table>
       <TableHeader>

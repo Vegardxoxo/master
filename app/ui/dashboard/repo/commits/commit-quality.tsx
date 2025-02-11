@@ -17,8 +17,9 @@ import {
 } from "recharts";
 import type { CommitEval, LLMResponse } from "@/app/lib/definitions";
 import { SetStateAction, useState } from "react";
-import CommitTable from "@/app/ui/dashboard/repo/commits/commit-table";
+import CommitQualityTable from "@/app/ui/dashboard/repo/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {ChartContainer} from "@/components/ui/chart";
 
 interface ActiveShape {
   cx: number;
@@ -125,12 +126,12 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
     : [];
 
   return (
-    <Card className="space-y-4 w-full">
+    <Card>
       <CardHeader>
         <CardTitle>Commit Message Quality</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full">
+        <ChartContainer config={{}} className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -165,7 +166,7 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
               />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartContainer>
         <div className="flex justify-center gap-4 ">
           {messageQuality.map((entry) => (
             <div
@@ -192,7 +193,7 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
                   {selectedCategory}.
                 </DialogDescription>
               </DialogHeader>
-              <CommitTable data={filteredData} />
+              <CommitQualityTable data={filteredData} />
             </DialogContent>
           </Dialog>
         )}

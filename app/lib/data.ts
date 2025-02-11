@@ -314,8 +314,8 @@ export async function fetchCommitStatsGraphQL(
   try {
     const response = await octokit.graphql(query, { owner, repo });
     const commits = Object.values(response.repository);
-    console.log(commits[0]);
-    return parseCommitStatsGraphQL(commits);
+    const parsedCommits = parseCommitStatsGraphQL(commits);
+    return {parsedCommits, commits};
   } catch (e) {
     console.error("GraphQL Error:", e);
     throw new Error("Failed to fetch commit details via GraphQL.");

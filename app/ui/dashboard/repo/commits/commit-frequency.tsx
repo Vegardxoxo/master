@@ -18,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChartContainer } from "@/components/ui/chart";
 
 export default function CommitFrequency({
   authors,
@@ -64,24 +65,26 @@ export default function CommitFrequency({
         </div>
 
         {/*Chart*/}
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={data}>
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            {selectedAuthors.map((email, index) => (
-              <Line
-                key={email}
-                type="monotone"
-                dataKey={email}
-                name={authors[email]}
-                stroke={`hsl(${(index * 360) / authorEntries.length}, 70%, 50%)`}
-                strokeWidth={2}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <ChartContainer config={{}} className="h-[400px] w-full">
+          <ResponsiveContainer width="100%" height={"100%"}>
+            <LineChart data={data}>
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {selectedAuthors.map((email, index) => (
+                <Line
+                  key={email}
+                  type="monotone"
+                  dataKey={email}
+                  name={authors[email]}
+                  stroke={`hsl(${(index * 360) / authorEntries.length}, 70%, 50%)`}
+                  strokeWidth={2}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

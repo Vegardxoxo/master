@@ -9,7 +9,7 @@ import {
 import { CommitStats } from "@/app/lib/definitions";
 import Link from "next/link";
 
-export default function UserCommits({ data }: { data: CommitStats }) {
+export default function CommitContributionsTable({ data }: { data: CommitStats }) {
   const isHighAddDelRatio = data.additions_deletions_ratio > 1;
   const isHighAverageChanges = data.average_changes > 50;
 
