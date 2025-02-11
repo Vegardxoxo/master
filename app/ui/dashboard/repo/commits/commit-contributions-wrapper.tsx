@@ -1,10 +1,8 @@
 import { parseCommitData } from "@/app/lib/utils";
 import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data";
 import CommitContributions from "@/app/ui/dashboard/repo/commits/commit-contributions";
-import CommitFrequency from "@/app/ui/dashboard/repo/commits/commit-frequency";
-import CommitSize from "@/app/ui/dashboard/repo/commits/commit-size";
 
-export default async function CommitSizeWrapper({
+export default async function CommitContributionsWrapper({
   owner,
   repo,
 }: {
@@ -13,7 +11,7 @@ export default async function CommitSizeWrapper({
 }) {
   const commitData = await fetchAllCommits(owner, repo);
   const { commitSummary } = parseCommitData(commitData);
-  const { commits } = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
-
-  return <CommitSize data={commits} />;
+  const {parsedCommits} = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
+  console.log(parsedCommits);
+    return <CommitContributions data={parsedCommits} />;
 }

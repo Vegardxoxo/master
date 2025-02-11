@@ -1,24 +1,19 @@
 "use client";
+import React, { useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
-  Bar,
+  ReferenceLine,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  LabelList,
 } from "recharts";
-import { ChartContainer } from "@/components/ui/chart";
-import { CommitStats } from "@/app/lib/definitions";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useState } from "react";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import {
   Dialog,
   DialogContent,
@@ -26,136 +21,202 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import UserCommits from "@/app/ui/dashboard/repo/commits/user-commits";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import CommitSizeTable from "@/app/ui/dashboard/repo/commits/commit-size-table";
 
-export default function CommitSize({
-  data,
-}: {
-  data: Record<string, CommitStats>;
-}) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<CommitStats | null>(null);
-  const chartData = Object.keys(data).map((key) => ({
-    name: data[key].name,
-    additions: data[key].additions,
-    deletions: data[key].deletions,
-    co_authored_lines: data[key].co_authored_lines,
-    total:
-      data[key].additions + data[key].deletions + data[key].co_authored_lines,
-    email: key,
-    commits: data[key].commits,
-  }));
+export default function CommitSize({ data }: { data: any[] }) {
+  const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-background p-4 rounded-md shadow-md border border-border">
-          <p className="font-bold">{label}</p>
-          <p className="text-green-500">Additions: {payload[0].value}</p>
-          <p className="text-red-500">Deletions: {payload[1].value}</p>
-          <p className="text-orange-500">
-            Co-authored lines: {payload[2].value}
-          </p>
-          <p className="font-semibold">
-            Total: {payload[0].value + payload[1].value + payload[2].value}
-          </p>
-        </div>
-      );
-    }
-    return null;
+  const processedData = useMemo(() => {
+    return data.map((commit) => {
+      const totalChanges = commit.additions + commit.deletions;
+      return {
+        ...commit,
+        committedDate: new Date(commit.committedDate).getTime(),
+        totalChanges: totalChanges === 0 ? 1 : totalChanges,
+      };
+    });
+  }, [data]);
+  console.log(processedData);
+
+  // Get unique months
+  const months = useMemo(() => {
+    const uniqueMonths = new Set(
+      data.map((commit) => {
+        const date = new Date(commit.committedDate);
+        return `${date.getFullYear()}-${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}`;
+      }),
+    );
+    return Array.from(uniqueMonths).sort();
+  }, [data]);
+
+  // Filter data by month
+  const filteredData = useMemo(() => {
+    if (selectedMonth === "all") return processedData;
+    return processedData.filter((commit) => {
+      const date = new Date(commit.committedDate);
+      const commitMonth = `${date.getFullYear()}-${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}`;
+      return commitMonth === selectedMonth;
+    });
+  }, [processedData, selectedMonth]);
+
+  const handleCommitClick = (commit: any) => {
+    setSelectedCommit(commit);
   };
 
-  const handleBarClick = (entry: any) => {
-    const userEmail = entry.email;
-    setSelectedUser(data[userEmail]);
-    setIsOpen(true);
+  const closeDialog = () => {
+    setSelectedCommit(null);
   };
+
+  // Unique days for drawing vertical reference lines
+  const uniqueDays = useMemo(() => {
+    const days = new Set(
+      filteredData.map((item) =>
+        new Date(item.committedDate).setHours(0, 0, 0, 0),
+      ),
+    );
+    return Array.from(days);
+  }, [filteredData]);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Commit size</CardTitle>
-        <CardDescription>Sum of value</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          Commit Size Scatter Plot
+        </CardTitle>
+        <div className="flex justify-end">
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+
+            {/*Month Selector*/}
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="all">All</SelectItem>
+                {months.map((month) => (
+                  <SelectItem key={month} value={month}>
+                    {new Date(month).toLocaleString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
+
+      {/*Chart*/}
       <CardContent>
         <ChartContainer
           config={{
-            additions: {
-              label: "Additions",
-              color: "hsl(142, 76%, 36%)",
-            },
-            deletions: {
-              label: "Deletions",
-              color: "hsl(var(--destructive))",
-            },
-            co_authored_lines: {
-              label: "Co-authored Lines",
-              color: "hsl(32, 98%, 56%)", // Orange color for co-authored lines
+            totalChanges: {
+              label: "Total Changes",
+              color: "hsl(var(--chart-2))",
             },
           }}
           className="h-[300px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              className={"hover:cursor-pointer"}
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <XAxis dataKey="name" />
+            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              {uniqueDays.map((day) => (
+                <ReferenceLine
+                  key={day}
+                  x={day}
+                  stroke="hsl(var(--chart-1))"
+                  strokeOpacity={0.5}
+                  strokeDasharray="3 3"
+                  ifOverflow="extendDomain"
+                />
+              ))}
+
+              <XAxis
+                dataKey="committedDate"
+                name="Date"
+                type="number"
+                scale="time"
+                domain={["dataMin - 86400000", "dataMax + 86400000"]}
+                tickFormatter={(timestamp) =>
+                  new Date(timestamp).toLocaleDateString()
+                }
+                tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                allowDataOverflow
+                padding={{ left: 20, right: 20 }}
+              />
               <YAxis
+                dataKey="totalChanges"
+                name="Total Changes"
+                allowDataOverflow
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
                 label={{
-                  value: "Sum of Values",
+                  value: "Total Changes",
                   angle: -90,
                   position: "insideLeft",
+                  style: { textAnchor: "middle" },
                 }}
+                scale={"log"}
+                domain={[1, "auto"]}
+                padding={{ top: 20, bottom: 10 }}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
 
-              <Bar
-                className={"hover:cursor-pointer"}
-                dataKey="additions"
-                stackId="a"
-                fill="var(--color-additions)"
-                onClick={handleBarClick}
+              <ChartTooltip
+                cursor={{ strokeDasharray: "3 3" }}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value, name) => {
+                      if (name === "Date") {
+                        return [new Date(value).toLocaleString("en-US"), null];
+                      }
+                      return [`${value} `, name];
+                    }}
+                  />
+                }
               />
-              <Bar
-                className={"hover:cursor-pointer"}
-                dataKey="deletions"
-                stackId="a"
-                fill="var(--color-deletions)"
-                onClick={handleBarClick}
+              <Scatter
+                name="Commits"
+                data={filteredData}
+                fill="var(--color-totalChanges)"
+                onClick={handleCommitClick}
+                x="committedDate"
+                y="totalChanges"
               />
-              <Bar
-                className={"hover:cursor-pointer"}
-                dataKey="co_authored_lines"
-                stackId="a"
-                fill="var(--color-co_authored_lines)"
-                onClick={handleBarClick}
-              >
-                <LabelList
-                  dataKey="commits"
-                  position="top"
-                  className={"font-bold "}
-                  formatter={(value: string) => `commits: ${value}`}
-                />
-              </Bar>
-            </BarChart>
+            </ScatterChart>
           </ResponsiveContainer>
         </ChartContainer>
-
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="h-[50vh] overflow-auto">
-            <DialogHeader>
-              <DialogTitle>Commit Details</DialogTitle>
-              <DialogDescription className="font-bold">
-                Detailed information for {selectedUser?.name}.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedUser && <UserCommits data={selectedUser} />}
-          </DialogContent>
-        </Dialog>
       </CardContent>
+
+      {/*Drill-Down*/}
+      <Dialog open={Boolean(selectedCommit)} onOpenChange={closeDialog}>
+        <DialogContent className="h-[50vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Commit Details</DialogTitle>
+            <DialogDescription className="font-bold">
+              Detailed information for the selected commit.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCommit && <CommitSizeTable data={selectedCommit} />}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -11,27 +11,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import {VisibleSections} from "@/app/lib/definitions";
+import { VisibleSections } from "@/app/lib/definitions";
 
 type DashboardProps = {
   owner: string;
   repo: string;
   children: {
+    // Project info
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
+    // Commit related
     commitQuality: React.ReactNode;
     commitFrequency: React.ReactNode;
+    commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
   };
 };
 
 export default function Dashboard({ owner, repo, children }: DashboardProps) {
-  const [visibleSections, setVisibleSections] = React.useState<VisibleSections>({
-    overview: true,
-    commits: true,
-    branches: true,
-    pullRequests: true,
-  });
+  const [visibleSections, setVisibleSections] = React.useState<VisibleSections>(
+    {
+      overview: true,
+      commits: true,
+      branches: true,
+      pullRequests: true,
+    },
+  );
 
   const toggleSection = (section: keyof typeof visibleSections) => {
     setVisibleSections((prev) => ({
@@ -44,7 +49,10 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
     <div className=" flex flex-col lg:flex-row md:space-x-10 min-h-screen">
       {/* Dashboard DashboardNavigation */}
       <div className="static md:sticky top-0 h-1/4 min-w-fit pt-8 sm:max-md:mx-auto sm:max-md:w-full">
-        <DashboardNavigation onToggle={toggleSection} visibleSections={visibleSections} />
+        <DashboardNavigation
+          onToggle={toggleSection}
+          visibleSections={visibleSections}
+        />
       </div>
 
       {/*Dashboard Content*/}
@@ -88,6 +96,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
               {children.commitQuality}
               {children.commitFrequency}
               {children.commitSize}
+              {children.commitContribution}
             </CardContent>
           </Card>
         )}
