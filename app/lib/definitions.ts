@@ -98,8 +98,10 @@ export interface CommitStats {
 }
 
 export type VisibleSections = {
-  overview: boolean;
-  commits: boolean;
-  branches: boolean;
-  pullRequests: boolean;
-};
+  [key: string]:
+    | boolean
+    | {
+        visible: boolean
+        [subKey: string]: boolean
+      }
+}
