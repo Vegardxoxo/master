@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ReferenceLine,
@@ -8,6 +8,7 @@ import {
   ScatterChart,
   XAxis,
   YAxis,
+  ZAxis,
 } from "recharts";
 import {
   ChartContainer,
@@ -42,6 +43,7 @@ export default function CommitSize({ data }: { data: any[] }) {
         ...commit,
         committedDate: new Date(commit.committedDate).getTime(),
         totalChanges: totalChanges === 0 ? 1 : totalChanges,
+        size: Math.log(totalChanges + 1) * 2, // Logarithmic scale for better visualization
       };
     });
   }, [data]);
@@ -51,9 +53,7 @@ export default function CommitSize({ data }: { data: any[] }) {
     const uniqueMonths = new Set(
       data.map((commit) => {
         const date = new Date(commit.committedDate);
-        return `${date.getFullYear()}-${(date.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}`;
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
       }),
     );
     return Array.from(uniqueMonths).sort();
@@ -64,9 +64,7 @@ export default function CommitSize({ data }: { data: any[] }) {
     if (selectedMonth === "all") return processedData;
     return processedData.filter((commit) => {
       const date = new Date(commit.committedDate);
-      const commitMonth = `${date.getFullYear()}-${(date.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}`;
+      const commitMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
       return commitMonth === selectedMonth;
     });
   }, [processedData, selectedMonth]);
@@ -89,38 +87,37 @@ export default function CommitSize({ data }: { data: any[] }) {
     return Array.from(days);
   }, [filteredData]);
 
+  const maxChanges = Math.max(
+    ...filteredData.map((commit) => commit.totalChanges),
+  );
+
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl font-bold">
           Commit Size Scatter Plot
         </CardTitle>
-        <div className="flex justify-end">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-
-            {/*Month Selector*/}
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                {months.map((month) => (
-                  <SelectItem key={month} value={month}>
-                    {new Date(month).toLocaleString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="all">All</SelectItem>
+              {months.map((month) => (
+                <SelectItem key={month} value={month}>
+                  {new Date(month).toLocaleString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </CardHeader>
-
-      {/*Chart*/}
       <CardContent>
+        {/*Chart*/}
         <ChartContainer
           config={{
             totalChanges: {
@@ -128,7 +125,7 @@ export default function CommitSize({ data }: { data: any[] }) {
               color: "hsl(var(--chart-2))",
             },
           }}
-          className="h-[300px] w-full"
+          className="h-[500px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
@@ -136,13 +133,12 @@ export default function CommitSize({ data }: { data: any[] }) {
                 <ReferenceLine
                   key={day}
                   x={day}
-                  stroke="hsl(var(--chart-1))"
-                  strokeOpacity={0.5}
-                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                  strokeOpacity={1}
+                  strokeDasharray="1 1"
                   ifOverflow="extendDomain"
                 />
               ))}
-
               <XAxis
                 dataKey="committedDate"
                 name="Date"
@@ -162,6 +158,8 @@ export default function CommitSize({ data }: { data: any[] }) {
               <YAxis
                 dataKey="totalChanges"
                 name="Total Changes"
+                type="number"
+                domain={[1, maxChanges]}
                 allowDataOverflow
                 tickLine={false}
                 axisLine={false}
@@ -172,13 +170,12 @@ export default function CommitSize({ data }: { data: any[] }) {
                   position: "insideLeft",
                   style: { textAnchor: "middle" },
                 }}
-                scale={"log"}
-                domain={[1, "auto"]}
+                scale="log"
                 padding={{ top: 20, bottom: 10 }}
               />
-
+              <ZAxis dataKey="size" range={[20, 50]} />
               <ChartTooltip
-                cursor={{ strokeDasharray: "3 3" }}
+                cursor={{ strokeDasharray: "1 1" }}
                 content={
                   <ChartTooltipContent
                     indicator="dot"
@@ -195,6 +192,7 @@ export default function CommitSize({ data }: { data: any[] }) {
                 name="Commits"
                 data={filteredData}
                 fill="var(--color-totalChanges)"
+                fillOpacity={1}
                 onClick={handleCommitClick}
                 x="committedDate"
                 y="totalChanges"
@@ -202,11 +200,13 @@ export default function CommitSize({ data }: { data: any[] }) {
             </ScatterChart>
           </ResponsiveContainer>
         </ChartContainer>
+        <div className="mt-4 text-center text-sm text-muted-foreground">
+          Click on a point to view detailed commit information
+        </div>
       </CardContent>
-
-      {/*Drill-Down*/}
+      {/*Drill-down*/}
       <Dialog open={Boolean(selectedCommit)} onOpenChange={closeDialog}>
-        <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+        <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
           <DialogHeader className={"h-fit"}>
             <DialogTitle>Commit Details</DialogTitle>
             <DialogDescription className="font-bold">

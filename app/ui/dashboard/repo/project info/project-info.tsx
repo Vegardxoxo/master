@@ -17,30 +17,40 @@ export default async function ProjectInfo({
 }) {
   const data = await fetchProjectInfo(owner, repo);
   return (
-    <Card className={"group hover:bg-sky-500 md:w-2/3"}>
-      <CardHeader className={"group-hover:text-white"}>
-        <CardTitle>{data.name}</CardTitle>
-        <CardDescription className={"group-hover:text-white"}>
+    <Card className="w-full h-full">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold text-gray-800">
+          {data.name}
+        </CardTitle>
+        <CardDescription className="text-sm text-gray-500">
           Last updated: {new Date(data.updatedAt).toLocaleDateString()}
         </CardDescription>
       </CardHeader>
-      <CardContent className={"group-hover:text-white"}>
+      <CardContent>
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center">
-            <Star className="mr-2" />
-            <span>{data.stars} Stars</span>
+          <div className="flex items-center space-x-2">
+            <Star className="w-5 h-5 text-yellow-400" />
+            <span className="text-sm font-medium text-gray-700">
+              {data.stars} Stars
+            </span>
           </div>
-          <div className="flex items-center">
-            <GitFork className="mr-2" />
-            <span>{data.forks} Forks</span>
+          <div className="flex items-center space-x-2">
+            <GitFork className="w-5 h-5 text-blue-400" />
+            <span className="text-sm font-medium text-gray-700">
+              {data.forks} Forks
+            </span>
           </div>
-          <div className="flex items-center">
-            <Eye className="mr-2" />
-            <span>{data.watchers} Watchers</span>
+          <div className="flex items-center space-x-2">
+            <Eye className="w-5 h-5 text-green-400" />
+            <span className="text-sm font-medium text-gray-700">
+              {data.watchers} Watchers
+            </span>
           </div>
-          <div className="flex items-center">
-            <AlertCircle className="mr-2" />
-            <span>{data.openIssues} Open Issues</span>
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-400" />
+            <span className="text-sm font-medium text-gray-700">
+              {data.openIssues} Open Issues
+            </span>
           </div>
         </div>
       </CardContent>

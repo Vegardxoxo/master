@@ -12,15 +12,14 @@ import {
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import type { VisibleSections } from "@/app/lib/definitions";
+import { cn } from "@/app/lib/utils";
 
 type DashboardProps = {
   owner: string;
   repo: string;
   children: {
-    // Project info
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
-    // Commit related
     commitQuality: React.ReactNode;
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
@@ -54,9 +53,12 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
     }));
   };
 
-  const toggleSubsection = (section: keyof VisibleSections, subsection: string) => {
+  const toggleSubsection = (
+    section: keyof VisibleSections,
+    subsection: string,
+  ) => {
     setVisibleSections((prev) => {
-      const sectionValue = prev[section]
+      const sectionValue = prev[section];
       if (typeof sectionValue === "object" && "visible" in sectionValue) {
         return {
           ...prev,
@@ -64,121 +66,125 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
             ...sectionValue,
             [subsection]: !sectionValue[subsection],
           },
-        }
+        };
       }
-      return prev
-    })
-  }
+      return prev;
+    });
+  };
 
   return (
-    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8 p-4 lg:p-8">
-      {/* Dashboard Navigation */}
-      <div className="lg:w-1/4">
-        <DashboardNavigation
-          onToggle={toggleSection}
-          onToggleSubsection={toggleSubsection}
-          visibleSections={visibleSections}
-        />
-      </div>
-
-      {/*Dashboard Content*/}
-      <div className="flex-grow">
-        {/*Project Name*/}
-        <div className="mb-6">
-          <Link
-            href={`https://git.ntnu.no/${owner}/${repo}`}
-            className={`${lusitana.className} text-3xl font-bold hover:underline text-blue-600`}
-          >
-            {owner}/{repo} Dashboard
-          </Link>
+    <div className="min-h-screen">
+      {/*Project subject and group.*/}
+      <header>
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <Link
+              href={`https://git.ntnu.no/${owner}/${repo}`}
+              className={cn(
+                lusitana.className,
+                "hover:underline text-blue-600",
+              )}
+            >
+              {owner}/{repo} Dashboard
+            </Link>
+          </h1>
         </div>
+      </header>
 
-        {/* General information Card */}
-        {visibleSections.overview && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Repository Overview</CardTitle>
-              <CardDescription>
-                General information and contributors
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-6 md:flex-row md:gap-x-6 md:justify-between">
-              {children.contributorsList}
-              {children.projectInfo}
-            </CardContent>
-          </Card>
-        )}
+      <main className="py-6">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:space-x-4">
+            {/*Sticky navigation*/}
+            <div className="lg:min-w-fit mb-6 lg:mb-0">
+              <div className="sticky top-6">
+                <DashboardNavigation
+                  onToggle={toggleSection}
+                  onToggleSubsection={toggleSubsection}
+                  visibleSections={visibleSections}
+                />
+              </div>
+            </div>
 
-        {/* Commit Card*/}
-        {visibleSections.commits.visible && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Commit Analysis</CardTitle>
-              <CardDescription>
-                Quality and frequency of commits
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-6">
-              {visibleSections.commits.quality && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Commit Quality</h3>
-                  {children.commitQuality}
-                </div>
+            {/*Card container*/}
+            <div className="flex-grow space-y-6">
+              {visibleSections.overview && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      Repository Overview
+                    </CardTitle>
+                    <CardDescription>
+                      General information and contributors
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid md:grid-cols-2 gap-6">
+                    <div className="md:col-span-1">
+                      {children.contributorsList}
+                    </div>
+                    <div className="md:col-span-1">{children.projectInfo}</div>
+                  </CardContent>
+                </Card>
               )}
-              {visibleSections.commits.frequency && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Commit Frequency
-                  </h3>
-                  {children.commitFrequency}
-                </div>
-              )}
-              {visibleSections.commits.size && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Commit Size</h3>
-                  {children.commitSize}
-                </div>
-              )}
-              {visibleSections.commits.contributions && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Contributions per Member
-                  </h3>
-                  {children.commitContribution}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Branches Card*/}
-        {visibleSections.branches && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Branching Strategy</CardTitle>
-              <CardDescription>
-                Analysis of branch usage and best practices
-              </CardDescription>
-            </CardHeader>
-            <CardContent>{/* Add branch analysis content here */}</CardContent>
-          </Card>
-        )}
+              {visibleSections.commits.visible && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      Commit Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {visibleSections.commits.quality && (
+                      <div>{children.commitQuality}</div>
+                    )}
+                    {visibleSections.commits.frequency && (
+                      <div>{children.commitFrequency}</div>
+                    )}
+                    {visibleSections.commits.size && (
+                      <div>{children.commitSize}</div>
+                    )}
+                    {visibleSections.commits.contributions && (
+                      <div>{children.commitContribution}</div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-        {/* Pull Request Card*/}
-        {visibleSections.pullRequests && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Pull Request Analysis</CardTitle>
-              <CardDescription>
-                Review process and PR status overview
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Add pull request analysis content here */}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+              {visibleSections.branches && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      Branching Strategy
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Add branch analysis content here */}
+                    <p className="text-gray-600">
+                      Branch analysis content will be added here.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {visibleSections.pullRequests && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      Pull Request Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Add pull request analysis content here */}
+                    <p className="text-gray-600">
+                      Pull request analysis content will be added here.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
