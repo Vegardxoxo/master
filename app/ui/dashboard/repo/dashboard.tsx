@@ -32,38 +32,64 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
   const [visibleSections, setVisibleSections] = React.useState<VisibleSections>(
     {
       overview: true,
-      commits: true,
+      commits: {
+        visible: true,
+        quality: true,
+        frequency: true,
+        size: true,
+        contributions: true,
+      },
       branches: true,
       pullRequests: true,
     },
   );
 
-  const toggleSection = (section: keyof typeof visibleSections) => {
+  const toggleSection = (section: keyof VisibleSections) => {
     setVisibleSections((prev) => ({
       ...prev,
-      [section]: !prev[section],
+      [section]:
+        typeof prev[section] === "object"
+          ? { ...(prev[section] as object), visible: !prev[section].visible }
+          : !prev[section],
     }));
   };
 
+  const toggleSubsection = (section: keyof VisibleSections, subsection: string) => {
+    setVisibleSections((prev) => {
+      const sectionValue = prev[section]
+      if (typeof sectionValue === "object" && "visible" in sectionValue) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionValue,
+            [subsection]: !sectionValue[subsection],
+          },
+        }
+      }
+      return prev
+    })
+  }
+
   return (
-    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-10 min-h-screen">
+    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8 p-4 lg:p-8">
       {/* Dashboard Navigation */}
-      <div className="lg:sticky lg:top-0 lg:h-screen">
+      <div className="lg:w-1/4">
         <DashboardNavigation
           onToggle={toggleSection}
+          onToggleSubsection={toggleSubsection}
           visibleSections={visibleSections}
         />
       </div>
 
       {/*Dashboard Content*/}
-      <div className="flex-grow p-4 lg:p-8">
+      <div className="flex-grow">
         {/*Project Name*/}
-        <div className="mb-4 text-3xl font-bold">
+        <div className="mb-6">
           <Link
             href={`https://git.ntnu.no/${owner}/${repo}`}
             className={`${lusitana.className} text-3xl font-bold hover:underline text-blue-600`}
           >
-            {owner}/{repo}-Dashboard
+            {owner}/{repo} Dashboard
           </Link>
         </div>
 
@@ -76,7 +102,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 General information and contributors
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-y-10 md:flex md:flex-row md:space-x-10 md:justify-between sm:flex-col">
+            <CardContent className="flex flex-col gap-y-6 md:flex-row md:gap-x-6 md:justify-between">
               {children.contributorsList}
               {children.projectInfo}
             </CardContent>
@@ -84,7 +110,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         )}
 
         {/* Commit Card*/}
-        {visibleSections.commits && (
+        {visibleSections.commits.visible && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>Commit Analysis</CardTitle>
@@ -92,11 +118,35 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 Quality and frequency of commits
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-y-10">
-              {children.commitQuality}
-              {children.commitFrequency}
-              {children.commitSize}
-              {children.commitContribution}
+            <CardContent className="flex flex-col gap-y-6">
+              {visibleSections.commits.quality && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Commit Quality</h3>
+                  {children.commitQuality}
+                </div>
+              )}
+              {visibleSections.commits.frequency && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Commit Frequency
+                  </h3>
+                  {children.commitFrequency}
+                </div>
+              )}
+              {visibleSections.commits.size && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Commit Size</h3>
+                  {children.commitSize}
+                </div>
+              )}
+              {visibleSections.commits.contributions && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Contributions per Member
+                  </h3>
+                  {children.commitContribution}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -110,6 +160,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 Analysis of branch usage and best practices
               </CardDescription>
             </CardHeader>
+            <CardContent>{/* Add branch analysis content here */}</CardContent>
           </Card>
         )}
 
@@ -122,6 +173,9 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 Review process and PR status overview
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              {/* Add pull request analysis content here */}
+            </CardContent>
           </Card>
         )}
       </div>
