@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -12,36 +12,56 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   useSidebar,
-} from "@/components/ui/sidebar"
-import NavLinksCollapse, { NavLinks } from "@/app/ui/dashboard/nav_links"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible"
-import { ChevronRight, PanelRightOpen, PlusIcon } from "lucide-react"
-import Link from "next/link"
-import { PowerIcon } from "@heroicons/react/24/outline"
-import AcmeLogo from "@/app/ui/acme-logo"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/app/lib/utils"
+} from "@/components/ui/sidebar";
+import NavLinksCollapse, { NavLinks } from "@/app/ui/dashboard/nav_links";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@radix-ui/react-collapsible";
+import { ChevronRight, PanelRightOpen, PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { PowerIcon } from "@heroicons/react/24/outline";
+import AcmeLogo from "@/app/ui/acme-logo";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function AddCourse() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton isActive={false} asChild>
-        <Button asChild variant="default" className="rounded-xl bg-sky-500 w-full md:w-auto">
-          <Link href="/dashboard/courses/add" className={" hover:bg-sky-500 hover:text-white"}>
+        <Button
+          asChild
+          variant="default"
+          className="rounded-xl bg-sky-500 w-full md:w-auto"
+        >
+          <Link
+            href="/dashboard/courses/add"
+            className={" hover:bg-sky-500 hover:text-white"}
+          >
             Add Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  )
+  );
 }
 
-function AppSidebar() {
+export function AppSidebar() {
   return (
-    <Sidebar collapsible="dismissible">
+    <Sidebar collapsible="offcanvas">
       <SidebarHeader>
-        <Link className="mb-2 flex h-20 items-end justify-start rounded-md bg-sky-500 p-4 md:h-40" href="/">
+        <Link
+          className="mb-2 flex h-20 items-end justify-start rounded-md bg-sky-500 p-4 md:h-40"
+          href="/"
+        >
           <div className="w-32 text-white md:w-40">
             <AcmeLogo />
           </div>
@@ -60,7 +80,9 @@ function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger>
-                <p className={"text-sm font-medium md:justify-start"}>My Courses</p>
+                <p className={"text-sm font-medium md:justify-start"}>
+                  My Courses
+                </p>
                 <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
               </CollapsibleTrigger>
             </SidebarGroupLabel>
@@ -89,28 +111,38 @@ function AppSidebar() {
         </form>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
 
 export function CustomTrigger() {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar();
 
   return (
-    <Button variant="ghost" size="icon" className="" onClick={toggleSidebar} disabled={false}>
-      <PanelRightOpen className="h-10 w-10" />
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>
-  )
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" className="fixed " onClick={toggleSidebar}>
+            <PanelRightOpen size={60} onClick={toggleSidebar} />
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="bg-sky-500" side="right" align="center">
+          <p className="font-medium text-sm text-white">
+            Toggle Sidebar (Ctrl+B)
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
-export default function SideBar() {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main>
-        <CustomTrigger />
-      </main>
-    </SidebarProvider>
-  )
-}
-
+// export default function SideBar() {
+//   return (
+//     <SidebarProvider>
+//       <AppSidebar />
+//       <main>
+//         <CustomTrigger />
+//       </main>
+//     </SidebarProvider>
+//   );
+// }
