@@ -8,9 +8,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { DayEntry } from "@/app/lib/definitions";
+import type { CommitByDate, DayEntry } from "@/app/lib/definitions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,17 +19,55 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import CommitFrequencyTable from "@/app/ui/dashboard/repo/commits/commit-frequency-table";
 
 export default function CommitFrequency({
   authors,
   data,
   total,
+  dates,
 }: {
   total: number;
   authors: Record<string, string>;
   data: DayEntry[];
+  dates: CommitByDate[];
 }) {
   const [selectedAuthors, setSelectedAuthors] = useState(["TOTAL@commits"]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  console.log("data: ", dates);
+
+  const handleClick = (e: any) => {
+    if (e?.activeLabel) {
+      setSelectedDate(e.activeLabel);
+      console.log(selectedDate);
+    }
+  };
+
+  const handleClose = () => {
+    setSelectedDate(null);
+  };
+
+  const filteredData = useMemo(() => {
+    if (!selectedDate) return data;
+
+    return dates.filter((d) => {
+      const formattedDate = new Date(d.commitDate).toISOString().split("T")[0];
+      const authorEmail = d.authorEmail;
+
+      return (
+        formattedDate === selectedDate &&
+        (selectedAuthors.includes("TOTAL@commits") ||
+          selectedAuthors.includes(authorEmail))
+      );
+    });
+  }, [dates, selectedDate, selectedAuthors, data]); // Added data to dependencies
 
   const toggleAuthor = (email: string) => {
     setSelectedAuthors((prev) =>
@@ -67,7 +105,7 @@ export default function CommitFrequency({
         {/*Chart*/}
         <ChartContainer config={{}} className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height={"100%"}>
-            <LineChart data={data}>
+            <LineChart data={data} onClick={handleClick}>
               <XAxis dataKey="day" />
               <YAxis />
               <Tooltip />
@@ -86,6 +124,25 @@ export default function CommitFrequency({
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
+
+      {/*Drill-Down*/}
+      <Dialog open={Boolean(selectedDate)} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+          <DialogHeader className={"h-fit"}>
+            <DialogTitle>Commit Details</DialogTitle>
+            <DialogDescription className="font-bold">
+              {`Commits on ${selectedDate} by ${
+                selectedAuthors.includes("TOTAL@commits")
+                  ? "all authors"
+                  : selectedAuthors.length > 1
+                    ? selectedAuthors.map((email) => authors[email]).join(", ")
+                    : authors[selectedAuthors[0]]
+              } (${filteredData.length} commit${filteredData.length !== 1 ? "s" : ""})`}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDate && <CommitFrequencyTable data={filteredData} />}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

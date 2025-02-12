@@ -68,6 +68,7 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
   const emailToDisplayName: Record<string, string> = {};
   const allEmails = new Set<string>();
   const commitSummary = [];
+  const commitByDate = [];
 
   for (const item of commitData) {
     const authorName = item.commit.author.name ?? "unknown";
@@ -75,8 +76,16 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
     const commitDate = item.commit.author.date;
     const message = item.commit.message;
     const url = item.commit.url;
+    const htmlUrl = item.html_url;
     const sha = item.sha;
     commitSummary.push({ sha, url, commit_message: message });
+    commitByDate.push({
+      authorEmail,
+      authorName,
+      commitDate,
+      message,
+      htmlUrl,
+    });
 
     emailToDisplayName[authorEmail] = authorName;
     const day = new Date(commitDate).toISOString().split("T")[0];
@@ -139,6 +148,7 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
     total,
     emailToDisplayName,
     commitSummary,
+    commitByDate,
   };
 }
 
@@ -367,7 +377,6 @@ export function parseCommitStatsGraphQL(data: any[]) {
   }
 
   const projectAverage = overallCommits > 0 ? overallTotal / overallCommits : 0;
-
 
   for (const email of Object.keys(statMap)) {
     const stats = statMap[email];

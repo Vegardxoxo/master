@@ -45,7 +45,6 @@ export default function CommitSize({ data }: { data: any[] }) {
       };
     });
   }, [data]);
-  console.log(processedData);
 
   // Get unique months
   const months = useMemo(() => {
@@ -207,8 +206,8 @@ export default function CommitSize({ data }: { data: any[] }) {
 
       {/*Drill-Down*/}
       <Dialog open={Boolean(selectedCommit)} onOpenChange={closeDialog}>
-        <DialogContent className="h-[50vh] overflow-auto">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+          <DialogHeader className={"h-fit"}>
             <DialogTitle>Commit Details</DialogTitle>
             <DialogDescription className="font-bold">
               Detailed information for the selected commit.
