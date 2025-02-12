@@ -39,7 +39,7 @@ export default function CommitSizeTable({ data }: CommitSizeTableProps) {
         <TableRow>
           <TableCell>Author</TableCell>
           <TableCell>
-            {data?.authorLogin || data?.authorName || data?.authorEmail}
+            {data?.authorLogin || data?.author.name || data?.author.email}
           </TableCell>
         </TableRow>
         <TableRow>
@@ -48,11 +48,11 @@ export default function CommitSizeTable({ data }: CommitSizeTableProps) {
         </TableRow>
         <TableRow>
           <TableCell>Additions</TableCell>
-          <TableCell>{data?.additions}</TableCell>
+          <TableCell className={"bg-green-100 text-green-700"}>{data?.additions}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Deletions</TableCell>
-          <TableCell>{data?.deletions}</TableCell>
+          <TableCell className={"bg-red-100 text-red-700"}>{data?.deletions}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Files Changed</TableCell>

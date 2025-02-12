@@ -19,7 +19,7 @@ import type { CommitEval, LLMResponse } from "@/app/lib/definitions";
 import { SetStateAction, useState } from "react";
 import CommitQualityTable from "@/app/ui/dashboard/repo/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {ChartContainer} from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 
 interface ActiveShape {
   cx: number;
@@ -185,8 +185,8 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
         </div>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="h-[50vh] overflow-auto">
-              <DialogHeader>
+            <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+              <DialogHeader className={"h-fit"}>
                 <DialogTitle>Commit Details</DialogTitle>
                 <DialogDescription className={"font-bold"}>
                   Detailed information commits categorized as:{" "}

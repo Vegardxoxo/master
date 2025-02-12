@@ -10,13 +10,15 @@ export default async function CommitFrequencyWrapper({
   repo: string;
 }) {
   const commitData = await fetchAllCommits(owner, repo);
-  const { total, dayEntries, emailToDisplayName } = parseCommitData(commitData);
+  const { total, dayEntries, emailToDisplayName, commitByDate } = parseCommitData(commitData);
+
 
   return (
     <CommitFrequency
       total={total}
       authors={emailToDisplayName}
       data={dayEntries}
+      dates={commitByDate}
     />
   );
 }

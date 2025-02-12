@@ -45,11 +45,19 @@ export type CommitMessageShort = {
   commit_message: string;
 };
 
+export type CommitByDate = {
+  authorEmail: string;
+  authorName: string;
+  commitDate: string;
+  message: string;
+  htmlUrl: string;
+};
 export type ParseCommitDataResult = {
   dayEntries: DayEntry[];
   total: number;
   emailToDisplayName: Record<string, string>;
   commitSummary: CommitMessageLong[];
+  commitByDate: CommitByDate[];
 };
 
 export type AuthorFrequency = {

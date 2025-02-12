@@ -11,7 +11,10 @@ export default async function CommitContributionsWrapper({
 }) {
   const commitData = await fetchAllCommits(owner, repo);
   const { commitSummary } = parseCommitData(commitData);
-  const {parsedCommits} = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
-  console.log(parsedCommits);
-    return <CommitContributions data={parsedCommits} />;
+  const { parsedCommits } = await fetchCommitStatsGraphQL(
+    owner,
+    repo,
+    commitSummary,
+  );
+  return <CommitContributions data={parsedCommits} />;
 }

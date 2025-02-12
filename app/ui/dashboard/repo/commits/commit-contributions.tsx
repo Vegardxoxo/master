@@ -145,8 +145,8 @@ export default function CommitContributions({
         </ChartContainer>
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="h-[50vh] overflow-auto">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+            <DialogHeader className={"h-fit"}>
               <DialogTitle>Commit Details</DialogTitle>
               <DialogDescription className="font-bold">
                 Detailed information for {selectedUser?.name}.

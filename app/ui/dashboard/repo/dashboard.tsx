@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import { VisibleSections } from "@/app/lib/definitions";
+import type { VisibleSections } from "@/app/lib/definitions";
 
 type DashboardProps = {
   owner: string;
@@ -46,9 +46,9 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
   };
 
   return (
-    <div className=" flex flex-col lg:flex-row md:space-x-10 min-h-screen">
-      {/* Dashboard DashboardNavigation */}
-      <div className="static md:sticky top-0 h-1/4 min-w-fit pt-8 sm:max-md:mx-auto sm:max-md:w-full">
+    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-10 min-h-screen">
+      {/* Dashboard Navigation */}
+      <div className="lg:sticky lg:top-0 lg:h-screen">
         <DashboardNavigation
           onToggle={toggleSection}
           visibleSections={visibleSections}
@@ -56,7 +56,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
       </div>
 
       {/*Dashboard Content*/}
-      <div className="container mx-auto p-8 ">
+      <div className="flex-grow p-4 lg:p-8">
         {/*Project Name*/}
         <div className="mb-4 text-3xl font-bold">
           <Link
