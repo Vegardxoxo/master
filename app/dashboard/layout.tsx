@@ -7,8 +7,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <main className={"w-full"}>
         <CustomTrigger />
-        <div className={"flex h-screen flex-col md:flex-row md:overflow-hidden"}>
-          <div className="flex-grow p-6 md:overflow-y-auto md:p-12 mx-auto w-full">{children}</div>
+        <div
+          className={"flex h-screen flex-col md:flex-row md:overflow-hidden"}
+        >
+          <div className="flex-grow p-6 md:overflow-y-auto md:p-12 mx-auto w-full">
+            {children}
+          </div>
         </div>
       </main>
     </SidebarProvider>

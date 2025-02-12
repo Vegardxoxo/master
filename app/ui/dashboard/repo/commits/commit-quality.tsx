@@ -5,18 +5,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Sector,
-  Tooltip,
-} from "recharts";
-import type { CommitEval, LLMResponse } from "@/app/lib/definitions";
-import { SetStateAction, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
+import type { LLMResponse } from "@/app/lib/definitions";
+import { useCallback, useState } from "react";
 import CommitQualityTable from "@/app/ui/dashboard/repo/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
@@ -30,19 +22,20 @@ interface ActiveShape {
   startAngle: number;
   endAngle: number;
   fill: string;
+  payload: any;
+  percent: number;
+  value: number;
 }
 
 export default function CommitQuality({ data }: { data: LLMResponse[] }) {
-  if (!data || data.length === 0) {
-    return <p>No commit data available.</p>;
-  }
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const onPieEnter = (_: any, index: SetStateAction<number>) => {
+  const onPieEnter = useCallback((_: any, index: number) => {
     setActiveIndex(index);
-  };
+  }, []);
+
   const renderActiveShape = (props: ActiveShape) => {
     const RADIAN = Math.PI / 180;
     const {
@@ -54,6 +47,9 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
       startAngle,
       endAngle,
       fill,
+      payload,
+      percent,
+      value,
     } = props;
     const sin = Math.sin(-RADIAN * midAngle);
     const cos = Math.cos(-RADIAN * midAngle);
@@ -71,7 +67,7 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
           cx={cx}
           cy={cy}
           innerRadius={innerRadius}
-          outerRadius={outerRadius + 5}
+          outerRadius={outerRadius}
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
@@ -91,6 +87,25 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
           fill="none"
         />
         <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+        <text
+          x={ex + (cos >= 0 ? 1 : -1) * 12}
+          y={ey}
+          textAnchor={textAnchor}
+          fill="#333"
+          className="text-sm"
+        >
+          {payload.name}
+        </text>
+        <text
+          x={ex + (cos >= 0 ? 1 : -1) * 12}
+          y={ey}
+          dy={18}
+          textAnchor={textAnchor}
+          fill="#666"
+          className="text-xs"
+        >
+          {`${value} commits (${(percent * 100).toFixed(2)}%)`}
+        </text>
       </g>
     );
   };
@@ -116,8 +131,8 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
     Excellent: "hsl(142, 76%, 36%)",
   };
 
-  const handlePieClick = (category: string) => {
-    setSelectedCategory(category);
+  const handlePieClick = (entry: any) => {
+    setSelectedCategory(entry.name);
     setIsOpen(true);
   };
 
@@ -125,78 +140,76 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
     ? data.filter((commit) => commit.category === selectedCategory)
     : [];
 
+  if (!data || data.length === 0) {
+    return <p>No commit data available.</p>;
+  }
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Commit Message Quality</CardTitle>
+        <CardTitle className="text-xl font-bold">
+          Commit Message Quality
+        </CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="text-center text-lg font-semibold mb-4">
+          Total Commits: {data.length}
+        </p>
         <ChartContainer config={{}} className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
-                onClickCapture={(e) => handlePieClick(e.name)}
                 data={messageQuality}
-                dataKey="value"
-                nameKey="name"
                 cx="50%"
                 cy="50%"
+                innerRadius={70}
                 outerRadius={100}
-                innerRadius={0}
-                paddingAngle={2}
-                label={({ name, value }) => `${name}: ${value}`}
+                fill="#8884d8"
+                dataKey="value"
                 onMouseEnter={onPieEnter}
+                onClick={handlePieClick}
+                className="cursor-pointer"
               >
-                {messageQuality.map((entry) => (
-                  <Cell
-                    key={`cell-${entry.name}`}
-                    fill={colorMap[entry.name]}
-                    strokeWidth={1}
-                  />
+                {messageQuality.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colorMap[entry.name]} />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value, name) => [`${value} commits`, name]}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--background))",
-                  border: "1px solid hsl(var(--border))",
-                }}
-              />
             </PieChart>
           </ResponsiveContainer>
         </ChartContainer>
-        <div className="flex justify-center gap-4 ">
+        <div className="flex flex-wrap justify-center gap-8 mt-6">
           {messageQuality.map((entry) => (
             <div
               key={entry.name}
               className="flex items-center justify-center gap-2"
             >
               <div
-                className="w-3 h-3 rounded-full"
+                className="w-6 h-6 rounded-full"
                 style={{ backgroundColor: colorMap[entry.name] }}
               />
-              <span className=" text-sm lg:text-lg font-semibold">
-                {entry.name}: {entry.value}
+              <span className="text-sm lg:text-base font-semibold">
+                {entry.name}: {entry.value} (
+                {((entry.value / data.length) * 100).toFixed(1)}%)
               </span>
             </div>
           ))}
         </div>
-        {isOpen && (
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
-              <DialogHeader className={"h-fit"}>
-                <DialogTitle>Commit Details</DialogTitle>
-                <DialogDescription className={"font-bold"}>
-                  Detailed information commits categorized as:{" "}
-                  {selectedCategory}.
-                </DialogDescription>
-              </DialogHeader>
-              <CommitQualityTable data={filteredData} />
-            </DialogContent>
-          </Dialog>
-        )}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold mb-2">
+                Commit Details
+              </DialogTitle>
+              <DialogDescription className="text-lg font-semibold">
+                Detailed information for commits categorized as:{" "}
+                {selectedCategory}.
+              </DialogDescription>
+            </DialogHeader>
+            <CommitQualityTable data={filteredData} />
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

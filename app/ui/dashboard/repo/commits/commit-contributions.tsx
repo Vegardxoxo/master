@@ -10,7 +10,7 @@ import {
   LabelList,
 } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
-import { CommitStats } from "@/app/lib/definitions";
+import type { CommitStats } from "@/app/lib/definitions";
 import {
   Card,
   CardContent,
@@ -22,9 +22,9 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import CommitContributionsTable from "@/app/ui/dashboard/repo/commits/commit-contributions-table";
 
@@ -65,17 +65,20 @@ export default function CommitContributions({
     return null;
   };
 
-  const handleBarClick = (entry: any) => {
-    const userEmail = entry.email;
-    setSelectedUser(data[userEmail]);
+  const handleBarClick = (barData: any) => {
+    setSelectedUser(data[barData.email]);
     setIsOpen(true);
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Contributions per group member</CardTitle>
-        <CardDescription>Sum of value</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          Contributions per Group Member
+        </CardTitle>
+        <CardDescription>
+          Distribution of additions, deletions, and co-authored lines
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -90,66 +93,86 @@ export default function CommitContributions({
             },
             co_authored_lines: {
               label: "Co-authored Lines",
-              color: "hsl(32, 98%, 56%)", // Orange color for co-authored lines
+              color: "hsl(32, 98%, 56%)",
             },
           }}
-          className="h-[400px] w-full"
+          className="h-[500px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              className={"hover:cursor-pointer"}
               data={chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
-              <XAxis dataKey="name" />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+                tick={{ fontSize: 12 }}
+              />
               <YAxis
                 label={{
-                  value: "Sum of Values",
+                  value: "Lines of Code",
                   angle: -90,
                   position: "insideLeft",
                 }}
+                tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-
               <Bar
+                onClick={(barData) => handleBarClick(barData)}
                 className={"hover:cursor-pointer"}
                 dataKey="additions"
                 stackId="a"
                 fill="var(--color-additions)"
-                onClick={handleBarClick}
               />
               <Bar
+                onClick={(barData) => handleBarClick(barData)}
                 className={"hover:cursor-pointer"}
                 dataKey="deletions"
                 stackId="a"
                 fill="var(--color-deletions)"
-                onClick={handleBarClick}
               />
               <Bar
+                onClick={(barData) => handleBarClick(barData)}
                 className={"hover:cursor-pointer"}
                 dataKey="co_authored_lines"
                 stackId="a"
                 fill="var(--color-co_authored_lines)"
-                onClick={handleBarClick}
               >
                 <LabelList
                   dataKey="commits"
                   position="top"
-                  className={"font-bold "}
-                  formatter={(value: string) => `commits: ${value}`}
+                  content={({ value, x, y, width }) => (
+                    <text
+                      x={Number(x) + Number(width) / 2}
+                      y={Number(y) - 10}
+                      fill="#000000"
+                      textAnchor="middle"
+                      fontSize={12}
+                    >
+                      {`${value} commits`}
+                    </text>
+                  )}
                 />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
-
+        <div className="mt-4 text-center text-sm text-muted-foreground">
+          Click on a bar to view detailed contribution information
+        </div>
+        {/*Drill-down*/}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
+          <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
             <DialogHeader className={"h-fit"}>
-              <DialogTitle>Commit Details</DialogTitle>
-              <DialogDescription className="font-bold">
-                Detailed information for {selectedUser?.name}.
+              <DialogTitle className="text-2xl font-bold">
+                Commit Details
+              </DialogTitle>
+              <DialogDescription className="text-lg font-semibold">
+                Detailed information for {selectedUser && selectedUser.name}.
               </DialogDescription>
             </DialogHeader>
             {selectedUser && <CommitContributionsTable data={selectedUser} />}

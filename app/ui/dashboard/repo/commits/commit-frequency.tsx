@@ -41,12 +41,10 @@ export default function CommitFrequency({
 }) {
   const [selectedAuthors, setSelectedAuthors] = useState(["TOTAL@commits"]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  console.log("data: ", dates);
 
   const handleClick = (e: any) => {
     if (e?.activeLabel) {
       setSelectedDate(e.activeLabel);
-      console.log(selectedDate);
     }
   };
 
@@ -67,7 +65,7 @@ export default function CommitFrequency({
           selectedAuthors.includes(authorEmail))
       );
     });
-  }, [dates, selectedDate, selectedAuthors, data]); // Added data to dependencies
+  }, [dates, selectedDate, selectedAuthors, data]);
 
   const toggleAuthor = (email: string) => {
     setSelectedAuthors((prev) =>
@@ -76,39 +74,85 @@ export default function CommitFrequency({
   };
 
   const authorEntries = Object.entries(authors);
+  const colors = [
+    "hsl(152, 80%, 40%)",
+    "hsl(228, 80%, 50%)",
+    "hsl(360, 80%, 50%)",
+    "hsl(48, 80%, 50%)",
+    "hsl(280, 80%, 50%)",
+    "hsl(200, 80%, 40%)",
+    "hsl(32, 80%, 50%)",
+    "hsl(320, 80%, 50%)",
+    "hsl(80, 80%, 40%)",
+    "hsl(180, 80%, 40%)",
+  ];
+
   return (
-    // Header
-    <Card>
-      <CardHeader className={"flex justify-between"}>
-        <CardTitle className="text-lg font-semibold mb-2">
-          Commit Frequency
-        </CardTitle>
-        <CardDescription className="text-lg font-bold mb-2">
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">Commit Frequency</CardTitle>
+        <CardDescription className="text-lg font-semibold">
           Total number of commits: {total}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/*Checkboxes*/}
-        <div className="mb-2">
-          {authorEntries.map(([email, displayName]) => (
-            <label key={email} className="flex items-center space-x-2 mr-4">
+        <div className="mb-6 flex flex-wrap gap-4">
+          {authorEntries.map(([email, displayName], index) => (
+            <label
+              key={email}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
               <Checkbox
                 id={`author-${email}`}
                 checked={selectedAuthors.includes(email)}
                 onCheckedChange={() => toggleAuthor(email)}
+                className="border-2 border-gray-300"
               />
-              <span>{displayName}</span>
+              <span
+                className="text-sm font-medium"
+                style={{
+                  color:
+                    colors[
+                      authorEntries.findIndex(([e]) => e === email) %
+                        colors.length
+                    ],
+                }}
+              >
+                {displayName}
+              </span>
             </label>
           ))}
         </div>
-
         {/*Chart*/}
         <ChartContainer config={{}} className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height={"100%"}>
-            <LineChart data={data} onClick={handleClick}>
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={data}
+              onClick={handleClick}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <XAxis
+                dataKey="day"
+                stroke="#888888"
+                fontSize={12}
+                tickLine={true}
+                axisLine={true}
+              />
+              <YAxis
+                stroke="#888888"
+                fontSize={12}
+                tickLine={true}
+                axisLine={true}
+                tickFormatter={(value) => `${value}`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--background))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "4px",
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+              />
               <Legend />
               {selectedAuthors.map((email, index) => (
                 <Line
@@ -116,8 +160,15 @@ export default function CommitFrequency({
                   type="monotone"
                   dataKey={email}
                   name={authors[email]}
-                  stroke={`hsl(${(index * 360) / authorEntries.length}, 70%, 50%)`}
+                  stroke={
+                    colors[
+                      authorEntries.findIndex(([e]) => e === email) %
+                        colors.length
+                    ]
+                  }
                   strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 8 }}
                 />
               ))}
             </LineChart>
@@ -125,12 +176,14 @@ export default function CommitFrequency({
         </ChartContainer>
       </CardContent>
 
-      {/*Drill-Down*/}
+      {/*Drill-down*/}
       <Dialog open={Boolean(selectedDate)} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-4xl h-auto max-h-[50vh] overflow-auto w-full">
-          <DialogHeader className={"h-fit"}>
-            <DialogTitle>Commit Details</DialogTitle>
-            <DialogDescription className="font-bold">
+        <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold mb-2">
+              Commit Details
+            </DialogTitle>
+            <DialogDescription className="text-lg font-semibold">
               {`Commits on ${selectedDate} by ${
                 selectedAuthors.includes("TOTAL@commits")
                   ? "all authors"

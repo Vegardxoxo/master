@@ -12,31 +12,33 @@ export default async function ContributorsList({
 }) {
   const { contributors } = await fetchContributors(owner, repo);
   return (
-    <Card className={"group hover:bg-sky-500 md:w-2/3"}>
+    <Card className="w-full h-full">
       <CardHeader>
-        <CardTitle className={"group-hover:text-white"}>Contributors</CardTitle>
+        <CardTitle className="text-xl font-semibold text-gray-800">
+          Contributors
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {contributors.map((contributor) => (
-            <div key={contributor} className="flex items-center">
-              <Avatar className="h-8 w-8">
+            <div key={contributor} className="flex items-center space-x-2">
+              <Avatar className="h-8 w-8 border-2 border-blue-200">
                 <AvatarImage
                   src={`https://github.com/${contributor}.png`}
                   alt={contributor}
                 />
-                <AvatarFallback>{contributor[0].toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="bg-blue-100 text-blue-600">
+                  {contributor[0].toUpperCase()}
+                </AvatarFallback>
               </Avatar>
-              <span className="ml-2  group-hover:text-white">
-                <Link
-                  className={"hover:underline"}
-                  href={`https://git.ntnu.no/${contributor}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {contributor}
-                </Link>
-              </span>
+              <Link
+                href={`https://git.ntnu.no/${contributor}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 truncate"
+              >
+                {contributor}
+              </Link>
             </div>
           ))}
         </div>
