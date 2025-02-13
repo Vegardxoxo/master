@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import CommitFrequencyTable from "@/app/ui/dashboard/repo/commits/commit-frequency-table";
+import CommitFrequencyTable from "@/app/ui/dashboard/commits/commit-frequency-table";
 
 export default function CommitFrequency({
   authors,

@@ -1,9 +1,5 @@
-import CommitQuality from "@/app/ui/dashboard/repo/commits/commit-quality";
-import { fetchCommits } from "@/app/lib/data";
-import {createUrlMap, mapIdToUrl, parseCommitData, preprocessCommit} from "@/app/lib/utils";
-import { sendCommitMessage } from "@/app/lib/model";
-import { CommitEval } from "@/app/lib/definitions";
-import {getDummyModelData} from "@/app/lib/placeholder-data";
+import CommitQuality from "@/app/ui/dashboard/commits/commit-quality";
+import { getDummyModelData } from "@/app/lib/placeholder-data";
 
 export default async function CommitQualityWrapper({
   owner,

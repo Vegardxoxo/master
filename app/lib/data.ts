@@ -5,9 +5,13 @@ import {
   repositoryOverview,
 } from "@/app/lib/definitions";
 import {
+  extractPRdata,
   formatTimestamp,
+  parseRawPullRequestComments,
   parseCommitStats,
   parseCommitStatsGraphQL,
+  parseRawPullRequests,
+  extractPRCommentsData,
 } from "@/app/lib/utils";
 
 const octokit = new Octokit({
@@ -315,9 +319,73 @@ export async function fetchCommitStatsGraphQL(
     const response = await octokit.graphql(query, { owner, repo });
     const commits = Object.values(response.repository);
     const parsedCommits = parseCommitStatsGraphQL(commits);
-    return {parsedCommits, commits};
+    return { parsedCommits, commits };
   } catch (e) {
     console.error("GraphQL Error:", e);
     throw new Error("Failed to fetch commit details via GraphQL.");
+  }
+}
+
+/**
+ * Lists review comments for all pull requests in a repository.
+ *
+ * @param {string} owner - The owner of the repository on GitHub.
+ * @param {string} repo - The name of the repository on GitHub.
+ * @return {Promise<Array>} A promise that resolves with an array of review comments for the pull requests in the specified repository.
+ * @throws {Error} Throws an error if the API request fails.
+ */
+export async function fetchReviewComments(
+  owner: string,
+  repo: string,
+): Promise<Record<string, any>> {
+  try {
+    const { data: reviewComments } = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls/comments",
+      {
+        owner,
+        repo,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    const parsed = parseRawPullRequestComments(reviewComments);
+    const leaderboard = extractPRCommentsData(parsed);
+    return {parsed, leaderboard};
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
+/**
+ * Fetches the list of pull requests for a given repository.
+ *
+ * @param {string} owner - The username or organization name of the repository owner.
+ * @param {string} repo - The name of the repository.
+ * @param state
+ * @return {Promise<Array>} A promise that resolves to an array of pull request objects retrieved from the repository. Returns an empty array if an error occurs.
+ */
+export async function fetchPullRequests(
+  owner: string,
+  repo: string,
+  state: "open" | "closed" | "all",
+): Promise<Record<string, any>> {
+  try {
+    const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
+      owner,
+      repo,
+      state,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    const parsed = parseRawPullRequests(pullRequests);
+    const stats = extractPRdata(parsed);
+    console.log(stats);
+    return parsed;
+  } catch (e) {
+    console.log(e);
+    return [];
   }
 }

@@ -1,6 +1,6 @@
 import { parseCommitData } from "@/app/lib/utils";
 import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data";
-import CommitContributions from "@/app/ui/dashboard/repo/commits/commit-contributions";
+import CommitContributions from "@/app/ui/dashboard/commits/commit-contributions";
 
 export default async function CommitContributionsWrapper({
   owner,

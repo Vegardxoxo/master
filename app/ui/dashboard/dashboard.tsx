@@ -24,6 +24,7 @@ type DashboardProps = {
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
+    pullRequestComments: React.ReactNode;
   };
 };
 
@@ -39,7 +40,10 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         contributions: true,
       },
       branches: true,
-      pullRequests: true,
+      pullRequests: {
+        visible: true,
+        comments: true,
+      },
     },
   );
 
@@ -166,7 +170,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 </Card>
               )}
 
-              {visibleSections.pullRequests && (
+              {visibleSections.pullRequests.visible && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold">
@@ -174,7 +178,9 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Add pull request analysis content here */}
+                    {visibleSections.pullRequests.comments && (
+                      <div>{children.pullRequestComments}</div>
+                    )}
                     <p className="text-gray-600">
                       Pull request analysis content will be added here.
                     </p>

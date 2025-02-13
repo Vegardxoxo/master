@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import CommitContributionsTable from "@/app/ui/dashboard/repo/commits/commit-contributions-table";
+import CommitContributionsTable from "@/app/ui/dashboard/commits/commit-contributions-table";
 
 export default function CommitContributions({
   data,
