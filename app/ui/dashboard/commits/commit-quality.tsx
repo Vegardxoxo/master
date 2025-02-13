@@ -9,7 +9,7 @@ import {
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
 import type { LLMResponse } from "@/app/lib/definitions";
 import { useCallback, useState } from "react";
-import CommitQualityTable from "@/app/ui/dashboard/repo/commits/commit-quality-table";
+import CommitQualityTable from "@/app/ui/dashboard/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 

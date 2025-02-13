@@ -1,8 +1,6 @@
 import { parseCommitData } from "@/app/lib/utils";
 import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data";
-import CommitContributions from "@/app/ui/dashboard/repo/commits/commit-contributions";
-import CommitFrequency from "@/app/ui/dashboard/repo/commits/commit-frequency";
-import CommitSize from "@/app/ui/dashboard/repo/commits/commit-size";
+import CommitSize from "@/app/ui/dashboard/commits/commit-size";
 
 export default async function CommitSizeWrapper({
   owner,

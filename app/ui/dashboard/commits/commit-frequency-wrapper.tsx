@@ -1,4 +1,4 @@
-import CommitFrequency from "@/app/ui/dashboard/repo/commits/commit-frequency";
+import CommitFrequency from "@/app/ui/dashboard/commits/commit-frequency";
 import { fetchAllCommits } from "@/app/lib/data";
 import { parseCommitData } from "@/app/lib/utils";
 

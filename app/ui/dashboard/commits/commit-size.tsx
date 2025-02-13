@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import CommitSizeTable from "@/app/ui/dashboard/repo/commits/commit-size-table";
+import CommitSizeTable from "@/app/ui/dashboard/commits/commit-size-table";
 
 export default function CommitSize({ data }: { data: any[] }) {
   const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
