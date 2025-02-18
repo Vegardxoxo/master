@@ -1,4 +1,5 @@
-import { fetchPullRequests, fetchReviewComments } from "@/app/lib/data";
+import { fetchPullRequests } from "@/app/lib/data";
+import { PullRequestMetrics } from "./pull-request-metrics";
 
 export default async function PullRequests({
   owner,
@@ -7,9 +8,11 @@ export default async function PullRequests({
   owner: string;
   repo: string;
 }) {
-  const data = await fetchPullRequests(owner, repo, "closed");
-  // const data = await fetchReviewComments(owner, repo);
-  console.log("Pull request comments ", +data[0]);
+  const pullRequestData = await fetchPullRequests(owner, repo, "all");
 
-  return <div>Pull Requests Comments</div>;
+  return (
+    <div className="space-y-8">
+      <PullRequestMetrics data={pullRequestData} />
+    </div>
+  );
 }

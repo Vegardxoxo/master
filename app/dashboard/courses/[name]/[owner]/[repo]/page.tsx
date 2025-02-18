@@ -4,11 +4,10 @@ import { CommitQualityChartSkeleton } from "@/app/ui/skeletons";
 import CommitQualityWrapper from "@/app/ui/dashboard/commits/commit-quality-wrapper";
 import CommitFrequencyWrapper from "@/app/ui/dashboard/commits/commit-frequency-wrapper";
 import CommitContributionsWrapper from "@/app/ui/dashboard/commits/commit-contributions-wrapper";
-import { notFound } from "next/navigation";
 import CommitSizeWrapper from "@/app/ui/dashboard/commits/commit-size-wrapper";
 import ProjectInfo from "@/app/ui/dashboard/project_info/project-info";
 import ContributorsList from "@/app/ui/dashboard/project_info/contributors";
-import PullRequests from "@/app/ui/dashboard/pull_requests/pull-requests";
+import { PullRequestOverview } from "@/app/ui/dashboard/pull_requests/pull-request-overview";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -36,10 +35,7 @@ export default async function Page(props: {
         commitContribution: (
           <CommitContributionsWrapper owner={owner} repo={repo} />
         ),
-        pullRequestComments: (
-            <PullRequests owner={owner} repo={repo} />
-        ),
-
+        pullRequestOverview: <PullRequestOverview owner={owner} repo={repo} />,
       }}
     </Dashboard>
   );

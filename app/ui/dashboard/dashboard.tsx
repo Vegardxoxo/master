@@ -13,18 +13,22 @@ import {
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import type { VisibleSections } from "@/app/lib/definitions";
 import { cn } from "@/app/lib/utils";
+import {PullRequestOverview} from "@/app/ui/dashboard/pull_requests/pull-request-overview";
 
 type DashboardProps = {
   owner: string;
   repo: string;
   children: {
+    // project info
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
+    // commit related components
     commitQuality: React.ReactNode;
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
-    pullRequestComments: React.ReactNode;
+    // pull-request related components
+    pullRequestOverview: React.ReactNode;
   };
 };
 
@@ -42,7 +46,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
       branches: true,
       pullRequests: {
         visible: true,
-        comments: true,
+        overview: true,
       },
     },
   );
@@ -178,8 +182,8 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {visibleSections.pullRequests.comments && (
-                      <div>{children.pullRequestComments}</div>
+                    {visibleSections.pullRequests.overview && (
+                      <div>{children.pullRequestOverview}</div>
                     )}
                     <p className="text-gray-600">
                       Pull request analysis content will be added here.

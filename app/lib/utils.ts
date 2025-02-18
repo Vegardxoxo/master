@@ -11,6 +11,8 @@ import {
   LLMResponse,
   MappedCommitMessage,
   ParseCommitDataResult,
+  PullRequestData,
+  Review,
 } from "@/app/lib/definitions";
 
 export function cn(...inputs: ClassValue[]) {
@@ -398,108 +400,108 @@ export function parseCommitStatsGraphQL(data: any[]) {
   return statMap;
 }
 
-export function parseRawPullRequests(data: any[]) {
-  let pull_requests: Record<string, any> = {};
+export function parsePullRequests(data: any[]): PullRequestData {
+  const totalPRs = data.length;
+  const openPRs = data.filter((pr) => pr.state === "open").length;
+  const closedPRs = totalPRs - openPRs;
 
-  for (const pr of data) {
-    if (!pr.id) continue;
-    pull_requests[pr.id] = {
-      url: pr.html_url,
-      user: pr.user?.login || "Unknown",
-      title: pr.title,
-      message: pr.body,
-      state: pr.state,
-      created_at: pr.created_at ? new Date(pr.created_at) : null,
-      updated_at: pr.updated_at ? new Date(pr.updated_at) : null,
-      closed_at: pr.closed_at ? new Date(pr.closed_at) : null,
-      merged_at: pr.merged_at ? new Date(pr.merged_at) : null,
-      reviewers: pr.requested_reviewers || [],
-      labels:
-        pr.labels?.map((label: any) => ({
-          name: label.name,
-          color: label.color,
-          description: label.description,
-        })) || [],
-      milestone: pr.milestone || null,
-    };
-  }
+  const commentsByMembers: Record<string, number> = {};
+  const prsByMember: Record<string, Review> = {};
+  const reviewsByMember: Record<string, Review> = {};
 
-  return pull_requests;
-}
+  let totalComments = 0;
+  let prsWithReview = 0;
+  let prsWithoutReview = 0;
+  let prsLinkedToIssues = 0;
+  const labelCounts: Record<string, number> = {};
 
-export function extractPRdata(pull_requests: Record<string, any>) {
-  let totalPRs = 0;
-  let reviewedPRs = 0;
-  let timeOpenToClose: Record<string, number> = {};
-  let reviewersCount: Record<string, number> = {};
+  data.forEach((pr) => {
+    // PRs by member
+    if (!prsByMember[pr.user]) {
+      prsByMember[pr.user] = { count: 0, prs: [] };
+    }
+    prsByMember[pr.user].count++;
+    prsByMember[pr.user].prs.push(pr);
 
-  for (const prId in pull_requests) {
-    totalPRs++;
-    const pr = pull_requests[prId];
+    // Reviews by member
+    Object.entries(pr.reviewers).forEach(([reviewer, count]) => {
+      if (!reviewsByMember[reviewer]) {
+        reviewsByMember[reviewer] = { count: 0, prs: [] };
+      }
+      reviewsByMember[reviewer].count += count as number;
+      reviewsByMember[reviewer].prs.push(pr);
+    });
+    // Comments by member
+    Object.entries(pr.commenters || {}).forEach(([commenter, count]) => {
+      commentsByMembers[commenter] =
+        (commentsByMembers[commenter] || 0) + (count as number);
+    });
 
-    // Determine if the PR was reviewed
-    // Here we assume that a PR is "reviewed" if it has at least one reviewer
-    if (
-      pr.reviewers &&
-      Array.isArray(pr.reviewers) &&
-      pr.reviewers.length > 0
-    ) {
-      reviewedPRs++;
+    if (pr.review_comments.length > 0) {
+      commentsByMembers[pr.user] = (commentsByMembers[pr.user] || 0) + 1;
+      totalComments += 1;
+    }
+    totalComments += pr.comments;
 
-      // Count each reviewer
-      pr.reviewers.forEach((reviewer: any) => {
-        const reviewerName = reviewer.login || "Unknown";
-        reviewersCount[reviewerName] = (reviewersCount[reviewerName] || 0) + 1;
+    // PRs with/without review
+    if (pr.reviews > 0) {
+      prsWithReview++;
+    } else {
+      prsWithoutReview++;
+    }
+
+    // PRs linked to issues
+    if (pr.linked_issues > 0) {
+      prsLinkedToIssues++;
+    }
+
+    // Label usage
+    if (pr.labels) {
+      pr.labels.forEach((label: { name: string }) => {
+        labelCounts[label.name] = (labelCounts[label.name] || 0) + 1;
       });
     }
+  });
 
-    // Calculate the time between opening and closing the PR (in minutes)
-    if (pr.created_at && pr.closed_at) {
-      const timeDiffMs = pr.closed_at.getTime() - pr.created_at.getTime();
-      const timeDiffMinutes = timeDiffMs / (1000 * 60);
-      timeOpenToClose[prId] = Math.round(timeDiffMinutes);
+  const averageCommentsPerPR = totalPRs > 0 ? totalComments / totalPRs : 0;
+  const percentageLinkedToIssues = (prsLinkedToIssues / totalPRs) * 100;
+
+  const averageTimeToMerge =
+    data.reduce((sum, pr) => {
+      if (pr.merged_at) {
+        const createDate = new Date(pr.created_at);
+        const mergeDate = new Date(pr.merged_at);
+        return (
+          sum + (mergeDate.getTime() - createDate.getTime()) / (1000 * 3600)
+        );
+      }
+      return sum;
+    }, 0) / data.filter((pr) => pr.merged_at).length;
+
+  const fastMergedPRs = data.filter((pr) => {
+    if (pr.merged_at) {
+      const createDate = new Date(pr.created_at);
+      const mergeDate = new Date(pr.merged_at);
+      const timeDiffMinutes =
+        (mergeDate.getTime() - createDate.getTime()) / (1000 * 60);
+      return timeDiffMinutes <= 5;
     }
-  }
-
-  // Calculate the average review time
-  const averageReviewTime =
-    timeOpenToClose.length > 0
-      ? timeOpenToClose.reduce((acc, cur) => acc + cur, 0) / timeOpenToClose.length
-      : 0;
+    return false;
+  });
 
   return {
     totalPRs,
-    reviewedPRs,
-    reviewersCount,
-    averageReviewTime,
-    timeOpenToClose, // Optionally, return all individual review times if needed
+    openPRs,
+    closedPRs,
+    averageTimeToMerge,
+    prsByMember,
+    reviewsByMember,
+    prsWithReview,
+    prsWithoutReview,
+    averageCommentsPerPR,
+    commentsByMembers,
+    percentageLinkedToIssues,
+    labelCounts,
+    fastMergedPRs,
   };
-}
-
-export function parseRawPullRequestComments(data: any[]) {
-  let comments: Record<string, any> = {};
-
-  for (const comment of data) {
-    if (!comment.id) continue;
-    comments[comment.id] = {
-      url: comment.html_url,
-      pull_request_review_id: comment.pull_request_review_id,
-      user: comment.user?.login || "Unknown",
-      comment: comment.body,
-      subject_type: comment.subject_type,
-      subject_id: comment.subject_id,
-    }
-
-  }
-  return comments;
-}
-
-export function extractPRCommentsData(comments: Record<string, any>) {
-  let leaderboard: Record<string, number> = {};
-  for (const commentId in comments) {
-    const obj = comments[commentId];
-    const user = obj.user;
-    leaderboard[user] = (leaderboard[user] || 0) + 1;
-  }
-  return leaderboard;
 }
