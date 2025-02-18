@@ -503,5 +503,6 @@ export function parsePullRequests(data: any[]): PullRequestData {
     percentageLinkedToIssues,
     labelCounts,
     fastMergedPRs,
+    totalComments
   };
 }

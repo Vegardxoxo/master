@@ -125,4 +125,5 @@ export type PullRequestData = {
   percentageLinkedToIssues: number;
   labelCounts: Record<string, number>;
   fastMergedPRs: any[];
+  totalComments: number;
 };

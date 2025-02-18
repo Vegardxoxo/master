@@ -1,7 +1,7 @@
 import { fetchPullRequests } from "@/app/lib/data";
 import { PullRequestMetrics } from "./pull-request-metrics";
 
-export default async function PullRequests({
+export default async function PullRequestsMetricsWrapper({
   owner,
   repo,
 }: {
@@ -9,7 +9,6 @@ export default async function PullRequests({
   repo: string;
 }) {
   const pullRequestData = await fetchPullRequests(owner, repo, "all");
-
   return (
     <div className="space-y-8">
       <PullRequestMetrics data={pullRequestData} />
