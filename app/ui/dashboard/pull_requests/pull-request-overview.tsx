@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PullRequestsOverviewTable from "@/app/ui/dashboard/pull_requests/pull-requests-overview-table";
+import PullRequestOverviewTable from "@/app/ui/dashboard/pull_requests/pull-request-overview-table";
 import type { PullRequestData } from "@/app/lib/definitions";
 
 type DialogData = {
@@ -67,6 +67,7 @@ export function PullRequestOverview({ data }: { data: PullRequestData }) {
   };
 
   const handleBarClick = (entry: any) => {
+    console.log("entry", entry)
     openDialog(
       `Pull Requests by ${entry.name}`,
       `Detailed view of pull requests created by ${entry.name}`,
@@ -199,7 +200,7 @@ export function PullRequestOverview({ data }: { data: PullRequestData }) {
               </DialogTitle>
               <DialogDescription>{dialogData?.description}</DialogDescription>
             </DialogHeader>
-            <PullRequestsOverviewTable data={dialogData?.data || []} />
+            <PullRequestOverviewTable data={dialogData?.data || []} />
           </DialogContent>
         </Dialog>
       </CardContent>

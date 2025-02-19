@@ -115,7 +115,7 @@ export type PullRequestData = {
   openPRs: number;
   closedPRs: number;
   averageTimeToMerge: number;
-
+  milestones: string[];
   prsByMember: Record<string, Review>;
   reviewsByMember: Record<string, Review>;
   commentsByMembers: Record<string, number>;

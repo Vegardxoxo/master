@@ -414,6 +414,8 @@ export function parsePullRequests(data: any[]): PullRequestData {
   let prsWithoutReview = 0;
   let prsLinkedToIssues = 0;
   const labelCounts: Record<string, number> = {};
+  let milestones : string[] = [];
+
 
   data.forEach((pr) => {
     // PRs by member
@@ -461,6 +463,10 @@ export function parsePullRequests(data: any[]): PullRequestData {
         labelCounts[label.name] = (labelCounts[label.name] || 0) + 1;
       });
     }
+
+    if (pr.milestone) {
+      milestones.push(pr.milestone.title);
+    }
   });
 
   const averageCommentsPerPR = totalPRs > 0 ? totalComments / totalPRs : 0;
@@ -489,6 +495,9 @@ export function parsePullRequests(data: any[]): PullRequestData {
     return false;
   });
 
+  // collect all milestones in an array
+
+
   return {
     totalPRs,
     openPRs,
@@ -501,6 +510,7 @@ export function parsePullRequests(data: any[]): PullRequestData {
     averageCommentsPerPR,
     commentsByMembers,
     percentageLinkedToIssues,
+    milestones,
     labelCounts,
     fastMergedPRs,
     totalComments
