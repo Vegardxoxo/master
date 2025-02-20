@@ -87,7 +87,7 @@ export function DashboardNavigation({ onToggle, onToggleSubsection, visibleSecti
                 </span>
                 <span className="flex items-center">
                   {typeof value === "object" && "visible" in value && (
-                    <span className="mr-8">
+                    <span className="mx-8">
                       {expandedSections[key] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </span>
                   )}

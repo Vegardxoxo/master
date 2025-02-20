@@ -399,7 +399,7 @@ export async function fetchPullRequests(
                         url: pr.html_url,
                         title: pr.title,
                         state: pr.state,
-                        milestone: pr.milestone?.title ?? "none",
+                        milestone: pr.milestone?.title ?? "None",
                         created_at: pr.created_at,
                         updated_at: pr.updated_at,
                         closed_at: pr.closed_at,
@@ -422,7 +422,6 @@ export async function fetchPullRequests(
             }),
         );
         const parsed = parsePullRequests(prsWithReviews);
-        console.log(parsed);
         return parsed;
     } catch (e) {
         console.log(e);

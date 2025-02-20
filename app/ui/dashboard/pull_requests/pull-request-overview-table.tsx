@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 
-export default function PullRequestOverviewTable({ data }: { data: any }) {
+export default function PullRequestOverviewTable({ data }: { data: never }) {
   return (
     <Table>
       <TableHeader>

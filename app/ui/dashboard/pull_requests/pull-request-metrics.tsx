@@ -1,179 +1,176 @@
 "use client";
 
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
-    Tooltip,
-    Legend,
-    Scatter,
-    ScatterChart,
-    ZAxis,
-    Cell,
-    BarChart,
-    Bar,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Scatter,
+  ScatterChart,
+  ZAxis,
+  Cell,
+  BarChart,
+  Bar,
 } from "recharts";
-import {useState} from "react";
+import { useState } from "react";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import type {PullRequestData} from "@/app/lib/definitions";
+import type { PullRequestData } from "@/app/lib/definitions";
 import PullRequestOverviewTable from "@/app/ui/dashboard/pull_requests/pull-request-overview-table";
 
-export function PullRequestMetrics({data}: { data: PullRequestData }) {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-    const [selectedData, setSelectedData] = useState<any[] | null>(null);
+export function PullRequestMetrics({ data }: { data: PullRequestData }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [selectedData, setSelectedData] = useState<any[] | null>(null);
 
-    const handleDataClick = (data: any) => {
-        setSelectedMetric(data.name);
-        setSelectedData(
-            data.reviewsByMember ? data.reviewsByMember[data.name].prs : data.prs,
-        );
-        setIsDialogOpen(true);
-        console.log(commentsByMembers);
-    };
-
-    const commentsByMembers = Object.entries(data.reviewsByMember || {}).map(
-        ([name, {count}]) => ({name, count}),
+  const handleDataClick = (data: any) => {
+    setSelectedMetric(data.name);
+    setSelectedData(
+      data.reviewsByMember ? data.reviewsByMember[data.name].prs : data.prs,
     );
+    setIsDialogOpen(true);
+  };
 
-    const reviewsByMember = Object.entries(data.reviewsByMember || {}).map(
-        ([name, {count, prs}]) => ({
-            name,
-            count,
-            prs,
-        }),
-    );
+  const commentsByMembers = Object.entries(data.reviewsByMember || {}).map(
+    ([name, { count }]) => ({ name, count }),
+  );
 
-    const COLORS = [
-        "#0088FE",
-        "#00C49F",
-        "#FFBB28",
-        "#FF8042",
-        "#8884D8",
-        "#82CA9D",
-    ];
+  const reviewsByMember = Object.entries(data.reviewsByMember || {}).map(
+    ([name, { count, prs }]) => ({
+      name,
+      count,
+      prs,
+    }),
+  );
 
-    const CustomTooltip = ({active, payload, label}: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-background p-4 rounded-md shadow-md border border-border">
-                    <p className={"font-bold"}>{payload[0].value}</p>
-                    <p>Comments: {payload[1].value}</p>
-                </div>
-            )
-        }
-        return null;
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884D8",
+    "#82CA9D",
+  ];
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background p-4 rounded-md shadow-md border border-border">
+          <p className={"font-bold"}>{payload[0].value}</p>
+          <p>Comments: {payload[1].value}</p>
+        </div>
+      );
     }
+    return null;
+  };
 
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Pull Request Metrics</CardTitle>
+        <CardDescription>
+          Detailed analysis of pull request activity
+        </CardDescription>
+      </CardHeader>
 
-    return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Pull Request Metrics</CardTitle>
-                <CardDescription>
-                    Detailed analysis of pull request activity
-                </CardDescription>
-            </CardHeader>
+      <CardContent>
+        <div className="space-y-8">
+          {commentsByMembers.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                Comments per Group Member
+              </h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <ScatterChart
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <XAxis type="category" dataKey="name" name="Member" />
+                  <YAxis type="number" dataKey="count" name="Comments" />
+                  <ZAxis type="number" range={[100, 1000]} />
+                  <Tooltip
+                    cursor={{ strokeDasharray: "3 3" }}
+                    content={<CustomTooltip />}
+                  />
 
-            <CardContent>
-                <div className="space-y-8">
-                    {commentsByMembers.length > 0 && (
-                        <div>
-                            <h3 className="text-lg font-semibold mb-4">
-                                Comments per Group Member
-                            </h3>
-                            <ResponsiveContainer width="100%" height={400}>
-                                <ScatterChart
-                                    margin={{top: 20, right: 20, bottom: 20, left: 20}}
-                                >
-                                    <XAxis type="category" dataKey="name" name="Member"/>
-                                    <YAxis type="number" dataKey="count" name="Comments"/>
-                                    <ZAxis type="number" range={[100, 1000]}/>
-                                    <Tooltip
-                                        cursor={{strokeDasharray: '3 3'}}
-                                        content={<CustomTooltip/>}
-                                    />
+                  <Legend />
+                  <Scatter
+                    name="Comments Made"
+                    data={commentsByMembers}
+                    fill="#8884d8"
+                  >
+                    {commentsByMembers.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
+          {reviewsByMember.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                Reviews per Group Member
+              </h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart
+                  data={reviewsByMember}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
+                    {reviewsByMember.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
 
-                                    <Legend/>
-                                    <Scatter
-                                        name="Comments Made"
-                                        data={commentsByMembers}
-                                        fill="#8884d8"
-                                    >
-                                        {commentsByMembers.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={COLORS[index % COLORS.length]}
-                                            />
-                                        ))}
-                                    </Scatter>
-                                </ScatterChart>
-                            </ResponsiveContainer>
-                        </div>
-                    )}
-
-                    {reviewsByMember.length > 0 && (
-                        <div>
-                            <h3 className="text-lg font-semibold mb-4">
-                                Reviews per Group Member
-                            </h3>
-                            <ResponsiveContainer width="100%" height={400}>
-                                <BarChart
-                                    data={reviewsByMember}
-                                    margin={{top: 20, right: 30, left: 20, bottom: 5}}
-                                >
-                                    <XAxis dataKey="name"/>
-                                    <YAxis/>
-                                    <Tooltip/>
-                                    <Legend/>
-                                    <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
-                                        {reviewsByMember.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={COLORS[index % COLORS.length]}
-                                            />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    )}
-                </div>
-
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="max-w-3xl">
-                        <DialogHeader>
-                            <DialogTitle>Details for {selectedMetric}</DialogTitle>
-                            <DialogDescription>
-                                Detailed information about reviews made by this member.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <PullRequestOverviewTable data={selectedData || []}/>
-                    </DialogContent>
-                </Dialog>
-            </CardContent>
-        </Card>
-    );
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Details for {selectedMetric}</DialogTitle>
+              <DialogDescription>
+                Detailed information about reviews made by this member.
+              </DialogDescription>
+            </DialogHeader>
+            <PullRequestOverviewTable data={selectedData || []} />
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
 }
