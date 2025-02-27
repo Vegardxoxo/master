@@ -37,7 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PullRequestData } from "@/app/lib/definitions";
-import PullRequestOverviewTable from "@/app/ui/dashboard/pull_requests/pull-request-overview-table";
+import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 
 export function PullRequestMetrics({ data }: { data: PullRequestData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -52,8 +52,8 @@ export function PullRequestMetrics({ data }: { data: PullRequestData }) {
     setIsDialogOpen(true);
   };
 
-  const commentsByMembers = Object.entries(data.reviewsByMember || {}).map(
-    ([name, { count }]) => ({ name, count }),
+  const commentsByMembers = Object.entries(data.commentsByMembers || {}).map(
+    ([name, count]) => ({ name, count }),
   );
 
   const reviewsByMember = Object.entries(data.reviewsByMember || {}).map(
@@ -160,14 +160,14 @@ export function PullRequestMetrics({ data }: { data: PullRequestData }) {
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
             <DialogHeader>
               <DialogTitle>Details for {selectedMetric}</DialogTitle>
               <DialogDescription>
                 Detailed information about reviews made by this member.
               </DialogDescription>
             </DialogHeader>
-            <PullRequestOverviewTable data={selectedData || []} />
+            <PullRequestsMembersTable data={selectedData || []} />
           </DialogContent>
         </Dialog>
       </CardContent>

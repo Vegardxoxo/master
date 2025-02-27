@@ -1,23 +1,21 @@
-import {Octokit} from "octokit";
+import { Octokit } from "octokit";
 import {
-    _Branches,
-    CommitMessageLong, PullRequestData,
-    repositoryOverview,
+  _Branches,
+  CommitMessageLong,
+  PullRequestData,
+  repositoryOverview,
 } from "@/app/lib/definitions";
 import {
-    extractPRdata,
-    formatTimestamp,
-    parseRawPullRequestComments,
-    parseCommitStats,
-    parseCommitStatsGraphQL,
-    parseRawPullRequests,
-    extractPRCommentsData,
-    parsePullRequests,
+  formatTimestamp,
+  parseCommitStats,
+  parseCommitStatsGraphQL,
+  parsePullRequests,
 } from "@/app/lib/utils";
+import { cache } from "react";
 
 const octokit = new Octokit({
-    auth: process.env.TOKEN,
-    baseUrl: "https://git.ntnu.no/api/v3",
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
 
 /**
@@ -26,44 +24,44 @@ const octokit = new Octokit({
  * @param repo
  */
 export async function fetchRepoOverview(
-    owner: string,
-    repo: string,
+  owner: string,
+  repo: string,
 ): Promise<repositoryOverview> {
-    try {
-        const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
-            owner,
-            repo,
-        });
+  try {
+    const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
+      owner,
+      repo,
+    });
 
-        const contributorsRes = await octokit.request(
-            "GET /repos/{owner}/{repo}/contributors",
-            {
-                owner,
-                repo,
-            },
-        );
+    const contributorsRes = await octokit.request(
+      "GET /repos/{owner}/{repo}/contributors",
+      {
+        owner,
+        repo,
+      },
+    );
 
-        const issuesRes = await octokit.request(
-            "GET /repos/{owner}/{repo}/issues",
-            {
-                owner,
-                repo,
-                state: "open",
-            },
-        );
+    const issuesRes = await octokit.request(
+      "GET /repos/{owner}/{repo}/issues",
+      {
+        owner,
+        repo,
+        state: "open",
+      },
+    );
 
-        return {
-            name: repoInfo.data.name,
-            contributors: contributorsRes.data
-                .map((c) => c.login)
-                .filter((login): login is string => !!login),
-            openIssues: issuesRes.data.length,
-            url: repoInfo.data.html_url,
-        };
-    } catch (err) {
-        console.error("Error fetching repo data via REST:", err);
-        throw new Error("Failed to fetch repository overview.");
-    }
+    return {
+      name: repoInfo.data.name,
+      contributors: contributorsRes.data
+        .map((c) => c.login)
+        .filter((login): login is string => !!login),
+      openIssues: issuesRes.data.length,
+      url: repoInfo.data.html_url,
+    };
+  } catch (err) {
+    console.error("Error fetching repo data via REST:", err);
+    throw new Error("Failed to fetch repository overview.");
+  }
 }
 
 /**
@@ -72,19 +70,19 @@ export async function fetchRepoOverview(
  * @param repo  - Repository name
  */
 export async function fetchBranches(owner: string, repo: string) {
-    try {
-        const {data: branchesData} = await octokit.request(
-            "GET /repos/{owner}/{repo}/branches",
-            {
-                owner,
-                repo,
-            },
-        );
-        return branchesData;
-    } catch (e) {
-        console.error("Error fetching branches:", e);
-        throw new Error("Failed to fetch branches.");
-    }
+  try {
+    const { data: branchesData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/branches",
+      {
+        owner,
+        repo,
+      },
+    );
+    return branchesData;
+  } catch (e) {
+    console.error("Error fetching branches:", e);
+    throw new Error("Failed to fetch branches.");
+  }
 }
 
 /**
@@ -94,24 +92,24 @@ export async function fetchBranches(owner: string, repo: string) {
  * @param branch - Branch name
  */
 export async function fetchBranchDetails(
-    owner: string,
-    repo: string,
-    branch: string,
+  owner: string,
+  repo: string,
+  branch: string,
 ) {
-    try {
-        const {data: branchData} = await octokit.request(
-            "GET /repos/{owner}/{repo}/branches/{branch}",
-            {
-                owner,
-                repo,
-                branch,
-            },
-        );
-        return branchData;
-    } catch (e) {
-        console.error("Error fetching details for branch:", e);
-        throw new Error("Failed to fetch details for branch.");
-    }
+  try {
+    const { data: branchData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/branches/{branch}",
+      {
+        owner,
+        repo,
+        branch,
+      },
+    );
+    return branchData;
+  } catch (e) {
+    console.error("Error fetching details for branch:", e);
+    throw new Error("Failed to fetch details for branch.");
+  }
 }
 
 /**
@@ -122,39 +120,39 @@ export async function fetchBranchDetails(
  * @param branches
  */
 export async function fetchBranchesWithStatus(
-    owner: string,
-    repo: string,
-    branches: _Branches[],
+  owner: string,
+  repo: string,
+  branches: _Branches[],
 ) {
-    const now = new Date();
-    const staleThresholdDays = 14;
+  const now = new Date();
+  const staleThresholdDays = 14;
 
-    return await Promise.all(
-        branches.map(async (branch) => {
-            const commitData = await fetchBranchDetails(owner, repo, branch.name);
+  return await Promise.all(
+    branches.map(async (branch) => {
+      const commitData = await fetchBranchDetails(owner, repo, branch.name);
 
-            // Default to a far-past date if commit info is missing
-            let lastCommitDate = new Date(0);
-            if (commitData.commit?.commit?.author?.date) {
-                lastCommitDate = new Date(commitData.commit.commit.author.date);
-            }
+      // Default to a far-past date if commit info is missing
+      let lastCommitDate = new Date(0);
+      if (commitData.commit?.commit?.author?.date) {
+        lastCommitDate = new Date(commitData.commit.commit.author.date);
+      }
 
-            // Calculate difference in days from now
-            const diffInMs = now.getTime() - lastCommitDate.getTime();
-            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      // Calculate difference in days from now
+      const diffInMs = now.getTime() - lastCommitDate.getTime();
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-            let status = "active";
-            if (diffInDays > staleThresholdDays) {
-                status = "stale";
-            }
+      let status = "active";
+      if (diffInDays > staleThresholdDays) {
+        status = "stale";
+      }
 
-            return {
-                ...branch,
-                lastUpdate: formatTimestamp(lastCommitDate.toISOString()),
-                status,
-            };
-        }),
-    );
+      return {
+        ...branch,
+        lastUpdate: formatTimestamp(lastCommitDate.toISOString()),
+        status,
+      };
+    }),
+  );
 }
 
 /**
@@ -163,21 +161,21 @@ export async function fetchBranchesWithStatus(
  * @param repo
  */
 export async function fetchContributors(owner: string, repo: string) {
-    try {
-        const {data: contributorData} = await octokit.request(
-            "GET /repos/{owner}/{repo}/contributors",
-            {
-                owner,
-                repo,
-            },
-        );
-        return {
-            contributors: contributorData.map((c: any) => c.login),
-        };
-    } catch (e) {
-        console.error("Error fetching repo details:", e);
-        throw new Error("Failed to fetch repository details.");
-    }
+  try {
+    const { data: contributorData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/contributors",
+      {
+        owner,
+        repo,
+      },
+    );
+    return {
+      contributors: contributorData.map((c: any) => c.login),
+    };
+  } catch (e) {
+    console.error("Error fetching repo details:", e);
+    throw new Error("Failed to fetch repository details.");
+  }
 }
 
 /**
@@ -186,26 +184,26 @@ export async function fetchContributors(owner: string, repo: string) {
  * @param repo
  */
 export async function fetchProjectInfo(owner: string, repo: string) {
-    try {
-        const {data: repoData} = await octokit.request(
-            "GET /repos/{owner}/{repo}",
-            {
-                owner,
-                repo,
-            },
-        );
-        return {
-            name: repoData.name,
-            stars: repoData.stargazers_count,
-            forks: repoData.forks_count,
-            watchers: repoData.watchers_count,
-            openIssues: repoData.open_issues_count,
-            updatedAt: repoData.updated_at,
-        };
-    } catch (e) {
-        console.error("Error fetching repo details:", e);
-        throw new Error("Failed to fetch repository details.");
-    }
+  try {
+    const { data: repoData } = await octokit.request(
+      "GET /repos/{owner}/{repo}",
+      {
+        owner,
+        repo,
+      },
+    );
+    return {
+      name: repoData.name,
+      stars: repoData.stargazers_count,
+      forks: repoData.forks_count,
+      watchers: repoData.watchers_count,
+      openIssues: repoData.open_issues_count,
+      updatedAt: repoData.updated_at,
+    };
+  } catch (e) {
+    console.error("Error fetching repo details:", e);
+    throw new Error("Failed to fetch repository details.");
+  }
 }
 
 /**
@@ -214,23 +212,23 @@ export async function fetchProjectInfo(owner: string, repo: string) {
  * @param repo
  */
 export async function fetchCommits(owner: string, repo: string) {
-    try {
-        const {data: commitData} = await octokit.request(
-            "GET /repos/{owner}/{repo}/commits",
-            {
-                owner,
-                repo,
-                per_page: 5,
-                headers: {
-                    "X-GitHub-Api-Version": "2022-11-28",
-                },
-            },
-        );
-        return commitData;
-    } catch (e) {
-        console.log(e);
-        throw new Error("Failed to fetch commits");
-    }
+  try {
+    const { data: commitData } = await octokit.request(
+      "GET /repos/{owner}/{repo}/commits",
+      {
+        owner,
+        repo,
+        per_page: 5,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    return commitData;
+  } catch (e) {
+    console.log(e);
+    throw new Error("Failed to fetch commits");
+  }
 }
 
 /**
@@ -239,57 +237,57 @@ export async function fetchCommits(owner: string, repo: string) {
  * @param repo
  */
 export async function fetchAllCommits(owner: string, repo: string) {
-    try {
-        return await octokit.paginate(octokit.rest.repos.listCommits, {
-            owner,
-            repo,
-            per_page: 100,
-            headers: {
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        });
-    } catch (e) {
-        console.log(e);
-        return [];
-    }
+  try {
+    return await octokit.paginate(octokit.rest.repos.listCommits, {
+      owner,
+      repo,
+      per_page: 100,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
 }
 
 export async function fetchCommitStats(
-    owner: string,
-    repo: string,
-    ref: string,
+  owner: string,
+  repo: string,
+  ref: string,
 ) {
-    try {
-        const {data: commitData} = await octokit.request(
-            "/repos/{owner}/{repo}/commits/{ref}",
-            {
-                owner,
-                repo,
-                ref,
+  try {
+    const { data: commitData } = await octokit.request(
+      "/repos/{owner}/{repo}/commits/{ref}",
+      {
+        owner,
+        repo,
+        ref,
 
-                headers: {
-                    "X-GitHub-Api-Version": "2022-11-28",
-                },
-            },
-        );
-        return parseCommitStats(commitData);
-    } catch (e) {
-        console.log(e);
-        throw new Error("Failed to fetch details about commit:" + ref);
-    }
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    return parseCommitStats(commitData);
+  } catch (e) {
+    console.log(e);
+    throw new Error("Failed to fetch details about commit:" + ref);
+  }
 }
 
 export async function fetchCommitStatsGraphQL(
-    owner: string,
-    repo: string,
-    data: CommitMessageLong[],
+  owner: string,
+  repo: string,
+  data: CommitMessageLong[],
 ) {
-    const shas = data.map((obj) => obj.sha);
-    const query = `
+  const shas = data.map((obj) => obj.sha);
+  const query = `
     query($owner: String!, $repo: String!) {
       repository(owner: $owner, name: $repo) {
         ${shas
-        .map(
+          .map(
             (sha, index) => `
             commit${index}: object(oid: "${sha}") {
               ... on Commit {
@@ -310,22 +308,29 @@ export async function fetchCommitStatsGraphQL(
               }
             }
           `,
-        )
-        .join("\n")}
+          )
+          .join("\n")}
       }
     }
   `;
 
-    try {
-        const response = await octokit.graphql(query, {owner, repo});
-        const commits = Object.values(response.repository);
-        const parsedCommits = parseCommitStatsGraphQL(commits);
-        return {parsedCommits, commits};
-    } catch (e) {
-        console.error("GraphQL Error:", e);
-        throw new Error("Failed to fetch commit details via GraphQL.");
-    }
+  try {
+    const response = await octokit.graphql(query, { owner, repo });
+    const commits = Object.values(response.repository);
+    const parsedCommits = parseCommitStatsGraphQL(commits);
+    return { parsedCommits, commits };
+  } catch (e) {
+    console.error("GraphQL Error:", e);
+    throw new Error("Failed to fetch commit details via GraphQL.");
+  }
 }
+
+// Cache key generator
+const getPullRequestsCacheKey = (
+  owner: string,
+  repo: string,
+  state: "open" | "closed" | "all",
+) => `pull-requests:${owner}:${repo}:${state}`;
 
 /**
  * Fetches the list of pull requests for a given repository.
@@ -335,96 +340,100 @@ export async function fetchCommitStatsGraphQL(
  * @param state
  * @return {Promise<Array>} A promise that resolves to an array of pull request objects retrieved from the repository. Returns an empty array if an error occurs.
  */
-export async function fetchPullRequests(
+export const fetchPullRequests = cache(
+  async (
     owner: string,
     repo: string,
     state: "open" | "closed" | "all",
-): Promise<PullRequestData> {
+  ): Promise<PullRequestData> => {
+    const cacheKey = getPullRequestsCacheKey(owner, repo, state);
+    console.log(`Fetching pull requests for ${cacheKey}`);
     try {
-        const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
-            owner,
-            repo,
-            state,
-            headers: {
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        });
-        const prsWithReviews = await Promise.all(
-            pullRequests.map(async (pr) => {
-                try {
-                    const reviews = await octokit.paginate(
-                        octokit.rest.pulls.listReviews,
-                        {
-                            owner,
-                            repo,
-                            pull_number: pr.number,
-                            per_page: 100,
-                        },
-                    );
+      const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
+        owner,
+        repo,
+        state,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      });
+      const prsWithReviews = await Promise.all(
+        pullRequests.map(async (pr) => {
+          try {
+            const reviews = await octokit.paginate(
+              octokit.rest.pulls.listReviews,
+              {
+                owner,
+                repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+            );
 
-                    // if (reviews.length > 0) console.log(reviews[0].body);
+            // if (reviews.length > 0) console.log(reviews[0].body);
 
-                    const comments = await octokit.paginate(
-                        octokit.rest.issues.listComments,
-                        {
-                            owner,
-                            repo,
-                            issue_number: pr.number,
-                            per_page: 100,
-                        },
-                    );
-                    // if (comments.length > 0) console.log("comments", comments[0].body, comments[0].user.login)
+            const comments = await octokit.paginate(
+              octokit.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number: pr.number,
+                per_page: 100,
+              },
+            );
+            // if (comments.length > 0) console.log("comments", comments[0].body, comments[0].user.login)
 
-                    const commenters = comments.reduce(
-                        (acc, comment) => {
-                            if (comment.user && comment.user.login) {
-                                acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
-                            }
-                            return acc;
-                        },
-                        {} as Record<string, number>,
-                    );
-
-                    const reviewers = reviews.reduce(
-                        (acc, review) => {
-                            if (review.user && review.user.login) {
-                                acc[review.user.login] = (acc[review.user.login] || 0) + 1;
-                            }
-                            return acc;
-                        },
-                        {} as Record<string, number>,
-                    );
-                    return {
-                        number: pr.number,
-                        url: pr.html_url,
-                        title: pr.title,
-                        state: pr.state,
-                        milestone: pr.milestone?.title ?? "None",
-                        created_at: pr.created_at,
-                        updated_at: pr.updated_at,
-                        closed_at: pr.closed_at,
-                        merged_at: pr.merged_at,
-                        user: pr.user?.login ?? "unknown",
-                        reviews: reviews.length,
-                        review_comments: reviews.map((review) => review.body).join(", "),
-                        comments: comments.length,
-                        linked_issues:
-                            typeof pr.body === "string"
-                                ? pr.body.match(/#\d+/g)?.length || 0
-                                : 0,
-                        reviewers,
-                        commenters,
-                    };
-                } catch (e) {
-                    console.log("failed to fetch");
-                    return [];
+            const commenters = comments.reduce(
+              (acc, comment) => {
+                if (comment.user && comment.user.login) {
+                  acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
                 }
-            }),
-        );
-        const parsed = parsePullRequests(prsWithReviews);
-        return parsed;
+                return acc;
+              },
+              {} as Record<string, number>,
+            );
+
+            const reviewers = reviews.reduce(
+              (acc, review) => {
+                if (review.user && review.user.login) {
+                  acc[review.user.login] = (acc[review.user.login] || 0) + 1;
+                }
+                return acc;
+              },
+              {} as Record<string, number>,
+            );
+            return {
+              number: pr.number,
+              url: pr.html_url,
+              title: pr.title,
+              state: pr.state,
+              milestone: pr.milestone?.title ?? "None",
+              created_at: pr.created_at,
+              updated_at: pr.updated_at,
+              closed_at: pr.closed_at,
+              merged_at: pr.merged_at,
+              user: pr.user?.login ?? "unknown",
+              reviews: reviews.length,
+              review_comments: reviews.map((review) => review.body).join(", "),
+              comments: comments.length,
+              linked_issues:
+                typeof pr.body === "string"
+                  ? pr.body.match(/#\d+/g)?.length || 0
+                  : 0,
+              reviewers,
+              commenters,
+            };
+          } catch (e) {
+            console.log("failed to fetch");
+            return [];
+          }
+        }),
+      );
+      const parsed = parsePullRequests(prsWithReviews);
+      return parsed;
     } catch (e) {
-        console.log(e);
-        return [];
+      console.log(e);
+      return [];
     }
-}
+  },
+);

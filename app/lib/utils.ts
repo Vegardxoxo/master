@@ -512,3 +512,35 @@ export function parsePullRequests(data: any[]): PullRequestData {
     totalComments,
   };
 }
+
+export function createChartData(
+  data: PullRequestData,
+  selectedMembers: string[],
+  selectedMilestone: string,
+): Array<{ date: string; [member: string]: number | string }> {
+  const filteredData = Object.entries(data.prsByMember || {}).reduce(
+    (acc, [name, { prs }]) => {
+      if (selectedMembers.includes(name)) {
+        prs.forEach((pr) => {
+          if (
+            selectedMilestone === "all" ||
+            pr.milestone === selectedMilestone
+          ) {
+            const date = new Date(pr.created_at).toISOString().split("T")[0];
+            if (!acc[date]) {
+              acc[date] = {};
+            }
+            acc[date][name] = (acc[date][name] || 0) + 1;
+          }
+        });
+      }
+      return acc;
+    },
+    {} as Record<string, Record<string, number>>,
+  );
+
+  return Object.entries(filteredData)
+    .map(([date, members]) => ({ date, ...members }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
