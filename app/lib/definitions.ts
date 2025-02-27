@@ -101,7 +101,29 @@ export type VisibleSections = {
   [key: string]:
     | boolean
     | {
-        visible: boolean
-        [subKey: string]: boolean
-      }
-}
+        visible: boolean;
+        [subKey: string]: boolean;
+      };
+};
+export type Review = {
+  count: number;
+  prs: any[];
+};
+
+export type PullRequestData = {
+  totalPRs: number;
+  openPRs: number;
+  closedPRs: number;
+  averageTimeToMerge: number;
+  milestones: Set<string>;
+  prsByMember: Record<string, Review>;
+  reviewsByMember: Record<string, Review>;
+  commentsByMembers: Record<string, number>;
+  prsWithReview: number;
+  prsWithoutReview: number;
+  averageCommentsPerPR: number;
+  percentageLinkedToIssues: number;
+  labelCounts: Record<string, number>;
+  fastMergedPRs: any[];
+  totalComments: number;
+};

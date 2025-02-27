@@ -2,17 +2,16 @@ import { Octokit } from "octokit";
 import {
   _Branches,
   CommitMessageLong,
+  PullRequestData,
   repositoryOverview,
 } from "@/app/lib/definitions";
 import {
-  extractPRdata,
   formatTimestamp,
-  parseRawPullRequestComments,
   parseCommitStats,
   parseCommitStatsGraphQL,
-  parseRawPullRequests,
-  extractPRCommentsData,
+  parsePullRequests,
 } from "@/app/lib/utils";
+import { cache } from "react";
 
 const octokit = new Octokit({
   auth: process.env.TOKEN,
@@ -326,37 +325,12 @@ export async function fetchCommitStatsGraphQL(
   }
 }
 
-/**
- * Lists review comments for all pull requests in a repository.
- *
- * @param {string} owner - The owner of the repository on GitHub.
- * @param {string} repo - The name of the repository on GitHub.
- * @return {Promise<Array>} A promise that resolves with an array of review comments for the pull requests in the specified repository.
- * @throws {Error} Throws an error if the API request fails.
- */
-export async function fetchReviewComments(
+// Cache key generator
+const getPullRequestsCacheKey = (
   owner: string,
   repo: string,
-): Promise<Record<string, any>> {
-  try {
-    const { data: reviewComments } = await octokit.request(
-      "GET /repos/{owner}/{repo}/pulls/comments",
-      {
-        owner,
-        repo,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    );
-    const parsed = parseRawPullRequestComments(reviewComments);
-    const leaderboard = extractPRCommentsData(parsed);
-    return {parsed, leaderboard};
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
-}
+  state: "open" | "closed" | "all",
+) => `pull-requests:${owner}:${repo}:${state}`;
 
 /**
  * Fetches the list of pull requests for a given repository.
@@ -366,26 +340,100 @@ export async function fetchReviewComments(
  * @param state
  * @return {Promise<Array>} A promise that resolves to an array of pull request objects retrieved from the repository. Returns an empty array if an error occurs.
  */
-export async function fetchPullRequests(
-  owner: string,
-  repo: string,
-  state: "open" | "closed" | "all",
-): Promise<Record<string, any>> {
-  try {
-    const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
-      owner,
-      repo,
-      state,
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    });
-    const parsed = parseRawPullRequests(pullRequests);
-    const stats = extractPRdata(parsed);
-    console.log(stats);
-    return parsed;
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
-}
+export const fetchPullRequests = cache(
+  async (
+    owner: string,
+    repo: string,
+    state: "open" | "closed" | "all",
+  ): Promise<PullRequestData> => {
+    const cacheKey = getPullRequestsCacheKey(owner, repo, state);
+    console.log(`Fetching pull requests for ${cacheKey}`);
+    try {
+      const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
+        owner,
+        repo,
+        state,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      });
+      const prsWithReviews = await Promise.all(
+        pullRequests.map(async (pr) => {
+          try {
+            const reviews = await octokit.paginate(
+              octokit.rest.pulls.listReviews,
+              {
+                owner,
+                repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+            );
+
+            // if (reviews.length > 0) console.log(reviews[0].body);
+
+            const comments = await octokit.paginate(
+              octokit.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number: pr.number,
+                per_page: 100,
+              },
+            );
+            // if (comments.length > 0) console.log("comments", comments[0].body, comments[0].user.login)
+
+            const commenters = comments.reduce(
+              (acc, comment) => {
+                if (comment.user && comment.user.login) {
+                  acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
+                }
+                return acc;
+              },
+              {} as Record<string, number>,
+            );
+
+            const reviewers = reviews.reduce(
+              (acc, review) => {
+                if (review.user && review.user.login) {
+                  acc[review.user.login] = (acc[review.user.login] || 0) + 1;
+                }
+                return acc;
+              },
+              {} as Record<string, number>,
+            );
+            return {
+              number: pr.number,
+              url: pr.html_url,
+              title: pr.title,
+              state: pr.state,
+              milestone: pr.milestone?.title ?? "None",
+              created_at: pr.created_at,
+              updated_at: pr.updated_at,
+              closed_at: pr.closed_at,
+              merged_at: pr.merged_at,
+              user: pr.user?.login ?? "unknown",
+              reviews: reviews.length,
+              review_comments: reviews.map((review) => review.body).join(", "),
+              comments: comments.length,
+              linked_issues:
+                typeof pr.body === "string"
+                  ? pr.body.match(/#\d+/g)?.length || 0
+                  : 0,
+              reviewers,
+              commenters,
+            };
+          } catch (e) {
+            console.log("failed to fetch");
+            return [];
+          }
+        }),
+      );
+      const parsed = parsePullRequests(prsWithReviews);
+      return parsed;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  },
+);

@@ -11,8 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import type { VisibleSections } from "@/app/lib/definitions";
 import { cn } from "@/app/lib/utils";
+import { VisibleSections } from "@/app/lib/definitions";
 
 type DashboardProps = {
   owner: string;
@@ -24,7 +24,9 @@ type DashboardProps = {
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
-    pullRequestComments: React.ReactNode;
+    pullRequestOverview: React.ReactNode;
+    pullRequestMembers: React.ReactNode;
+    pullRequestMetrics: React.ReactNode;
   };
 };
 
@@ -42,7 +44,9 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
       branches: true,
       pullRequests: {
         visible: true,
-        comments: true,
+        overview: true,
+        members: true,
+        metrics: true,
       },
     },
   );
@@ -177,13 +181,16 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       Pull Request Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    {visibleSections.pullRequests.comments && (
-                      <div>{children.pullRequestComments}</div>
+                  <CardContent className="space-y-6">
+                    {visibleSections.pullRequests.overview && (
+                      <div>{children.pullRequestOverview}</div>
                     )}
-                    <p className="text-gray-600">
-                      Pull request analysis content will be added here.
-                    </p>
+                    {visibleSections.pullRequests.members && (
+                        <div> {children.pullRequestMembers}</div>
+                    )}
+                    {visibleSections.pullRequests.metrics && (
+                      <div>{children.pullRequestMetrics}</div>
+                    )}
                   </CardContent>
                 </Card>
               )}
