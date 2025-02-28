@@ -39,7 +39,15 @@ import {
 import type { PullRequestData } from "@/app/lib/definitions";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 
-export function PullRequestMetrics({ data }: { data: PullRequestData }) {
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#82CA9D",
+];
+export function PullRequestsComments({ data }: { data: PullRequestData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<any[] | null>(null);
@@ -56,22 +64,9 @@ export function PullRequestMetrics({ data }: { data: PullRequestData }) {
     ([name, count]) => ({ name, count }),
   );
 
-  const reviewsByMember = Object.entries(data.reviewsByMember || {}).map(
-    ([name, { count, prs }]) => ({
-      name,
-      count,
-      prs,
-    }),
-  );
 
-  const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#8884D8",
-    "#82CA9D",
-  ];
+
+
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -127,33 +122,6 @@ export function PullRequestMetrics({ data }: { data: PullRequestData }) {
                     ))}
                   </Scatter>
                 </ScatterChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {reviewsByMember.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">
-                Reviews per Group Member
-              </h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={reviewsByMember}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
-                    {reviewsByMember.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
               </ResponsiveContainer>
             </div>
           )}

@@ -7,9 +7,10 @@ import CommitContributionsWrapper from "@/app/ui/dashboard/commits/commit-contri
 import CommitSizeWrapper from "@/app/ui/dashboard/commits/commit-size-wrapper";
 import ProjectInfo from "@/app/ui/dashboard/project_info/project-info";
 import ContributorsList from "@/app/ui/dashboard/project_info/contributors";
-import PullRequestMetricsWrapper from "@/app/ui/dashboard/pull_requests/pull-request-metrics-wrapper";
+import PullRequestsCommentsWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-comments-wrapper";
 import PullRequestsMembersWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-members-wrapper";
 import PullRequestsOverviewWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-overview-wrapper";
+import PullRequestsReviewsWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-reviews-wrapper";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -43,9 +44,12 @@ export default async function Page(props: {
         pullRequestMembers: (
           <PullRequestsMembersWrapper owner={owner} repo={repo} />
         ),
-        pullRequestMetrics: (
-          <PullRequestMetricsWrapper owner={owner} repo={repo} />
+        pullRequestComments: (
+          <PullRequestsCommentsWrapper owner={owner} repo={repo} />
         ),
+        pullRequestReviews: (
+            <PullRequestsReviewsWrapper owner={owner} repo={repo}/>
+        )
       }}
     </Dashboard>
   );

@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useState } from "react";
+import {useMemo, useState} from "react";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +60,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#82CA9D",
+  "#a65628",
+  "#f781bf",
+  "#999999",
+  "#e41a1c",
+  "#377eb8",
+  "#4daf4a",
+  "#984ea3",
+  "#ff7f00",
+  "#ffff33",
+  "#a6cee3",
+  "#1f78b4",
+  "#b2df8a",
+];
+
 export function PullRequestsMembers({ data }: { data: PullRequestData }) {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [dialogData, setDialogData] = useState<DialogData | null>(null);
@@ -71,14 +92,15 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
 
   const chartData = createChartData(data, selectedMembers, selectedMilestone);
 
-  const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#8884D8",
-    "#82CA9D",
-  ];
+  const memberColors = useMemo(() => {
+    return members.reduce(
+      (acc, member, index) => {
+        acc[member] = COLORS[index % COLORS.length];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+  }, [members]);
 
   const openDialog = (title: string, description: string, tableData: any[]) => {
     const formattedData = tableData.map((pr) => ({
@@ -92,7 +114,6 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
     setDialogData({ title, description, data: formattedData });
     setIsDialogOpen(true);
   };
-
 
   const toggleMember = (member: string) => {
     setSelectedMembers((prev) =>
@@ -170,7 +191,7 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
                   <Label
                     htmlFor={`member-${member}`}
                     className="text-sm font-medium"
-                    style={{ color: COLORS[index % COLORS.length] }}
+                    style={{ color: memberColors[member] }}
                   >
                     {member}
                   </Label>
@@ -215,7 +236,7 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
                     key={member}
                     dataKey={member}
                     stackId="a"
-                    fill={COLORS[index % COLORS.length]}
+                    fill={memberColors[member]}
                   />
                 ))}
               </BarChart>
