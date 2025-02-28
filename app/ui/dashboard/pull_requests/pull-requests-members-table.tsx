@@ -8,7 +8,16 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 
-export default function PullRequestsMembersTable({ data }: { data: never }) {
+interface PullRequest {
+  number: number;
+  title: string;
+  user: string;
+  created_at: string;
+  closed_at: string;
+  url: string;
+}
+
+export default function PullRequestsMembersTable({ data }: { data: any }) {
   return (
     <Table>
       <TableHeader>
@@ -20,7 +29,7 @@ export default function PullRequestsMembersTable({ data }: { data: never }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((pr) => {
+        {data.map((pr: PullRequest) => {
           const createdDate = new Date(pr.created_at);
           const closedDate = pr.closed_at ? new Date(pr.closed_at) : new Date();
           const minutesToClose = Math.round(

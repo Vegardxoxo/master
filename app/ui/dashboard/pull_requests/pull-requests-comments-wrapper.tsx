@@ -1,7 +1,7 @@
 import { fetchPullRequests } from "@/app/lib/data";
-import { PullRequestMetrics } from "./pull-request-metrics";
+import { PullRequestsComments } from "./pull-requests-comments";
 
-export default async function PullRequestMetricsWrapper({
+export default async function PullRequestsCommentsWrapper({
   owner,
   repo,
 }: {
@@ -11,7 +11,7 @@ export default async function PullRequestMetricsWrapper({
   const pullRequestData = await fetchPullRequests(owner, repo, "all");
   return (
     <div className="space-y-8">
-      <PullRequestMetrics data={pullRequestData} />
+      <PullRequestsComments data={pullRequestData} />
     </div>
   );
 }

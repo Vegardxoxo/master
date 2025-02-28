@@ -26,7 +26,8 @@ type DashboardProps = {
     commitSize: React.ReactNode;
     pullRequestOverview: React.ReactNode;
     pullRequestMembers: React.ReactNode;
-    pullRequestMetrics: React.ReactNode;
+    pullRequestComments: React.ReactNode;
+    pullRequestReviews: React.ReactNode;
   };
 };
 
@@ -46,7 +47,8 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         visible: true,
         overview: true,
         members: true,
-        metrics: true,
+        comments: true,
+        reviews: true,
       },
     },
   );
@@ -186,10 +188,14 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       <div>{children.pullRequestOverview}</div>
                     )}
                     {visibleSections.pullRequests.members && (
-                        <div> {children.pullRequestMembers}</div>
+                      <div> {children.pullRequestMembers}</div>
                     )}
-                    {visibleSections.pullRequests.metrics && (
-                      <div>{children.pullRequestMetrics}</div>
+                    {visibleSections.pullRequests.comments && (
+                      <div>{children.pullRequestComments}</div>
+                    )}
+
+                    {visibleSections.pullRequests.reviews && (
+                      <div>{children.pullRequestReviews}</div>
                     )}
                   </CardContent>
                 </Card>
