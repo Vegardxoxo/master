@@ -12,34 +12,36 @@ jobs:
 
       - name: Fetch artifacts from student
         env:
-          GH_TOKEN: ${{ secrets.STUDENT_REPO }}
+          GH_TOKEN: ${{ secrets.STUDENT_REPO_TOKEN }}
         run: |
-          # 1) Hent ut client_payload fra event
+          # 1) Retrieve client_payload from the event
           STUDENT_REPO="${{ github.event.client_payload.student_repo }}"
           RUN_ID="${{ github.event.client_payload.run_id }}"
-          
+
           echo "Student repo: $STUDENT_REPO"
           echo "Run ID: $RUN_ID"
 
-          # 2) Sjekk tilgjengelige artifacts i studentrepoet for den kjøringen
+          # 2) List available artifacts for that run in the student repo
           gh api \
             repos/$STUDENT_REPO/actions/runs/$RUN_ID/artifacts \
             --jq '.artifacts[] | {id: .id, name: .name, size_in_bytes: .size_in_bytes}'
 
-          # 3) Hvis du finner artifacten du vil ha (f.eks. coverage),
-          #    lagre ID-en og last den ned:
+          # 3) Find the artifact with name "coverage" and store its ID
           ARTIFACT_ID=$(gh api repos/$STUDENT_REPO/actions/runs/$RUN_ID/artifacts --jq '.artifacts[] | select(.name=="coverage") | .id')
 
           echo "Artifact ID = $ARTIFACT_ID"
 
-          # 4) Last ned artifact til en folder i teacher-run
+          # 4) Download the artifact using curl (which correctly follows redirects)
           if [ -n "$ARTIFACT_ID" ]; then
-            gh api repos/$STUDENT_REPO/actions/artifacts/$ARTIFACT_ID/zip --silent > coverage.zip
+            curl -L -H "Authorization: token $GH_TOKEN" \
+              https://api.github.com/repos/$STUDENT_REPO/actions/artifacts/$ARTIFACT_ID/zip \
+              -o coverage.zip
 
             unzip coverage.zip -d coverage_extracted
             echo "Coverage artifact extracted!"
           else
             echo "No coverage artifact found!"
           fi
+      
 
 
