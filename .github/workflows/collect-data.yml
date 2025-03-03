@@ -1,32 +1,50 @@
-name: Collect student data
-
+name: Handle student test data
 on:
   repository_dispatch:
     types: [student_test_results]
 
 jobs:
-  process-data:
+  process-student-data:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Sjekk ut lærer-repo
+      - name: Check out teacher repo
         uses: actions/checkout@v4
 
-      - name: Fetch data from event-payload
+      - name: Fetch artifacts from student
         run: |
-          echo "Repo Name: ${{ github.event.client_payload.repo_name }}"
-          echo "Commit: ${{ github.event.client_payload.commit_sha }}"
+          # 1) Hent ut client_payload fra event
+          STUDENT_REPO="${{ github.event.client_payload.student_repo }}"
+          RUN_ID="${{ github.event.client_payload.run_id }}"
           
-          echo "Test results (base64): ${{ github.event.client_payload.test_results }}"
+          echo "Student repo: $STUDENT_REPO"
+          echo "Run ID: $RUN_ID"
 
-          echo "${{ github.event.client_payload.test_results }}" | base64 --decode > results.json
-          
-          echo "Her har du results.json fra studentrepoet!"
+          # 2) Sjekk tilgjengelige artifacts i studentrepoet for den kjøringen
+          gh api \
+            repos/$STUDENT_REPO/actions/runs/$RUN_ID/artifacts \
+            --jq '.artifacts[] | {id: .id, name: .name, size_in_bytes: .size_in_bytes}'
 
-      - name: (Valgfritt) Commit data til lærer-repo
+          # 3) Hvis du finner artifacten du vil ha (f.eks. coverage),
+          #    lagre ID-en og last den ned:
+          ARTIFACT_ID=$(gh api repos/$STUDENT_REPO/actions/runs/$RUN_ID/artifacts --jq '.artifacts[] | select(.name=="coverage") | .id')
+
+          echo "Artifact ID = $ARTIFACT_ID"
+
+          # 4) Last ned artifact til en folder i teacher-run
+          if [ -n "$ARTIFACT_ID" ]; then
+            gh api \
+              repos/$STUDENT_REPO/actions/artifacts/$ARTIFACT_ID/zip \
+              --silent --output coverage.zip
+
+            unzip coverage.zip -d coverage_extracted
+            echo "Coverage artifact extracted!"
+          else
+            echo "No coverage artifact found!"
+          fi
+
+      - name: Do something with coverage
         run: |
-          git config user.name "YourActionBot"
-          git config user.email "[email protected]"
-          git add results.json
-          git commit -m "Legger til results.json fra ${{ github.event.client_payload.repo_name }}"
-          git push origin HEAD:main
+          # For eksempel parse coverage_extracted/lcov.info
+          # eller commit filene tilbake i teacher repo
+          echo "Coverage is downloaded. Let's parse or store it."
+
