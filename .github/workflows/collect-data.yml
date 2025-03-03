@@ -12,7 +12,7 @@ jobs:
 
       - name: Fetch artifacts from student
         env:
-          GH_TOKEN: ${{ secrets.STUDENT_REPO_TOKEN }}
+          GH_TOKEN: ${{github.token }}
         run: |
           # 1) Retrieve client_payload from the event
           STUDENT_REPO="${{ github.event.client_payload.student_repo }}"
