@@ -34,9 +34,7 @@ jobs:
 
           # 4) Last ned artifact til en folder i teacher-run
           if [ -n "$ARTIFACT_ID" ]; then
-            gh api \
-              repos/$STUDENT_REPO/actions/artifacts/$ARTIFACT_ID/zip \
-              --silent --output coverage.zip
+            gh api repos/$STUDENT_REPO/actions/artifacts/$ARTIFACT_ID/zip --silent > coverage.zip
 
             unzip coverage.zip -d coverage_extracted
             echo "Coverage artifact extracted!"
