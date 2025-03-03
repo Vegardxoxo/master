@@ -4,7 +4,8 @@
     "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -43,13 +44,20 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/jest": "^29.5.14",
     "@types/node": "22.10.1",
     "@types/papaparse": "^5.3.15",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
-    "prettier": "^3.4.2"
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.4.2",
+    "ts-node": "^10.9.2"
   }
 }

@@ -129,7 +129,7 @@ export default function CommitFrequency({
             <LineChart
               data={data}
               onClick={handleClick}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
             >
               <XAxis
                 dataKey="day"

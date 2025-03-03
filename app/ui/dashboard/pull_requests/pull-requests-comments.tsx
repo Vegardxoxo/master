@@ -83,15 +83,13 @@ export function PullRequestsComments({ data }: { data: PullRequestData }) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Pull Request Metrics</CardTitle>
-        <CardDescription>
-          Detailed analysis of pull request activity
-        </CardDescription>
+        <CardTitle>Pull Request Comments</CardTitle>
+
       </CardHeader>
 
       <CardContent>
         <div className="space-y-8">
-          {commentsByMembers.length > 0 && (
+          {commentsByMembers.length > 0 ? (
             <div>
               <h3 className="text-lg font-semibold mb-4">
                 Comments per Group Member
@@ -124,7 +122,7 @@ export function PullRequestsComments({ data }: { data: PullRequestData }) {
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
-          )}
+          ): <div>No comments have been made so far.</div>}
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

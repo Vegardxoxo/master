@@ -62,35 +62,33 @@ export default function PullRequestsReviews({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Pull Request Reviews</CardTitle>
-        <CardDescription>
-          Detailed analysis of pull request reviews
-        </CardDescription>
       </CardHeader>
 
       <CardContent>
         <div>
-          <h3 className="text-lg font-semibold mb-4">
-            Reviews per Group Member
-          </h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={reviewsByMember}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
-                {reviewsByMember.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          {reviewsByMember.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart
+                data={reviewsByMember}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
+                  {reviewsByMember.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div>No reviews have been made so far.</div>
+          )}
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

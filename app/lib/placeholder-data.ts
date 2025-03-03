@@ -3,29 +3,29 @@
 import { Home, Settings } from "lucide-react";
 import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions";
 
-// export const studentRepos = [
-//   { owner: "Vegardxoxo", repo: "bachelor_project" },
-//   { owner: "Vegardxoxo", repo: "tail" },
-//   { owner: "Vegardxoxo", repo: "nextjs-blog" },
-//   { owner: "Vegardxoxo", repo: "master" },
-// ];
-
-export const getRepos = () => {
-  const repos: { owner: string; repo: string }[] = [];
-  for (let i = 1; i < 15; i++) {
-    const owner = "IT2810-H24";
-    const repo = `T${i < 10 ? `0${i}` : i}-Project-2`;
-    repos.push({ owner, repo });
-  }
-  return repos;
-};
-
-export const studentRepos = [
-  { owner: "IT2810-H24", repo: "T01-Project-2" },
-  { owner: "IT2810-H24", repo: "T02-Project-2" },
-  { owner: "IT2810-H24", repo: "T03-Project-2" },
-  { owner: "IT2810-H24", repo: "T04-Project-2" },
+export const getRepos = [
+  { owner: "Vegardxoxo", repo: "bachelor_project" },
+  { owner: "Vegardxoxo", repo: "tail" },
+  { owner: "Vegardxoxo", repo: "nextjs-blog" },
+  { owner: "Vegardxoxo", repo: "master" },
 ];
+
+// export const getRepos = () => {
+//   const repos: { owner: string; repo: string }[] = [];
+//   for (let i = 1; i < 15; i++) {
+//     const owner = "IT2810-H24";
+//     const repo = `T${i < 10 ? `0${i}` : i}-Project-2`;
+//     repos.push({ owner, repo });
+//   }
+//   return repos;
+// };
+
+// export const getRepos = [
+//   { owner: "IT2810-H24", repo: "T01-Project-2" },
+//   { owner: "IT2810-H24", repo: "T02-Project-2" },
+//   { owner: "IT2810-H24", repo: "T03-Project-2" },
+//   { owner: "IT2810-H24", repo: "T04-Project-2" },
+// ];
 
 export const courses = [
   {

@@ -1,0 +1,32 @@
+name: Collect student data
+
+on:
+  repository_dispatch:
+    types: [student_test_results]
+
+jobs:
+  process-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sjekk ut lærer-repo
+        uses: actions/checkout@v4
+
+      - name: Fetch data from event-payload
+        run: |
+          echo "Repo Name: ${{ github.event.client_payload.repo_name }}"
+          echo "Commit: ${{ github.event.client_payload.commit_sha }}"
+          
+          echo "Test results (base64): ${{ github.event.client_payload.test_results }}"
+
+          echo "${{ github.event.client_payload.test_results }}" | base64 --decode > results.json
+          
+          echo "Her har du results.json fra studentrepoet!"
+
+      - name: (Valgfritt) Commit data til lærer-repo
+        run: |
+          git config user.name "YourActionBot"
+          git config user.email "[email protected]"
+          git add results.json
+          git commit -m "Legger til results.json fra ${{ github.event.client_payload.repo_name }}"
+          git push origin HEAD:main

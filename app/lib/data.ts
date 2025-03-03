@@ -13,9 +13,13 @@ import {
 } from "@/app/lib/utils";
 import { cache } from "react";
 
+// const octokit = new Octokit({
+//   auth: process.env.TOKEN,
+//   baseUrl: "https://git.ntnu.no/api/v3",
+// });
+
 const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
+  auth: process.env.PERSONAL,
 });
 
 /**
@@ -28,6 +32,7 @@ export async function fetchRepoOverview(
   repo: string,
 ): Promise<repositoryOverview> {
   try {
+    console.log("owner", owner, "repo", repo);
     const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
       owner,
       repo,
@@ -51,6 +56,7 @@ export async function fetchRepoOverview(
     );
 
     return {
+      owner: repoInfo.data.owner.login,
       name: repoInfo.data.name,
       contributors: contributorsRes.data
         .map((c) => c.login)
@@ -162,6 +168,7 @@ export async function fetchBranchesWithStatus(
  */
 export async function fetchContributors(owner: string, repo: string) {
   try {
+    console.log("owner", owner, "repo", repo);
     const { data: contributorData } = await octokit.request(
       "GET /repos/{owner}/{repo}/contributors",
       {
@@ -173,8 +180,8 @@ export async function fetchContributors(owner: string, repo: string) {
       contributors: contributorData.map((c: any) => c.login),
     };
   } catch (e) {
-    console.error("Error fetching repo details:", e);
-    throw new Error("Failed to fetch repository details.");
+    console.error("Error fetching contributors:", e);
+    throw new Error("Failed to fetch contributors.");
   }
 }
 
@@ -201,8 +208,8 @@ export async function fetchProjectInfo(owner: string, repo: string) {
       updatedAt: repoData.updated_at,
     };
   } catch (e) {
-    console.error("Error fetching repo details:", e);
-    throw new Error("Failed to fetch repository details.");
+    console.error("Error fetching project info:", e);
+    throw new Error("Failed to fetch repository information.");
   }
 }
 
