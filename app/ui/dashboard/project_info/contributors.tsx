@@ -11,6 +11,7 @@ export default async function ContributorsList({
   repo: string;
 }) {
   const { contributors } = await fetchContributors(owner, repo);
+  console.log("contributors", contributors);
   return (
     <Card className="w-full h-full">
       <CardHeader>

@@ -186,9 +186,10 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     header: "",
     cell: ({ row }) => {
       const details = row.original;
+      console.log("details", details)
       return (
         <div className="flex justify-end gap-2">
-          <ViewProject owner={"IT2810-H24"} repo={details.name} />
+          <ViewProject owner={details.owner} repo={details.name} />
           <AddToClipboard url={details.url} />
           <DeleteFromList id={details.url} />
         </div>

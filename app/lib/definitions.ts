@@ -1,4 +1,5 @@
 export type repositoryOverview = {
+  owner: string;
   name: string;
   contributors: string[];
   openIssues: number;

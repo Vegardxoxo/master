@@ -1,0 +1,40 @@
+name: Send Test Results to Main Repo using API
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  report-results:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout student repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies and run tests
+        run: |
+          npm ci
+          # Adjust this command as needed. This example generates a coverage report.
+          npm test -- --json --outputFile=test-results.json
+
+      - name: Update test result in main repository
+      - run: |
+          TEST_RESULTS=$(cat test-results.json | base64 | tr -d '\n')
+           gh api \
+                     repos/<TEACHER_ORG_OR_USERNAME>/<TEACHER_REPO>/dispatches \
+                     -F event_type=student_test_results \
+                     -F client_payload="{ \
+                         \"repo_name\": \"${{ github.repository }}\", \
+                         \"commit_sha\": \"${{ github.sha }}\", \
+                         \"test_results\": \"${TEST_RESULTS}\" \
+                     }"
+                 env:
+                   GITHUB_TOKEN: ${{ secrets.TEACHER_TOKEN }}
