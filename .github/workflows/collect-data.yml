@@ -11,6 +11,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch artifacts from student
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # 1) Hent ut client_payload fra event
           STUDENT_REPO="${{ github.event.client_payload.student_repo }}"
@@ -42,9 +44,4 @@ jobs:
             echo "No coverage artifact found!"
           fi
 
-      - name: Do something with coverage
-        run: |
-          # For eksempel parse coverage_extracted/lcov.info
-          # eller commit filene tilbake i teacher repo
-          echo "Coverage is downloaded. Let's parse or store it."
 
