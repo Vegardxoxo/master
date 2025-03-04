@@ -13,14 +13,14 @@ import {
 } from "@/app/lib/utils";
 import { cache } from "react";
 
-// const octokit = new Octokit({
-//   auth: process.env.TOKEN,
-//   baseUrl: "https://git.ntnu.no/api/v3",
-// });
-
 const octokit = new Octokit({
-  auth: process.env.PERSONAL,
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
+
+// const octokit = new Octokit({
+//   auth: process.env.PERSONAL,
+// });
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.

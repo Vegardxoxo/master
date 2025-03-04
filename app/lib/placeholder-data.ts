@@ -3,22 +3,22 @@
 import { Home, Settings } from "lucide-react";
 import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions";
 
-export const getRepos = [
-  { owner: "Vegardxoxo", repo: "bachelor_project" },
-  { owner: "Vegardxoxo", repo: "tail" },
-  { owner: "Vegardxoxo", repo: "nextjs-blog" },
-  { owner: "Vegardxoxo", repo: "master" },
-];
+// export const getRepos = [
+//   { owner: "Vegardxoxo", repo: "bachelor_project" },
+//   { owner: "Vegardxoxo", repo: "tail" },
+//   { owner: "Vegardxoxo", repo: "nextjs-blog" },
+//   { owner: "Vegardxoxo", repo: "master" },
+// ];
 
-// export const getRepos = () => {
-//   const repos: { owner: string; repo: string }[] = [];
-//   for (let i = 1; i < 15; i++) {
-//     const owner = "IT2810-H24";
-//     const repo = `T${i < 10 ? `0${i}` : i}-Project-2`;
-//     repos.push({ owner, repo });
-//   }
-//   return repos;
-// };
+export const getRepos = () => {
+  const repos: { owner: string; repo: string }[] = [];
+  for (let i = 1; i < 15; i++) {
+    const owner = "IT2810-H24";
+    const repo = `T${i < 10 ? `0${i}` : i}-Project-2`;
+    repos.push({ owner, repo });
+  }
+  return repos;
+};
 
 // export const getRepos = [
 //   { owner: "IT2810-H24", repo: "T01-Project-2" },
