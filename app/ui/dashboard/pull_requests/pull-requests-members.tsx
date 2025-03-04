@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {useMemo, useState} from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -132,26 +132,34 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
   const handleChartClick = (props: any) => {
     if (props?.activePayload?.length > 0) {
       const clickedDate = props.activePayload[0].payload.date;
+
+      // Get the total count from the chart for verification
+      const totalChartCount = selectedMembers.reduce((sum, member) => {
+        return sum + (props.activePayload[0].payload[member] || 0);
+      }, 0);
+
+      // Filter PRs by the clicked date
       const relevantPRs = selectedMembers.flatMap(
         (member) =>
-          data.prsByMember[member]?.prs.filter(
-            (pr: any) =>
-              new Date(pr.created_at).toISOString().split("T")[0] ===
-              clickedDate,
-          ) || [],
+          data.prsByMember[member]?.prs.filter((pr: any) => {
+            const prDate = new Date(pr.created_at).toISOString().split("T")[0];
+            return prDate === clickedDate;
+          }) || [],
+      );
+
+      console.log(
+        `Chart shows ${totalChartCount} PRs, found ${relevantPRs.length} PRs for ${clickedDate}`,
       );
 
       if (relevantPRs.length > 0) {
         openDialog(
-          `Pull Requests on ${clickedDate}`,
+          `Pull Requests on ${clickedDate} (${relevantPRs.length})`,
           `Showing all pull requests created by ${selectedMembers.join(", ")} on ${clickedDate}`,
           relevantPRs,
         );
       }
     }
   };
-
-  if (!data?.totalPRs) return null;
 
   if (!data || !data.totalPRs) {
     console.log("PullRequestsMembers - No data or totalPRs is 0");

@@ -13,7 +13,7 @@ export default async function CoursePage(props: {
 }) {
   const params = await props.params;
   const name = params.name;
-  const repos = getRepos;
+  const repos = getRepos();
   const repoData = await Promise.all(
     repos.map(({ owner, repo }: {owner: string, repo: string}) => fetchRepoOverview(owner, repo)),
   );
