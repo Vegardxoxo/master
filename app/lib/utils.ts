@@ -517,30 +517,39 @@ export function createChartData(
   data: PullRequestData,
   selectedMembers: string[],
   selectedMilestone: string,
-): Array<{ date: string; [member: string]: number | string }> {
-  const filteredData = Object.entries(data.prsByMember || {}).reduce(
-    (acc, [name, { prs }]) => {
-      if (selectedMembers.includes(name)) {
-        prs.forEach((pr) => {
-          if (
-            selectedMilestone === "all" ||
-            pr.milestone === selectedMilestone
-          ) {
-            const date = new Date(pr.created_at).toISOString().split("T")[0];
-            if (!acc[date]) {
-              acc[date] = {};
-            }
-            acc[date][name] = (acc[date][name] || 0) + 1;
-          }
-        });
-      }
-      return acc;
-    },
-    {} as Record<string, Record<string, number>>,
-  );
+) {
+  // Create a map to store PR counts by date and member
+  const prCountsByDate = new Map<string, Record<string, number>>();
 
-  return Object.entries(filteredData)
-    .map(([date, members]) => ({ date, ...members }))
+  // Process each selected member's PRs
+  selectedMembers.forEach((member) => {
+    const memberData = data.prsByMember[member];
+    if (!memberData) return;
+
+    // Filter PRs by milestone if needed
+    const filteredPRs =
+      selectedMilestone === "all"
+        ? memberData.prs
+        : memberData.prs.filter((pr) => pr.milestone === selectedMilestone);
+
+    // Count PRs by date
+    filteredPRs.forEach((pr) => {
+      const date = new Date(pr.created_at).toISOString().split("T")[0];
+
+      if (!prCountsByDate.has(date)) {
+        prCountsByDate.set(date, {});
+      }
+
+      const dateData = prCountsByDate.get(date)!;
+      dateData[member] = (dateData[member] || 0) + 1;
+    });
+  });
+
+  // Convert the map to an array of objects for the chart
+  return Array.from(prCountsByDate.entries())
+    .map(([date, counts]) => ({
+      date,
+      ...counts,
+    }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
-
