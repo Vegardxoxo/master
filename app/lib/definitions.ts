@@ -6,11 +6,11 @@ export type repositoryOverview = {
   url: string;
 };
 
-export type Payment = {
+export type User = {
   id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
+  name: string;
   email: string;
+  password: string;
 };
 
 export type _Branches = {
