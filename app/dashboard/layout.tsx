@@ -1,10 +1,18 @@
 import { AppSidebar, CustomTrigger } from "@/app/ui/dashboard/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { auth } from "@/auth";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+  const user = session?.user ?? { name: "Guest" };
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar user={user} />
       <main className={"w-full"}>
         <CustomTrigger />
         <div

@@ -1,34 +1,21 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useActionState } from "react"
+import Link from "next/link"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { Button } from "@/app/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createUser } from "@/app/lib/actions"
 
 const formSchema = z
   .object({
-    name: z.string().min(2, {
-      message: "Name must be at least 2 characters.",
+    name: z.string().min(1, {
+      message: "Name is required.",
     }),
     email: z.string().email({
       message: "Please enter a valid email address.",
@@ -37,19 +24,17 @@ const formSchema = z
       message: "Password must be at least 8 characters.",
     }),
     confirmPassword: z.string(),
-    role: z.enum(["educator", "student"], {
+    userType: z.enum(["EDUCATOR", "STUDENT"], {
       required_error: "Please select a role.",
     }),
+    githubUrl: z.string().url().optional().or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
-  });
+  })
 
 export function SignupForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,35 +42,15 @@ export function SignupForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      githubUrl: "",
     },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
-    try {
-      // In a real application, you would call your registration API here
-      console.log(values);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Redirect to dashboard on successful registration
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Registration failed:", error);
-      form.setError("root", {
-        message: "Registration failed. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  })
+  const [formState, formAction, isPending] = useActionState(createUser, undefined)
 
   return (
     <div className="grid gap-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -93,12 +58,13 @@ export function SignupForm() {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="Your name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <input type="hidden" name="userType" value={form.getValues("userType") || ""} />
           <FormField
             control={form.control}
             name="email"
@@ -114,24 +80,34 @@ export function SignupForm() {
           />
           <FormField
             control={form.control}
-            name="role"
+            name="userType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Role</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="educator">Educator</SelectItem>
-                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="EDUCATOR">Educator</SelectItem>
+                    <SelectItem value="STUDENT">Student</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="githubUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>GitHub URL (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://github.com/yourusername" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -162,26 +138,20 @@ export function SignupForm() {
               </FormItem>
             )}
           />
-          {form.formState.errors.root && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.root.message}
-            </p>
-          )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Create account"}
+          {formState?.error && <p className="text-sm font-medium text-destructive">{formState.error}</p>}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Creating account..." : "Create account"}
           </Button>
         </form>
       </Form>
 
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <Link
-          href="/login"
-          className="underline underline-offset-4 hover:text-primary"
-        >
+        <Link href="/login" className="underline underline-offset-4 hover:text-primary">
           Sign in
         </Link>
       </div>
     </div>
-  );
+  )
 }
+
