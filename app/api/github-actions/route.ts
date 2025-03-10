@@ -5,10 +5,7 @@ export async function POST(request: NextRequest) {
   const apiKey = authHeader?.replace("Bearer ", "");
 
   // Check token
-  if (
-    !process.env.WEBHOOK_SECRET ||
-    apiKey !== process.env.WEBHOOK_SECRET
-  ) {
+  if (!process.env.WEBHOOK_SECRET || apiKey !== process.env.WEBHOOK_SECRET) {
     console.log("Missing or invalid API key.");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -18,18 +15,19 @@ export async function POST(request: NextRequest) {
     console.log(payload);
     return NextResponse.json({
       success: true,
-      message: "Data received.",
+      message: `Message received: ${payload.message}`,
       id: payload.id,
       timestamp: new Date().toISOString(),
     });
   } catch (e) {
     console.error("Error parsing JSON.", e);
 
-    return NextResponse.json({
+    return NextResponse.json(
+      {
         error: "Failed to parse JSON.",
-        message: e instanceof Error ? e.message : "Unknown error."
-
-
-    }, {status: 500});
+        message: e instanceof Error ? e.message : "Unknown error.",
+      },
+      { status: 500 },
+    );
   }
 }

@@ -10,7 +10,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
   useSidebar,
 } from "@/components/ui/sidebar";
 import NavLinksCollapse, { NavLinks } from "@/app/ui/dashboard/nav_links";
@@ -22,7 +21,6 @@ import {
 import { ChevronRight, PanelRightOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { PowerIcon } from "@heroicons/react/24/outline";
-import AcmeLogo from "@/app/ui/acme-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/app/lib/utils";
 import {
@@ -31,7 +29,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {handleSignOut} from "@/app/lib/actions";
+import { handleSignOut } from "@/app/lib/actions";
+import UserProfile from "@/app/ui/user-profile";
 
 function AddCourse() {
   return (
@@ -55,16 +54,16 @@ function AddCourse() {
   );
 }
 
-export function AppSidebar() {
+export function AppSidebar({ user }: { user: any }) {
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
         <Link
-          className="mb-2 flex h-20 items-end justify-start rounded-md bg-sky-500 p-4 md:h-40"
-          href="/"
+          className="flex flex-col h-20 md:h-40 items-start justify-start md:justify-center rounded-md bg-sky-500 p-0"
+          href="/dashboard"
         >
-          <div className="w-32 text-white md:w-40">
-            <AcmeLogo />
+          <div className="w-full text-white">
+            <UserProfile user={user} />
           </div>
         </Link>
       </SidebarHeader>
@@ -104,9 +103,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <form
-        action={handleSignOut}
-        >
+        <form action={handleSignOut}>
           <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
             <PowerIcon className="w-6" />
             <div className="hidden md:block">Sign Out</div>
