@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import NavLinksCollapse, { NavLinks } from "@/app/ui/dashboard/nav_links";
+import  { NavLinks } from "@/app/ui/dashboard/nav_links";
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/tooltip";
 import { handleSignOut } from "@/app/lib/actions";
 import UserProfile from "@/app/ui/user-profile";
+import {usePathname} from "next/navigation";
+import Courses from "@/app/ui/courses/course";
 
 function AddCourse() {
   return (
@@ -54,7 +56,8 @@ function AddCourse() {
   );
 }
 
-export function AppSidebar({ user }: { user: any }) {
+export function AppSidebar({ user, courses }: { user: any, courses: any }) {
+  const pathName = usePathname();
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
@@ -93,7 +96,7 @@ export function AppSidebar({ user }: { user: any }) {
             >
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <NavLinksCollapse />
+                  <Courses pathName={pathName} courses={courses} />
                   <AddCourse />
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -135,14 +138,3 @@ export function CustomTrigger() {
     </TooltipProvider>
   );
 }
-
-// export default function SideBar() {
-//   return (
-//     <SidebarProvider>
-//       <AppSidebar />
-//       <main>
-//         <CustomTrigger />
-//       </main>
-//     </SidebarProvider>
-//   );
-// }

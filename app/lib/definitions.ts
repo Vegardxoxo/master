@@ -6,6 +6,15 @@ export type repositoryOverview = {
   url: string;
 };
 
+export interface Course {
+  id: string;
+  name: string;
+  semester: string;
+  year: number;
+  ownerId: string;
+}
+
+
 export type User = {
   id: string;
   name: string;

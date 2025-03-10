@@ -7,14 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserType {
-  EDUCATOR
-  STUDENT
-}
-
 model User {
   id           String       @id @default(uuid())
-  email        String      @unique
+  email        String       @unique
   password     String       @db.VarChar(255)
   avatarUrl    String?
   githubUrl    String?
@@ -23,6 +18,19 @@ model User {
   updatedAt    DateTime     @updatedAt
   repositories Repository[] @relation("RepositoryMembers")
   accessToken  String?
+
+  courses Course[]
+}
+
+model Course {
+  id       String   @id @default(uuid())
+  name     String
+  semester Semester
+  year     Int
+  ownerId  String
+  owner    User     @relation(fields: [ownerId], references: [id])
+
+  repositories Repository[]
 }
 
 model Repository {
@@ -30,5 +38,19 @@ model Repository {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  members   User[]   @relation("RepositoryMembers")
+
+  members User[] @relation("RepositoryMembers")
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id])
+}
+
+enum Semester {
+  SPRING
+  AUTUMN
+}
+
+enum UserType {
+  EDUCATOR
+  STUDENT
 }
