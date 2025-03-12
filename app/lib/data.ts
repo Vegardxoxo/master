@@ -32,7 +32,6 @@ export async function fetchRepoOverview(
   repo: string,
 ): Promise<repositoryOverview> {
   try {
-    console.log("owner", owner, "repo", repo);
     const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
       owner,
       repo,
@@ -168,7 +167,6 @@ export async function fetchBranchesWithStatus(
  */
 export async function fetchContributors(owner: string, repo: string) {
   try {
-    console.log("owner", owner, "repo", repo);
     const { data: contributorData } = await octokit.request(
       "GET /repos/{owner}/{repo}/contributors",
       {

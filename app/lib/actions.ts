@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { Semester } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 const prisma = new PrismaClient();
 
@@ -37,10 +38,74 @@ const SignupSchema = z.object({
 
 const CourseSchema = z.object({
   name: z.string().min(1, "Course name is required"),
-  courseId: z.string().optional(),
+  description: z.string().optional(),
   year: z.coerce.number().int().min(1900).max(new Date().getFullYear()),
   semester: z.enum(["SPRING", "AUTUMN"]),
+  courseSubjectId: z.string().optional(),
 });
+
+const EnrollCourseSchema = z.object({
+  courseId: z.string().min(1, "Course ID is required"),
+});
+
+export async function enrollInCourse(prevstate: any, formData: FormData) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return { error: "You must be logged in to enroll in a course" };
+  }
+  const parsedFormData = EnrollCourseSchema.safeParse({
+    courseId: formData.get("courseId"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { courseId } = parsedFormData.data;
+
+  try {
+    // Check if the course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return { error: "Course not found" };
+    }
+
+    // Check if the user is already enrolled
+    const existingEnrollment = await prisma.userCourse.findUnique({
+      where: {
+        userId_courseId: {
+          userId: session.user.id,
+          courseId,
+        },
+      },
+    });
+
+    if (existingEnrollment) {
+      return { error: "You are already enrolled in this course" };
+    }
+
+    // Create the enrollment
+    const enrollment = await prisma.userCourse.create({
+      data: {
+        userId: session.user.id,
+        courseId,
+      },
+      include: {
+        course: true,
+      },
+    });
+
+    revalidatePath("/dashboard/courses");
+    return { success: true, enrollment };
+  } catch (error) {
+    console.error("Error enrolling in course:", error);
+    return { error: "Failed to enroll in course. Please try again." };
+  }
+}
 
 export async function createCourse(prevState: any, formData: FormData) {
   const session = await auth();
@@ -51,29 +116,90 @@ export async function createCourse(prevState: any, formData: FormData) {
 
   const parsedFormData = CourseSchema.safeParse({
     name: formData.get("name"),
-    courseId: formData.get("courseId"),
+    description: formData.get("description"),
     year: formData.get("year"),
     semester: formData.get("semester"),
+    courseSubjectId: formData.get("courseSubjectId"),
   });
 
   if (!parsedFormData.success) {
     return { error: "Validation failed. Please check your input." };
   }
 
-  const { name, courseId, year, semester } = parsedFormData.data;
+  const { name, description, year, semester, courseSubjectId } =
+    parsedFormData.data;
 
   try {
-    console.log("ownerID", session.user);
-    const newCourse = await prisma.course.create({
-      data: {
-        id: courseId || crypto.randomUUID(),
-        name,
-        year,
-        semester: semester as Semester,
-        ownerId: session.user.id,
-      },
-    });
-    return { success: true, course: newCourse };
+    // If courseSubjectId is provided, create a new instance of an existing subject
+    if (courseSubjectId) {
+      // Check if the subject exists and belongs to the user
+      const existingSubject = await prisma.courseSubject.findFirst({
+        where: {
+          id: courseSubjectId,
+          ownerId: session.user.id,
+        },
+      });
+
+      if (!existingSubject) {
+        return {
+          error:
+            "Course subject not found or you don't have permission to add instances to it.",
+        };
+      }
+
+      // Check if an instance with the same year and semester already exists
+      const existingInstance = await prisma.courseInstance.findFirst({
+        where: {
+          subjectId: courseSubjectId,
+          year,
+          semester,
+        },
+      });
+
+      if (existingInstance) {
+        return {
+          error: `An instance of this course for ${semester} ${year} already exists.`,
+        };
+      }
+
+      // Create a new course instance
+      const newInstance = await prisma.courseInstance.create({
+        data: {
+          year,
+          semester,
+          isActive: true,
+          subjectId: courseSubjectId,
+        },
+      });
+
+      revalidatePath("/dashboard/courses");
+      return { success: true, instance: newInstance };
+    }
+    // If no courseSubjectId, create a new course subject and its first instance
+    else {
+      // Create a new course subject
+      const newSubject = await prisma.courseSubject.create({
+        data: {
+          name,
+          description,
+          ownerId: session.user.id,
+          // Create the first instance of this course
+          courseInstances: {
+            create: {
+              year,
+              semester,
+              isActive: true,
+            },
+          },
+        },
+        include: {
+          courseInstances: true,
+        },
+      });
+
+      revalidatePath("/dashboard/courses");
+      return { success: true, subject: newSubject };
+    }
   } catch (error) {
     console.error("Error creating course:", error);
     return { error: "Failed to create course. Please try again." };

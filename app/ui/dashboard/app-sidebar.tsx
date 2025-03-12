@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import  { NavLinks } from "@/app/ui/dashboard/nav_links";
+import { NavLinks, Courses } from "@/app/ui/dashboard/nav_links";
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,32 +31,24 @@ import {
 } from "@/components/ui/tooltip";
 import { handleSignOut } from "@/app/lib/actions";
 import UserProfile from "@/app/ui/user-profile";
-import {usePathname} from "next/navigation";
-import Courses from "@/app/ui/courses/course";
+import { usePathname } from "next/navigation";
 
-function AddCourse() {
+function AddCourseButton() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton isActive={false} asChild>
-        <Button
-          asChild
-          variant="default"
-          className="rounded-xl bg-sky-500 w-full md:w-auto"
-        >
-          <Link
-            href="/dashboard/courses/add"
-            className={" hover:bg-sky-500 hover:text-white"}
-          >
+        <Button asChild variant="default" className="rounded-xl bg-sky-500 w-full md:w-auto">
+          <Link href="/dashboard/courses/add" className="hover:bg-sky-500 hover:text-white">
             Add Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  );
+  )
 }
 
-export function AppSidebar({ user, courses }: { user: any, courses: any }) {
+export function AppSidebar({ user, courses }: { user: any; courses: any }) {
   const pathName = usePathname();
   return (
     <Sidebar collapsible="offcanvas">
@@ -79,11 +71,12 @@ export function AppSidebar({ user, courses }: { user: any, courses: any }) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
         <Collapsible defaultOpen={false} className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
-              <CollapsibleTrigger>
-                <p className={"text-sm font-medium md:justify-start"}>
+              <CollapsibleTrigger className="flex w-full items-center mb-2">
+                <p className="text-sm font-medium md:justify-start">
                   My Courses
                 </p>
                 <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -97,7 +90,7 @@ export function AppSidebar({ user, courses }: { user: any, courses: any }) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <Courses pathName={pathName} courses={courses} />
-                  <AddCourse />
+                  <AddCourseButton />
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
@@ -106,7 +99,11 @@ export function AppSidebar({ user, courses }: { user: any, courses: any }) {
       </SidebarContent>
 
       <SidebarFooter>
-        <form action={handleSignOut}>
+        <form
+          action={async () => {
+            handleSignOut();
+          }}
+        >
           <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
             <PowerIcon className="w-6" />
             <div className="hidden md:block">Sign Out</div>
@@ -124,8 +121,8 @@ export function CustomTrigger() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" className="fixed " onClick={toggleSidebar}>
-            <PanelRightOpen size={60} onClick={toggleSidebar} />
+          <Button variant="ghost" className="fixed" onClick={toggleSidebar}>
+            <PanelRightOpen size={60} />
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
         </TooltipTrigger>

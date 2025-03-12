@@ -6,21 +6,46 @@ export type repositoryOverview = {
   url: string;
 };
 
-export interface Course {
-  id: string;
-  name: string;
-  semester: string;
-  year: number;
-  ownerId: string;
+export type CourseInstance = {
+  id: string
+  year: number
+  semester: "SPRING" | "AUTUMN"
+  startDate?: Date
+  endDate?: Date
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  subjectId: string
+}
+export type Course = {
+  id: string
+  code: string
+  name: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type CourseSubject = {
+  id: string
+  name: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+  ownerId: string
 }
 
 
 export type User = {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-};
+  id: string
+  email: string
+  avatarUrl?: string
+  githubUrl?: string
+  userType: "EDUCATOR" | "STUDENT"
+  createdAt: Date
+  updatedAt: Date
+  accessToken?: string
+}
 
 export type _Branches = {
   name: string;
@@ -137,3 +162,11 @@ export type PullRequestData = {
   fastMergedPRs: any[];
   totalComments: number;
 };
+
+export type Repository = {
+  id: string
+  name: string
+  createdAt: Date
+  updatedAt: Date
+  courseInstanceId?: string
+}
