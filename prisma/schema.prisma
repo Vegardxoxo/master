@@ -7,14 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserType {
-  EDUCATOR
-  STUDENT
-}
-
 model User {
   id           String       @id @default(uuid())
-  email        String      @unique
+  email        String       @unique
   password     String       @db.VarChar(255)
   avatarUrl    String?
   githubUrl    String?
@@ -23,6 +18,55 @@ model User {
   updatedAt    DateTime     @updatedAt
   repositories Repository[] @relation("RepositoryMembers")
   accessToken  String?
+
+  // User's enrolled courses (many-to-many relationship)
+  enrolledCourses UserCourse[]
+}
+
+// Pre-populated course catalog
+model Course {
+  id          String   @id @default(uuid())
+  code        String   @unique // Course code like "TDMA5004"
+  name        String
+  enrolledUsers UserCourse[]
+}
+
+// Join table for users and courses with additional data
+model UserCourse {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  // References
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Course instances (years/semesters) created by this user for this course
+  instances CourseInstance[]
+
+  // Composite unique constraint to prevent duplicate enrollments
+  @@unique([userId, courseId])
+}
+
+// Course instance represents a specific year/semester offering
+model CourseInstance {
+  id          String   @id @default(uuid())
+  year        Int
+  semester    Semester
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationship to UserCourse
+  userCourseId String
+  userCourse   UserCourse @relation(fields: [userCourseId], references: [id], onDelete: Cascade)
+
+  // Repositories associated with this course instance
+  repositories Repository[]
+
+  // Prevent duplicate instances for the same user-course combination
+  @@unique([userCourseId, year, semester])
 }
 
 model Repository {
@@ -30,5 +74,21 @@ model Repository {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  members   User[]   @relation("RepositoryMembers")
+
+  // Members of the repository
+  members User[] @relation("RepositoryMembers")
+
+  // Relationship to course instance
+  courseInstanceId String?
+  courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id])
+}
+
+enum Semester {
+  SPRING
+  AUTUMN
+}
+
+enum UserType {
+  EDUCATOR
+  STUDENT
 }

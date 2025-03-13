@@ -6,15 +6,7 @@ import { User } from "@/app/lib/definitions";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-
 const prisma = new PrismaClient();
-
-const mockUser: User = {
-  id: "1",
-  email: "coolboy@gmail.com",
-  name: "Cool McBoy",
-  password: "password123",
-};
 
 export async function getUser(email: string) {
   try {
@@ -29,6 +21,21 @@ export async function getUser(email: string) {
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  callbacks: {
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+  },
+
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -42,7 +49,10 @@ export const { auth, signIn, signOut } = NextAuth({
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.password);
 
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            console.log(user);
+            return user;
+          }
         }
         console.log("Invalid credentials");
         return null;

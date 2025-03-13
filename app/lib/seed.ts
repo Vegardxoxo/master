@@ -1,0 +1,292 @@
+const codes = [
+  { code: "COSI4901", name: "COSI Master Thesis" },
+  { code: "DCST1001", name: "Infrastructure: basic skills" },
+  { code: "DCST1002", name: "Cyber security and teamwork" },
+  { code: "DCST1003", name: "Fundamental Programming" },
+  { code: "DCST1004", name: "Mathematics for Computer Science" },
+  { code: "DCST1005", name: "Infrastructure: secure core services" },
+  { code: "DCST1006", name: "Data communication and networks" },
+  { code: "DCST1007", name: "Object-oriented Programming" },
+  { code: "DCST1008", name: "System Development" },
+  { code: "DCST2001", name: "Interconnected Networks and Network Security" },
+  { code: "DCST2002", name: "Web Development" },
+  { code: "DCST2003", name: "Robust and Scalable Services" },
+  { code: "DCST2004", name: "Digital service management" },
+  { code: "DCST2005", name: "Risk Management" },
+  {
+    code: "DCST2900",
+    name: "Bachelor Thesis Bachelor of Science in Digital Infrastructure and Cyber Security",
+  },
+  { code: "DIFT1001", name: "Web Technology and Teamwork" },
+  {
+    code: "DIFT1002",
+    name: "Introduction to information technology and databases",
+  },
+  { code: "DIFT1003", name: "Economic management and accounting" },
+  { code: "DIFT1004", name: "Organisation, management and change" },
+  { code: "DIFT1005", name: "Computer-supported cooperative work" },
+  {
+    code: "DIFT1006",
+    name: "Economic analysis and reporting using spreadsheets",
+  },
+  {
+    code: "DIFT2004",
+    name: "Product development, market and software product management (PMM)",
+  },
+  { code: "DIFT2005", name: "Digital change and transformation" },
+  { code: "DIFT2006", name: "Big Data" },
+  { code: "DIFT2007", name: "Information security management" },
+  { code: "DIFT2008", name: "Digital strategy in organizations" },
+  { code: "DIFT2010", name: "Digital entrepreneurship" },
+  {
+    code: "DIFT2011",
+    name: "Project management and Business Information Systems",
+  },
+  { code: "DIFT2501", name: "E-commerce and the digital economy" },
+  { code: "DIFT2502", name: "Enterprise Social Networks (ESN) and change" },
+  { code: "DIFT2503", name: "Digitalisation in industries" },
+  { code: "DIFT2900", name: "Bachelor Thesis" },
+  { code: "IDATA1001", name: "Programming 1" },
+  { code: "IDATA1002", name: "Software Engineering" },
+  { code: "IDATG1002", name: "Software Engineering" },
+  { code: "IDATG1003", name: "Programming 1" },
+  { code: "IDATG1004", name: "Team-based collaboration" },
+  { code: "IDATG2003", name: "Programming 2" },
+  { code: "IDATG2102", name: "Algorithmic Methods" },
+  { code: "IDATG2204", name: "Data modeling and database systems" },
+  { code: "IDATG2206", name: "Computer Vision" },
+  { code: "IDATG2900", name: "Bachelor Thesis" },
+  { code: "IDATT1001", name: "Programming 1" },
+  { code: "IDATT1002", name: "Software Engineering" },
+  { code: "IDATT2001", name: "Programming 2" },
+  { code: "IDATT2003", name: "Programming 2" },
+  { code: "IDATT2101", name: "Algorithms and data structures" },
+  { code: "IDATT2103", name: "Databases" },
+  { code: "IDATT2104", name: "Network Programming" },
+  { code: "IDATT2105", name: "Full-stack application development" },
+  { code: "IDATT2106", name: "System development 2 with flexible project" },
+  { code: "IDATT2202", name: "Operating Systems" },
+  { code: "IDATT2501", name: "Specialization Project" },
+  { code: "IDATT2503", name: "Security in programming and cryptography" },
+  { code: "IDATT2505", name: "Extended Reality (XR)" },
+  { code: "IDATT2506", name: "Application Development for Mobile Units" },
+  { code: "IDATT2900", name: "Bachelor Thesis" },
+  { code: "IDG1004", name: "Color in Interface Design" },
+  { code: "IDG1011", name: "Front-end web development" },
+  { code: "IDG2001", name: "Cloud Technologies" },
+  { code: "IDG2002", name: "Colour Management" },
+  { code: "IDG2003", name: "Back-end web development I" },
+  { code: "IDG2004", name: "Information Structures and Database Systems" },
+  { code: "IDI1002", name: "Front-end web development" },
+  { code: "IDIG3001", name: "Project Work for Exchange Bachelor Students" },
+  { code: "IDIG4001", name: "Project Work for Exchange Master Students" },
+  { code: "IDIG4002", name: "Computer Graphics Fundamentals and Applications" },
+  { code: "IDIG4003", name: "Appearance, Perception and Measurement" },
+  { code: "IDIG4004", name: "Computer vision and applications" },
+  { code: "IDIG4225", name: "Specialisation in Multimodal Data Analysis" },
+  { code: "IDIG4321", name: "Introduction to Color Image Processing" },
+  { code: "IFUD1051", name: "ICT in learning 1" },
+  { code: "IFUD1052", name: "ICT in learning 2" },
+  { code: "IFUD1053", name: "ICT in learning 3" },
+  { code: "IMT2363", name: "Colour Management and Image Quality" },
+  { code: "IMT3603", name: "Game Programming" },
+  { code: "IMT4134", name: "Introduction to Research in Software Engineering" },
+  {
+    code: "IMT4135",
+    name: "Introduction to Research on Colour and Visual Computing",
+  },
+  { code: "IMT4304", name: "Cross-media Color Reproduction" },
+  {
+    code: "IMT4306",
+    name: "Introduction to Research in Decentralised Systems",
+  },
+  {
+    code: "IMT4307",
+    name: "Introduction to Research in Serious Games and Gamification",
+  },
+  { code: "IMT4308", name: "Introduction to Research on Web Technologies" },
+  {
+    code: "IMT4310",
+    name: "Experts in Teamwork - Visual Appearance reproduction using 3D printing techniques / Challenges and Opportunities",
+  },
+  { code: "IMT4315", name: "Colour in interface design" },
+  { code: "IMT4392", name: "Deep Learning for Visual Computing" },
+  { code: "IMT4461", name: "Project Work for Exchange Master Students" },
+  { code: "IMT4807", name: "Integration Project" },
+  { code: "IMT4884", name: "Advanced Colour Management" },
+  { code: "IMT4886", name: "Applied Computer Science Project" },
+  { code: "IMT4887", name: "Specialisation in Web Technology" },
+  {
+    code: "IMT4889",
+    name: "Advanced Topics in Software and Systems Engineering",
+  },
+  { code: "IMT4890", name: "Specialisation in Video Processing" },
+  { code: "IMT4894", name: "Advanced Project Work" },
+  { code: "IMT4895", name: "Specialisation in Colour Imaging" },
+  {
+    code: "INFT1001",
+    name: "Introduction to information technology and databases",
+  },
+  { code: "INFT1002", name: "Fundamental Programming" },
+  { code: "INFT1003", name: "Web technology and Teamwork" },
+  { code: "INFT1004", name: "Economic management and accounting" },
+  { code: "INFT1005", name: "Computer architecture and operating systems" },
+  { code: "INFT1006", name: "Object-oriented Programming" },
+  { code: "INFT1007", name: "Data communication" },
+  { code: "INFT1008", name: "Computer-supported cooperative work" },
+  { code: "INFT2001", name: "Information Security" },
+  { code: "INFT2002", name: "Web Development" },
+  { code: "INFT2003", name: "Big Data" },
+  { code: "INFT2004", name: "IT Service management" },
+  { code: "INFT2005", name: "Quality in and Testing of Software Systems" },
+  { code: "INFT2006", name: "Business Intelligence" },
+  { code: "INFT2007", name: "Digital Strategy in Organizations" },
+  { code: "INFT2501", name: "Application development for mobile units" },
+  { code: "INFT2502", name: "Specialization Project" },
+  { code: "INFT2503", name: "C++ for Programmers" },
+  { code: "INFT2504", name: "Cloud services as a business" },
+  {
+    code: "INFT2505",
+    name: "Product development, market and software product management (PMM)",
+  },
+  {
+    code: "INFT2507",
+    name: "Economic analysis and reporting using spread sheets",
+  },
+  {
+    code: "INFT2508",
+    name: "Cross-platform Applications Development for Mobile Devices",
+  },
+  { code: "INFT2900", name: "Bacheloroppgave i informasjonsbehandling" },
+  { code: "INGG1001", name: "Introduction to the engineering profession" },
+  { code: "IT1101", name: "Introduction to Informatics" },
+  { code: "IT1604", name: "Digital Society" },
+  { code: "IT1901", name: "Informatics, Project I" },
+  { code: "IT2805", name: "Web Technologies" },
+  { code: "IT2810", name: "Web Development" },
+  { code: "IT2901", name: "Informatics Project II" },
+  {
+    code: "IT3010",
+    name: "Research-based Innovation Methodologies in Computer and Information Science",
+  },
+  { code: "IT3020", name: "Current Topics in Informatics" },
+  { code: "IT3021", name: "Game+" },
+  { code: "IT3022", name: "Participatory design" },
+  { code: "IT3023", name: "Learning Technology and Analytics" },
+  { code: "IT3024", name: "Research Methods in Human-Computer Interaction" },
+  { code: "IT3105", name: "Artificial Intelligence Programming" },
+  { code: "IT3212", name: "Data Powered Software" },
+  { code: "IT3402", name: "User Interface Design" },
+  { code: "IT3708", name: "Bio-Inspired Artificial Intelligence" },
+  { code: "IT3901", name: "Informatics Postgraduate Thesis: Software" },
+  {
+    code: "IT3902",
+    name: "Informatics Postgraduate Thesis: Database Management and Search",
+  },
+  {
+    code: "IT3903",
+    name: "Informatics Postgraduate Thesis: Artificial Intelligence",
+  },
+  {
+    code: "IT3906",
+    name: "Informatics Postgraduate Thesis: Interaction Design, Game and Learning Technology",
+  },
+  {
+    code: "IMT4135",
+    name: "Introduction to Research on Colour and Visual Computing",
+  },
+  { code: "IMT4304", name: "Cross-media Color Reproduction" },
+  {
+    code: "IMT4306",
+    name: "Introduction to Research in Decentralised Systems",
+  },
+  {
+    code: "IMT4307",
+    name: "Introduction to Research in Serious Games and Gamification",
+  },
+  { code: "IMT4308", name: "Introduction to Research on Web Technologies" },
+  {
+    code: "IMT4310",
+    name: "Experts in Teamwork - Visual Appearance reproduction using 3D printing techniques / Challenges and Opportunities",
+  },
+  { code: "IMT4315", name: "Colour in interface design" },
+  { code: "IMT4392", name: "Deep Learning for Visual Computing" },
+  { code: "IMT4461", name: "Project Work for Exchange Master Students" },
+  { code: "IMT4807", name: "Integration Project" },
+  { code: "IMT4884", name: "Advanced Colour Management" },
+  { code: "IMT4886", name: "Applied Computer Science Project" },
+  { code: "IMT4887", name: "Specialisation in Web Technology" },
+  {
+    code: "IMT4889",
+    name: "Advanced Topics in Software and Systems Engineering",
+  },
+  { code: "IMT4890", name: "Specialisation in Video Processing" },
+  { code: "IMT4894", name: "Advanced Project Work" },
+  { code: "IMT4895", name: "Specialisation in Colour Imaging" },
+  { code: "IT3950", name: "Informatics Postgraduate Thesis" },
+  { code: "ITO1000", name: "Digitalization - Supplementary Course Technology" },
+  { code: "LAOS", name: "Teaching Assistant Training" },
+  {
+    code: "MACS4000",
+    name: "Research Project Planning (Applied Computer Science)",
+  },
+  { code: "MACS490", name: "Master Thesis - Applied Computer Science" },
+  { code: "PROG1001", name: "Fundamental Programming" },
+  { code: "PROG1003", name: "Object-oriented Programming" },
+  { code: "PROG1004", name: "Software Development" },
+  { code: "PROG2002", name: "Graphics Programming" },
+  { code: "PROG2005", name: "Cloud Technologies" },
+  { code: "PROG2006", name: "Advanced Programming" },
+  { code: "PROG2007", name: "Mobile Programming" },
+  { code: "PROG2051", name: "Artificial Intelligence" },
+  { code: "PROG2052", name: "Integration Project" },
+  { code: "PROG2053", name: "Web Technologies" },
+  { code: "PROG2900", name: "Bachelor Thesis" },
+  { code: "TDMA4003", name: "Scientific Methods" },
+  { code: "TDMA4004", name: "Knowledge Management" },
+  { code: "TDMA4005", name: "Concurrent Design" },
+  { code: "TDMA4006", name: "Customized Corporate E-Learning" },
+  {
+    code: "TDMA4007",
+    name: "Implementation of Enterprise Collaboration Systems",
+  },
+  { code: "TDMA4008", name: "Cooperation Technology" },
+  { code: "TDMA4009", name: "Project Management" },
+  { code: "TDMA5001", name: "Collaborative Management" },
+  { code: "TDMA5002", name: "Marketing Management and Business Models" },
+  { code: "TDMA5004", name: "Research Project Planning" },
+  { code: "TDMA5005", name: "Master Thesis" },
+  {code: "TDT4110", name: "Informasjonsteknologi, grunnkurs"}
+];
+
+// drop duplicates
+const courses = Array.from(
+    new Map(codes.map(course => [course.code, course])).values()
+);
+
+import {PrismaClient} from "@prisma/client"
+
+const prisma = new PrismaClient()
+
+
+
+async function main() {
+  for (const course of courses) {
+    await prisma.course.upsert({
+      where: { code: course.code },
+      update: {},
+      create: course,
+    })
+  }
+
+  console.log("Database seeded successfully")
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })

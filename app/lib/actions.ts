@@ -1,25 +1,30 @@
-"use server"
-import { AuthError } from "next-auth"
-import { signIn, signOut } from "@/auth"
-import { PrismaClient } from "@prisma/client"
-import { z } from "zod"
-import bcrypt from "bcryptjs"
+"use server";
+import { AuthError } from "next-auth";
+import { auth, signIn, signOut } from "@/auth";
+import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
+import bcrypt from "bcryptjs";
+import { Semester } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-export async function authenticate(prevState: string | undefined, formData: FormData) {
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
   try {
-    await signIn("credentials", formData)
+    await signIn("credentials", formData);
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return "Invalid credentials."
+          return "Invalid credentials.";
         default:
-          return "Something went wrong."
+          return "Something went wrong.";
       }
     }
-    throw error
+    throw error;
   }
 }
 
@@ -29,32 +34,362 @@ const SignupSchema = z.object({
   name: z.string().min(1),
   userType: z.enum(["STUDENT", "EDUCATOR"]),
   githubUrl: z.string().url().optional().or(z.literal("")),
-})
+});
+
+const CourseSchema = z.object({
+  name: z.string().min(1, "Course name is required"),
+  description: z.string().optional(),
+  year: z.coerce.number().int().min(1900).max(new Date().getFullYear()),
+  semester: z.enum(["SPRING", "AUTUMN"]),
+  courseSubjectId: z.string().optional(),
+});
+
+const EnrollCourseSchema = z.object({
+  courseId: z.string().min(1, "Course ID is required"),
+});
+
+const RemoveEnrollmentSchema = z.object({
+  userCourseId: z.string().min(1, "User course ID is required"),
+});
+
+const CourseInstanceSchema = z.object({
+  userCourseId: z.string().min(1, "User course ID is required"),
+  year: z.coerce
+    .number()
+    .int()
+    .min(1900)
+    .max(new Date().getFullYear() + 5),
+  semester: z.enum(["SPRING", "AUTUMN"]),
+});
+
+export async function enrollInCourse(prevstate: any, formData: FormData) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return { error: "You must be logged in to enroll in a course" };
+  }
+  const parsedFormData = EnrollCourseSchema.safeParse({
+    courseId: formData.get("courseId"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { courseId } = parsedFormData.data;
+
+  try {
+    // Check if the course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return { error: "Course not found" };
+    }
+
+    // Check if the user is already enrolled
+    const existingEnrollment = await prisma.userCourse.findUnique({
+      where: {
+        userId_courseId: {
+          userId: session.user.id,
+          courseId,
+        },
+      },
+    });
+
+    if (existingEnrollment) {
+      return { error: "You are already enrolled in this course" };
+    }
+
+    // Create the enrollment
+    const enrollment = await prisma.userCourse.create({
+      data: {
+        userId: session.user.id,
+        courseId,
+      },
+      include: {
+        course: true,
+      },
+    });
+
+    revalidatePath("/dashboard/courses");
+    return { success: true, enrollment };
+  } catch (error) {
+    console.error("Error enrolling in course:", error);
+    return { error: "Failed to enroll in course. Please try again." };
+  }
+}
+
+/**
+ * Removes a user's enrollment from a course
+ */
+export async function removeEnrollment(prevState: any, formData: FormData) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return { error: "You must be logged in to remove a course" };
+  }
+
+  const parsedFormData = RemoveEnrollmentSchema.safeParse({
+    userCourseId: formData.get("userCourseId"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { userCourseId } = parsedFormData.data;
+
+  try {
+    // Check if the enrollment exists and belongs to the user
+    const userCourse = await prisma.userCourse.findFirst({
+      where: {
+        id: userCourseId,
+        userId: session.user.id,
+      },
+      include: {
+        course: true,
+        instances: true,
+      },
+    });
+
+    if (!userCourse) {
+      return {
+        error: "Course enrollment not found or you don't have permission",
+      };
+    }
+
+    // Delete all instances associated with this enrollment
+    if (userCourse.instances.length > 0) {
+      await prisma.courseInstance.deleteMany({
+        where: {
+          userCourseId,
+        },
+      });
+    }
+
+    // Delete the enrollment
+    await prisma.userCourse.delete({
+      where: {
+        id: userCourseId,
+      },
+    });
+
+    revalidatePath("/dashboard/courses");
+    return {
+      success: true,
+      message: `Successfully removed ${userCourse.course.code} - ${userCourse.course.name}`,
+      removedId: userCourseId, // Return the ID of the removed course
+    };
+  } catch (error) {
+    console.error("Error removing course enrollment:", error);
+    return { error: "Failed to remove course. Please try again." };
+  }
+}
+
+/**
+ * Adds a new year/semester instance to a user's enrolled course
+ */
+export async function addCourseInstance(prevState: any, formData: FormData) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return { error: "You must be logged in to add a course instance" };
+  }
+
+  const parsedFormData = CourseInstanceSchema.safeParse({
+    userCourseId: formData.get("userCourseId"),
+    year: formData.get("year"),
+    semester: formData.get("semester"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { userCourseId, year, semester } = parsedFormData.data;
+
+  try {
+    // Check if the user course exists and belongs to the user
+    const userCourse = await prisma.userCourse.findFirst({
+      where: {
+        id: userCourseId,
+        userId: session.user.id,
+      },
+      include: {
+        course: true,
+      },
+    });
+
+    if (!userCourse) {
+      return {
+        error: "Course enrollment not found or you don't have permission",
+      };
+    }
+
+    // Check if an instance with the same year and semester already exists
+    const existingInstance = await prisma.courseInstance.findFirst({
+      where: {
+        userCourseId,
+        year,
+        semester,
+      },
+    });
+
+    if (existingInstance) {
+      return {
+        error: `An instance for ${semester} ${year} already exists for this course`,
+      };
+    }
+
+    // Create the new instance
+    const instance = await prisma.courseInstance.create({
+      data: {
+        userCourseId,
+        year,
+        semester,
+        isActive: true,
+      },
+    });
+
+    // Revalidate all course-related paths to ensure the sidebar updates
+    revalidatePath("/dashboard/courses");
+    revalidatePath(`/dashboard/courses/${userCourse.course.code}`);
+
+    return {
+      success: true,
+      instance,
+      message: `Added ${semester} ${year} to ${userCourse.course.code}`,
+    };
+  } catch (error) {
+    console.error("Error adding course instance:", error);
+    return { error: "Failed to add course instance. Please try again." };
+  }
+}
+
+export async function createCourse(prevState: any, formData: FormData) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return { error: "You must be logged in to create a course" };
+  }
+
+  const parsedFormData = CourseSchema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description"),
+    year: formData.get("year"),
+    semester: formData.get("semester"),
+    courseSubjectId: formData.get("courseSubjectId"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { name, description, year, semester, courseSubjectId } =
+    parsedFormData.data;
+
+  try {
+    // If courseSubjectId is provided, create a new instance of an existing subject
+    if (courseSubjectId) {
+      // Check if the subject exists and belongs to the user
+      const existingSubject = await prisma.courseSubject.findFirst({
+        where: {
+          id: courseSubjectId,
+          ownerId: session.user.id,
+        },
+      });
+
+      if (!existingSubject) {
+        return {
+          error:
+            "Course subject not found or you don't have permission to add instances to it.",
+        };
+      }
+
+      // Check if an instance with the same year and semester already exists
+      const existingInstance = await prisma.courseInstance.findFirst({
+        where: {
+          subjectId: courseSubjectId,
+          year,
+          semester,
+        },
+      });
+
+      if (existingInstance) {
+        return {
+          error: `An instance of this course for ${semester} ${year} already exists.`,
+        };
+      }
+
+      // Create a new course instance
+      const newInstance = await prisma.courseInstance.create({
+        data: {
+          year,
+          semester,
+          isActive: true,
+          subjectId: courseSubjectId,
+        },
+      });
+
+      revalidatePath("/dashboard/courses");
+      return { success: true, instance: newInstance };
+    }
+    // If no courseSubjectId, create a new course subject and its first instance
+    else {
+      // Create a new course subject
+      const newSubject = await prisma.courseSubject.create({
+        data: {
+          name,
+          description,
+          ownerId: session.user.id,
+          // Create the first instance of this course
+          courseInstances: {
+            create: {
+              year,
+              semester,
+              isActive: true,
+            },
+          },
+        },
+        include: {
+          courseInstances: true,
+        },
+      });
+
+      revalidatePath("/dashboard/courses");
+      return { success: true, subject: newSubject };
+    }
+  } catch (error) {
+    console.error("Error creating course:", error);
+    return { error: "Failed to create course. Please try again." };
+  }
+}
 
 export async function createUser(prevState: any, formData: FormData) {
-  console.log("formData", formData)
+  console.log("formData", formData);
   const parsedFormData = SignupSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
     name: formData.get("name"),
     userType: formData.get("userType"),
     githubUrl: formData.get("githubUrl") || "",
-  })
+  });
 
   if (!parsedFormData.success) {
-    return { error: "Validation failed. Please check your input." }
+    return { error: "Validation failed. Please check your input." };
   }
 
-  const { email, password, name, userType, githubUrl } = parsedFormData.data
+  const { email, password, name, userType, githubUrl } = parsedFormData.data;
 
-  const existingUser = await prisma.user.findUnique({ where: { email } })
+  const existingUser = await prisma.user.findUnique({ where: { email } });
 
   // Check if user already exists
   if (existingUser) {
-    return { error: "User already exists." }
+    return { error: "User already exists." };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12)
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   try {
     await prisma.user.create({
@@ -65,16 +400,15 @@ export async function createUser(prevState: any, formData: FormData) {
         userType,
         githubUrl: githubUrl || null,
       },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error creating user:", error)
-    return { error: "Failed to create user. Please try again." }
+    console.error("Error creating user:", error);
+    return { error: "Failed to create user. Please try again." };
   }
 }
 
 export async function handleSignOut() {
-  await signOut({ redirectTo: "/" })
+  await signOut({ redirectTo: "/" });
 }
-
