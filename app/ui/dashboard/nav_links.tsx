@@ -4,10 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { BookOpen, Calendar, ChevronRight, Clock, LayoutDashboard, Settings, Users } from "lucide-react"
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
+import { BookOpen, Calendar, ChevronRight, Clock, LayoutDashboard, Settings, Users } from 'lucide-react'
 import { useState, useEffect, useRef } from "react"
-import {Collapsible, CollapsibleContent} from "@radix-ui/react-collapsible";
+import {AddCourseInstance} from "@/app/ui/courses/add/add-course-instance";
 
+// Define the navigation links
 export const links = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Students", href: "/dashboard/students", icon: Users },
@@ -15,28 +17,8 @@ export const links = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
-export const dummyCourses = {
-  courses: [
-    {
-      id: "1",
-      name: "Web Development",
-      years: ["2023", "2024", "2025"],
-    },
-    {
-      id: "2",
-      name: "Data Science",
-      years: ["2022", "2023", "2024"],
-    },
-    {
-      id: "3",
-      name: "Mobile App Development",
-      years: ["2023", "2024"],
-    },
-  ],
-}
-
 /**
- * Non-collapsable links to be rendered in side-nav.-
+ * Non-collapsable links to be rendered in side-nav
  */
 export function NavLinks() {
   const pathname = usePathname()
@@ -49,14 +31,14 @@ export function NavLinks() {
               <Link
                 href={link.href}
                 className={clsx(
-                  "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+                  "flex h-[40px] grow items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-sky-100 hover:text-blue-600",
                   {
                     "bg-sky-100 text-blue-600": link.href === pathname,
                   },
                 )}
               >
-                <link.icon />
-                <p className="hidden md:block">{link.name}</p>
+                <link.icon className="h-4 w-4" />
+                <span>{link.name}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -77,13 +59,21 @@ function normalizePath(path: string): string {
 /**
  * Course item with collapsible years
  */
-function CourseItem({ course, pathName }: { course: any; pathName: string }) {
-  // Normalize the course name for URL paths
-  const normalizedCourseName = normalizePath(course.name)
-  const basePath = `/dashboard/courses/${normalizedCourseName}`
+function CourseItem({
+  userCourse,
+  pathName,
+}: {
+  userCourse: any
+  pathName: string
+}) {
+  const { course, instances, id: userCourseId } = userCourse
 
-  // Check if any year of this course is active
-  const isCourseActive = pathName.toLowerCase().includes(normalizedCourseName.toLowerCase())
+  // Normalize the course code for URL paths
+  const normalizedCourseCode = course.code
+  const basePath = `/dashboard/courses/${normalizedCourseCode}`
+
+  // Check if any instance of this course is active
+  const isCourseActive = pathName.toLowerCase().includes(normalizedCourseCode.toLowerCase())
 
   // Track if this is the initial render
   const initialRender = useRef(true)
@@ -101,57 +91,75 @@ function CourseItem({ course, pathName }: { course: any; pathName: string }) {
     }
   }, [isCourseActive])
 
-  // Toggle function that allows explicit control
-  const toggleDropdown = () => {
-    setIsOpen((prev) => !prev)
-  }
-
   return (
-    <SidebarMenuItem className={"mb-2"}>
-      <div className="w-full">
-        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
-          <div className="w-full">
-            <SidebarMenuButton isActive={isCourseActive} className="w-full" onClick={toggleDropdown}>
-              <div className="flex w-full items-center">
-                <BookOpen className="h-5 w-5" />
-                <p className="ml-2">{course.name}</p>
-                <ChevronRight
-                  className={`ml-auto h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
-                />
+    <div className="w-full p-2">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center justify-between">
+          <SidebarMenuButton
+            isActive={isCourseActive}
+            className="flex-1 h-10"
+            onClick={() => setIsOpen(prev => !prev)}
+          >
+            <div className="flex items-center w-full">
+              <BookOpen className="h-4 w-4 shrink-0" />
+              <div className="ml-2 flex flex-col min-w-0">
+                <span className="text-xs font-medium truncate">{course.code}</span>
+                <span className="text-sm truncate">{course.name}</span>
               </div>
-            </SidebarMenuButton>
-          </div>
+              <ChevronRight
+                className={`ml-auto h-4 w-4 shrink-0 transition-transform duration-200 ${
+                  isOpen ? "rotate-90" : ""
+                }`}
+              />
+            </div>
+          </SidebarMenuButton>
+          <AddCourseInstance
+            userCourseId={userCourseId}
+            courseName={course.name}
+            courseCode={course.code}
+          />
+        </div>
 
-          <CollapsibleContent className="pl-6">
-            {course.years.map((year: string) => {
-              const yearPath = `${basePath}/${year}`
-              const normalizedPathName = normalizePath(pathName)
-              const normalizedYearPath = normalizePath(yearPath)
+        <CollapsibleContent className="pl-6 space-y-1">
+          {instances.length === 0 ? (
+            <div className="p-2 text-sm text-muted-foreground">No semesters added</div>
+          ) : (
+            instances.map((instance: any) => {
+              // Create a unique path that includes both year and semester
+              const semesterValue = instance.semester.toLowerCase()
+              const instancePath = `${basePath}/${instance.year}/${semesterValue}`
 
-              // Check if this specific year is active
-              const isYearActive = normalizedPathName === normalizedYearPath
+              // Check if the current path exactly matches this instance's path
+              const currentPath = normalizePath(pathName)
+              const normalizedInstancePath = normalizePath(instancePath)
+
+              // An instance is active only if the exact path matches
+              const isInstanceActive = currentPath === normalizedInstancePath
+
+              // Format semester and year for display
+              const semesterLabel = instance.semester === "SPRING" ? "Spring" : "Autumn"
+              const yearLabel = `${semesterLabel} ${instance.year}`
 
               return (
-                <div key={`${course.id}-${year}`} className="py-1">
-                  <Link
-                    href={yearPath}
-                    className={clsx(
-                      "flex items-center gap-2 text-sm rounded-md p-2 hover:bg-sky-100 hover:text-blue-600",
-                      {
-                        "bg-sky-100 text-blue-600": isYearActive,
-                      },
-                    )}
-                  >
-                    <Clock className="h-4 w-4" />
-                    <span>{year}</span>
-                  </Link>
-                </div>
+                <Link
+                  key={instance.id}
+                  href={instancePath}
+                  className={clsx(
+                    "flex h-8 items-center gap-2 rounded-md px-2 text-sm hover:bg-sky-100 hover:text-blue-600",
+                    {
+                      "bg-sky-100 text-blue-600": isInstanceActive,
+                    },
+                  )}
+                >
+                  <Clock className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{yearLabel}</span>
+                </Link>
               )
-            })}
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-    </SidebarMenuItem>
+            })
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   )
 }
 
@@ -159,18 +167,15 @@ function CourseItem({ course, pathName }: { course: any; pathName: string }) {
  * Courses component with nested collapsible years
  */
 export function Courses({
-  pathName,
-  courses = dummyCourses,
-}: {
-  pathName: string
-  courses?: any
+  courses,
 }) {
+  const pathName = usePathname();
   return (
-    <>
-      {dummyCourses.courses.map((course: any) => (
-        <CourseItem key={course.id} course={course} pathName={pathName} />
+    <div className="w-full">
+      {courses?.map((userCourse) => (
+        <CourseItem key={userCourse.id} userCourse={userCourse} pathName={pathName} />
       ))}
-    </>
+    </div>
   )
 }
 

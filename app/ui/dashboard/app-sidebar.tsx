@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavLinks, Courses } from "@/app/ui/dashboard/nav_links";
+import { Courses, NavLinks } from "@/app/ui/dashboard/nav_links";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,94 +22,100 @@ import { ChevronRight, PanelRightOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { PowerIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/app/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { handleSignOut } from "@/app/lib/actions";
 import UserProfile from "@/app/ui/user-profile";
 import { usePathname } from "next/navigation";
+import {handleSignOut} from "@/app/lib/actions";
 
 function AddCourseButton() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton isActive={false} asChild>
-        <Button asChild variant="default" className="rounded-xl bg-sky-500 w-full md:w-auto">
-          <Link href="/dashboard/courses/add" className="hover:bg-sky-500 hover:text-white">
+        <Button
+          asChild
+          variant="default"
+          className="rounded-xl bg-sky-500 w-full md:w-auto"
+        >
+          <Link
+            href="/dashboard/courses/add"
+            className="hover:bg-sky-500 hover:text-white"
+          >
             Add Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  )
+  );
 }
 
 export function AppSidebar({ user, courses }: { user: any; courses: any }) {
   const pathName = usePathname();
+
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader>
-        <Link
-          className="flex flex-col h-20 md:h-40 items-start justify-start md:justify-center rounded-md bg-sky-500 p-0"
-          href="/dashboard"
-        >
-          <div className="w-full text-white">
-            <UserProfile user={user} />
-          </div>
-        </Link>
-      </SidebarHeader>
+      {/*Header*/}
+      <div className="flex flex-col h-full">
+        <SidebarHeader className="flex-shrink-0">
+          <Link
+            className="flex flex-col h-20 items-start justify-start rounded-md bg-sky-500 p-0"
+            href="/dashboard"
+          >
+            <div className="w-full text-white">
+              <UserProfile user={user} />
+            </div>
+          </Link>
+        </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <NavLinks />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <Collapsible defaultOpen={false} className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center mb-2">
-                <p className="text-sm font-medium md:justify-start">
-                  My Courses
-                </p>
-                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent
-              className={cn(
-                "text-popover-foreground outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-              )}
-            >
+        {/*Main navigation*/}
+        <div className="flex-1 overflow-y-auto">
+          <SidebarContent>
+            <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <Courses pathName={pathName} courses={courses} />
-                  <AddCourseButton />
+                  <NavLinks />
                 </SidebarMenu>
               </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-      </SidebarContent>
+            </SidebarGroup>
 
-      <SidebarFooter>
-        <form
-          action={async () => {
-            handleSignOut();
-          }}
-        >
-          <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
-            <PowerIcon className="w-6" />
-            <div className="hidden md:block">Sign Out</div>
-          </button>
-        </form>
-      </SidebarFooter>
+            {/*Courses*/}
+            <Collapsible defaultOpen className="group/collapsible">
+              <SidebarGroup>
+                <SidebarGroupLabel asChild>
+                  <CollapsibleTrigger className="flex w-full items-center px-2 py-1.5">
+                    <span className="text-sm font-medium">My Courses</span>
+                    <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      <Courses
+                        courses={courses.enrolledCourses}
+                      />
+                      <AddCourseButton />
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </SidebarContent>
+        </div>
+        {/*Footer*/}
+        <SidebarFooter className="flex-shrink-0">
+          <form action={() => handleSignOut()}>
+            <button className="flex h-10 w-full items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-sky-100 hover:text-blue-600">
+              <PowerIcon className="h-4 w-4" />
+              <span>Sign Out</span>
+            </button>
+          </form>
+        </SidebarFooter>
+      </div>
     </Sidebar>
   );
 }

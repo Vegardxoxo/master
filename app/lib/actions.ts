@@ -48,6 +48,20 @@ const EnrollCourseSchema = z.object({
   courseId: z.string().min(1, "Course ID is required"),
 });
 
+const RemoveEnrollmentSchema = z.object({
+  userCourseId: z.string().min(1, "User course ID is required"),
+});
+
+const CourseInstanceSchema = z.object({
+  userCourseId: z.string().min(1, "User course ID is required"),
+  year: z.coerce
+    .number()
+    .int()
+    .min(1900)
+    .max(new Date().getFullYear() + 5),
+  semester: z.enum(["SPRING", "AUTUMN"]),
+});
+
 export async function enrollInCourse(prevstate: any, formData: FormData) {
   const session = await auth();
 
@@ -104,6 +118,152 @@ export async function enrollInCourse(prevstate: any, formData: FormData) {
   } catch (error) {
     console.error("Error enrolling in course:", error);
     return { error: "Failed to enroll in course. Please try again." };
+  }
+}
+
+/**
+ * Removes a user's enrollment from a course
+ */
+export async function removeEnrollment(prevState: any, formData: FormData) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return { error: "You must be logged in to remove a course" };
+  }
+
+  const parsedFormData = RemoveEnrollmentSchema.safeParse({
+    userCourseId: formData.get("userCourseId"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { userCourseId } = parsedFormData.data;
+
+  try {
+    // Check if the enrollment exists and belongs to the user
+    const userCourse = await prisma.userCourse.findFirst({
+      where: {
+        id: userCourseId,
+        userId: session.user.id,
+      },
+      include: {
+        course: true,
+        instances: true,
+      },
+    });
+
+    if (!userCourse) {
+      return {
+        error: "Course enrollment not found or you don't have permission",
+      };
+    }
+
+    // Delete all instances associated with this enrollment
+    if (userCourse.instances.length > 0) {
+      await prisma.courseInstance.deleteMany({
+        where: {
+          userCourseId,
+        },
+      });
+    }
+
+    // Delete the enrollment
+    await prisma.userCourse.delete({
+      where: {
+        id: userCourseId,
+      },
+    });
+
+    revalidatePath("/dashboard/courses");
+    return {
+      success: true,
+      message: `Successfully removed ${userCourse.course.code} - ${userCourse.course.name}`,
+      removedId: userCourseId, // Return the ID of the removed course
+    };
+  } catch (error) {
+    console.error("Error removing course enrollment:", error);
+    return { error: "Failed to remove course. Please try again." };
+  }
+}
+
+/**
+ * Adds a new year/semester instance to a user's enrolled course
+ */
+export async function addCourseInstance(prevState: any, formData: FormData) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return { error: "You must be logged in to add a course instance" };
+  }
+
+  const parsedFormData = CourseInstanceSchema.safeParse({
+    userCourseId: formData.get("userCourseId"),
+    year: formData.get("year"),
+    semester: formData.get("semester"),
+  });
+
+  if (!parsedFormData.success) {
+    return { error: "Validation failed. Please check your input." };
+  }
+
+  const { userCourseId, year, semester } = parsedFormData.data;
+
+  try {
+    // Check if the user course exists and belongs to the user
+    const userCourse = await prisma.userCourse.findFirst({
+      where: {
+        id: userCourseId,
+        userId: session.user.id,
+      },
+      include: {
+        course: true,
+      },
+    });
+
+    if (!userCourse) {
+      return {
+        error: "Course enrollment not found or you don't have permission",
+      };
+    }
+
+    // Check if an instance with the same year and semester already exists
+    const existingInstance = await prisma.courseInstance.findFirst({
+      where: {
+        userCourseId,
+        year,
+        semester,
+      },
+    });
+
+    if (existingInstance) {
+      return {
+        error: `An instance for ${semester} ${year} already exists for this course`,
+      };
+    }
+
+    // Create the new instance
+    const instance = await prisma.courseInstance.create({
+      data: {
+        userCourseId,
+        year,
+        semester,
+        isActive: true,
+      },
+    });
+
+    // Revalidate all course-related paths to ensure the sidebar updates
+    revalidatePath("/dashboard/courses");
+    revalidatePath(`/dashboard/courses/${userCourse.course.code}`);
+
+    return {
+      success: true,
+      instance,
+      message: `Added ${semester} ${year} to ${userCourse.course.code}`,
+    };
+  } catch (error) {
+    console.error("Error adding course instance:", error);
+    return { error: "Failed to add course instance. Please try again." };
   }
 }
 

@@ -6,24 +6,28 @@ export type repositoryOverview = {
   url: string;
 };
 
+export type UserCourse = {
+  id: string
+  userId: string
+  courseId: string
+  createdAt: Date
+  course: Course
+  instances: CourseInstance[]
+}
 export type CourseInstance = {
   id: string
   year: number
   semester: "SPRING" | "AUTUMN"
-  startDate?: Date
-  endDate?: Date
   isActive: boolean
   createdAt: Date
   updatedAt: Date
-  subjectId: string
+  userCourseId: string
 }
+
 export type Course = {
   id: string
   code: string
   name: string
-  description?: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 export type CourseSubject = {
