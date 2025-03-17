@@ -6,6 +6,7 @@ import {
 import { DataTable } from "@/app/ui/courses/table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
 import { fetchRepoOverview } from "@/app/lib/data";
+import {getDummyCourseInstance, getMockRepositories} from "@/app/lib/placeholder-data";
 
 interface pageProps {
   name: string;
@@ -19,7 +20,7 @@ export default async function CoursePage(props: {
   const { name: courseCode, semester, year } = await props.params;
   const yearNum = Number.parseInt(year, 10);
 
-  const { courseInstance, error: instanceError } = await getCourseInstance(
+  const { courseInstance, error: instanceError } = await getDummyCourseInstance(
     courseCode,
     yearNum,
     semester,
@@ -36,9 +37,10 @@ export default async function CoursePage(props: {
   }
 
   // Fetch repositories from database
-  const { repositories, error: repoError } = await getRepositories(
+  const { repositories, error: repoError } = await getMockRepositories(
     courseInstance.id,
   );
+
   if (repoError) {
     return (
       <div className="container mx-auto py-10">

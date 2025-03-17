@@ -1,7 +1,15 @@
 // placeholder data
 
 import { Home, Settings } from "lucide-react";
-import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions";
+import {
+  CommitEval,
+  Course,
+  CourseInstance,
+  LLMResponse,
+  Payment,
+  repositoryOverview,
+  UserCourse
+} from "@/app/lib/definitions";
 
 // export const getRepos = [
 //   { owner: "Vegardxoxo", repo: "bachelor_project" },
@@ -339,3 +347,264 @@ const obj = {
     }
 }
 
+
+export async function getDummyUserCourses(): Promise<{
+  error?: string;
+  success?: boolean;
+  enrolledCourses: UserCourse[];
+}> {
+  return {
+    success: true,
+    enrolledCourses: [
+      {
+        id: "uc-1",
+        userId: "dummy-user-id",
+        courseId: "c-1",
+        role: "STUDENT",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        course: {
+          id: "c-1",
+          code: "CS101",
+          name: "Introduction to Computer Science",
+          description: "Fundamental concepts of programming and computer science",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        instances: [
+          {
+            id: "ci-1",
+            courseId: "c-1",
+            year: 2024,
+            semester: "SPRING",
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: "ci-2",
+            courseId: "c-1",
+            year: 2023,
+            semester: "FALL",
+            active: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        ]
+      },
+      {
+        id: "uc-2",
+        userId: "dummy-user-id",
+        courseId: "c-2",
+        role: "TEACHING_ASSISTANT",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        course: {
+          id: "c-2",
+          code: "CS201",
+          name: "Data Structures and Algorithms",
+          description: "Study of common data structures and algorithms",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        instances: [
+          {
+            id: "ci-3",
+            courseId: "c-2",
+            year: 2024,
+            semester: "SPRING",
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        ]
+      },
+      {
+        id: "uc-3",
+        userId: "dummy-user-id",
+        courseId: "c-3",
+        role: "STUDENT",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        course: {
+          id: "c-3",
+          code: "CS301",
+          name: "Software Engineering",
+          description: "Software development processes and methodologies",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        instances: [
+          {
+            id: "ci-4",
+            courseId: "c-3",
+            year: 2024,
+            semester: "SPRING",
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        ]
+      }
+    ]
+  };
+}
+
+
+export async function getDummyCourseInstance(
+  courseCode: string,
+  year: number,
+  semester: string,
+): Promise<{
+  error?: string;
+  success?: boolean;
+  courseInstance: CourseInstance | null;
+  course?: Course;
+}> {
+  // Get the same data from getDummyUserCourses to maintain consistency
+  const { enrolledCourses } = await getDummyUserCourses();
+
+  // Normalize semester for consistency (FALL in dummy data vs input parameter)
+  const normalizedSemester = semester.toUpperCase();
+
+  // Find the course by code
+  const userCourse = enrolledCourses.find(uc => uc.course.code === courseCode);
+  if (!userCourse) {
+    return {
+      error: "Course not found",
+      courseInstance: null,
+    };
+  }
+
+  // Find the specific instance by year and semester
+  const instance = userCourse.instances.find(
+    inst => inst.year === year &&
+    (inst.semester.toUpperCase() === normalizedSemester ||
+    (normalizedSemester === "AUTUMN" && inst.semester.toUpperCase() === "FALL"))
+  );
+
+  if (!instance) {
+    return {
+      error: `No ${semester} ${year} instance found for this course`,
+      courseInstance: null,
+    };
+  }
+
+  // Create a courseInstance object with the necessary structure
+  const courseInstance = {
+    ...instance,
+    userCourseId: userCourse.id,
+    userCourse: {
+      ...userCourse,
+      // Remove the instances array since it's not in the getCourseInstance return structure
+      instances: undefined
+    }
+  };
+
+  return {
+    success: true,
+    courseInstance,
+    course: userCourse.course,
+  };
+}
+
+export async function getMockRepositories(courseInstanceId: string): Promise<{
+  error?: string;
+  success?: boolean;
+  message?: string;
+  repositories: any[];
+}> {
+  // Mock repositories database
+  const allRepositories = {
+    // CS101 Spring 2024
+    "ci-1": [
+      {
+        id: "repo-1",
+        username: "student-1",
+        repoName: "cs101-assignment1",
+        url: "https://github.com/student-1/cs101-assignment1",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-2",
+        username: "student-1",
+        repoName: "cs101-project",
+        url: "https://github.com/student-1/cs101-project",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-3",
+        username: "course-admin",
+        repoName: "cs101-materials",
+        url: "https://github.com/course-admin/cs101-materials",
+        platform: "GITHUB",
+      }
+    ],
+    // CS101 Fall 2023
+    "ci-2": [
+      {
+        id: "repo-4",
+        username: "student-1",
+        repoName: "cs101-assignment1-2023",
+        url: "https://github.com/student-1/cs101-assignment1-2023",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-5",
+        username: "course-admin",
+        repoName: "cs101-materials-2023",
+        url: "https://github.com/course-admin/cs101-materials-2023",
+        platform: "GITHUB",
+      }
+    ],
+    // CS201 Spring 2024
+    "ci-3": [
+      {
+        id: "repo-6",
+        username: "student-1",
+        repoName: "cs201-datastructures",
+        url: "https://github.com/student-1/cs201-datastructures",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-7",
+        username: "student-1",
+        repoName: "cs201-algorithms-project",
+        url: "https://github.com/student-1/cs201-algorithms-project",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-8",
+        username: "course-admin",
+        repoName: "cs201-resources",
+        url: "https://gitlab.com/course-admin/cs201-resources",
+        platform: "GITLAB",
+      }
+    ],
+    // CS301 Spring 2024
+    "ci-4": [
+      {
+        id: "repo-9",
+        username: "student-1",
+        repoName: "software-engineering-group-project",
+        url: "https://github.com/student-1/software-engineering-group-project",
+        platform: "GITHUB",
+      },
+      {
+        id: "repo-10",
+        username: "team-alpha",
+        repoName: "cs301-team-project",
+        url: "https://gitlab.com/team-alpha/cs301-team-project",
+        platform: "GITLAB",
+      }
+    ]
+  };
+
+  // Return the repositories for the given course instance ID or an empty array if none exist
+  const repositories = allRepositories[courseInstanceId] || [];
+
+  return {
+    success: true,
+    repositories,
+  };
+}
