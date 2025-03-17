@@ -40,13 +40,13 @@ function AddCourseButton() {
         <Button
           asChild
           variant="default"
-          className="rounded-xl bg-sky-500 w-full md:w-auto"
+          className="rounded-xl bg-sky-500 w-full md:w-auto mt-2"
         >
           <Link
             href="/dashboard/courses/add"
             className="hover:bg-sky-500 hover:text-white"
           >
-            Add Course
+            Modify Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>
@@ -86,7 +86,7 @@ export function AppSidebar({ user, courses }: { user: any; courses: UserCourse[]
             <Collapsible defaultOpen className="group/collapsible">
               <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex w-full items-center px-2 py-1.5">
+                  <CollapsibleTrigger className="flex w-full items-center  ">
                     <span className="text-sm font-medium">My Courses</span>
                     <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </CollapsibleTrigger>
