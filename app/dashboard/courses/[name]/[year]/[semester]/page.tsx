@@ -39,6 +39,7 @@ export default async function CoursePage(props: {
   const { repositories, error: repoError } = await getRepositories(
     courseInstance.id,
   );
+
   if (repoError) {
     return (
       <div className="container mx-auto py-10">
@@ -51,10 +52,11 @@ export default async function CoursePage(props: {
 
   // Fetch data from the github api
   const repoData = await Promise.all(
-    repositories.map(({ id, username, repoName }) =>
+    repositories.map(({ id, username, repoName, url }) =>
       fetchRepoOverview(username, repoName).then((result) => ({
         ...result,
         databaseId: id,
+        url: url,
       })),
     ),
   );
@@ -65,9 +67,8 @@ export default async function CoursePage(props: {
     .map((result) => ({
       ...result.data,
       databaseId: result.databaseId,
+      url: result.url,
     }));
-
-
 
   const errors = repoData
     .filter((result) => result.error !== null)
@@ -78,21 +79,22 @@ export default async function CoursePage(props: {
 
   return (
     <div>
-      <div className="container mx-auto py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-center mb-2">{courseCode}</h1>
-          <h2 className="text-xl text-muted-foreground text-center">
+      <div className="min-h-screen p-6 w-3/4 mx-auto">
+        {/* Header with gradient background */}
+        <div className="mb-8 bg-gradient-to-r from-blue-300 to-sky-500 rounded-xl shadow-lg p-8 text-white">
+          <h1 className="text-4xl font-bold text-center mb-2">{courseCode}</h1>
+          <h2 className="text-xl text-center opacity-90">
             {semesterDisplay} {year}
           </h2>
         </div>
 
         {errors.length > 0 && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-            <div className="text-yellow-700">
-              <p className="font-medium">
-                Some repositories could not be loaded:
+          <div className="bg-amber-50 border-2 border-amber-300 p-5 mb-8 rounded-xl shadow-md">
+            <div className="text-amber-800">
+              <p className="font-bold text-lg mb-2">
+                ⚠️ Some repositories could not be loaded:
               </p>
-              <ul className="list-disc ml-5 mt-2">
+              <ul className="list-disc ml-6 mt-2 space-y-1">
                 {errors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
