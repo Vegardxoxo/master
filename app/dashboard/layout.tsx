@@ -10,12 +10,12 @@ export default async function Layout({
 }) {
   const session = await auth();
   const user = session?.user ?? { name: "Guest" };
-  const courses = await getUserCourses();
-  console.log("courses", courses);
+  const {success, error, enrolledCourses} = await getUserCourses();
+  console.log("user", user);
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} courses={courses} />
+      <AppSidebar user={user} courses={enrolledCourses} />
       <main className={"w-full"}>
         <CustomTrigger />
         <div

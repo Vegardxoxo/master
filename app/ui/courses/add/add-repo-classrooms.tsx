@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { parseCSV } from "@/app/lib/utils";
 
-export function AddRepositoryClassroom() {
+export function AddRepositoryClassroom({courseInstanceId}: {courseInstanceId: string}) {
   const [organization, setOrganization] = React.useState("");
   const [assignment, setAssignment] = React.useState("");
   const [file, setFile] = React.useState<File | null>(null);

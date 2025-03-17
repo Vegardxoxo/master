@@ -1,4 +1,5 @@
 export type repositoryOverview = {
+  databaseId: string;
   owner: string;
   name: string;
   contributors: string[];
@@ -7,49 +8,42 @@ export type repositoryOverview = {
 };
 
 export type UserCourse = {
-  id: string
-  userId: string
-  courseId: string
-  createdAt: Date
-  course: Course
-  instances: CourseInstance[]
-}
+  id: string;
+  userId: string;
+  courseId: string;
+  createdAt: Date;
+  course: Course;
+  instances: CourseInstance[];
+};
 export type CourseInstance = {
-  id: string
-  year: number
-  semester: "SPRING" | "AUTUMN"
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
-  userCourseId: string
-}
+  id: string;
+  year: number;
+  semester: "SPRING" | "AUTUMN";
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  userCourseId: string;
+};
 
 export type Course = {
-  id: string
-  code: string
-  name: string
-}
+  id: string;
+  code: string;
+  name: string;
+};
 
 export type CourseSubject = {
-  id: string
-  name: string
-  description?: string
-  createdAt: Date
-  updatedAt: Date
-  ownerId: string
-}
-
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string;
+};
 
 export type User = {
-  id: string
-  email: string
-  avatarUrl?: string
-  githubUrl?: string
-  userType: "EDUCATOR" | "STUDENT"
-  createdAt: Date
-  updatedAt: Date
-  accessToken?: string
-}
+  id: string;
+  email: string;
+};
 
 export type _Branches = {
   name: string;
@@ -168,9 +162,13 @@ export type PullRequestData = {
 };
 
 export type Repository = {
-  id: string
-  name: string
-  createdAt: Date
-  updatedAt: Date
-  courseInstanceId?: string
-}
+  id: string;
+  name: string;
+  url: string;
+  platform: string;
+  createdAt: Date;
+  updatedAt: Date;
+  courseInstanceId?: string;
+  courseInstance?: CourseInstance;
+  members: User[];
+};

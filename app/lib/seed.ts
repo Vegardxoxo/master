@@ -270,16 +270,11 @@ const prisma = new PrismaClient()
 
 
 
-async function main() {
-  for (const course of courses) {
-    await prisma.course.upsert({
-      where: { code: course.code },
-      update: {},
-      create: course,
-    })
-  }
 
-  console.log("Database seeded successfully")
+async function main() {
+  await prisma.repository.deleteMany({});
+
+  console.log("Purged repositories")
 }
 
 main()

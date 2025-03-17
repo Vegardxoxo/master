@@ -25,9 +25,9 @@ model User {
 
 // Pre-populated course catalog
 model Course {
-  id          String   @id @default(uuid())
-  code        String   @unique // Course code like "TDMA5004"
-  name        String
+  id            String       @id @default(uuid())
+  code          String       @unique // Course code like "TDMA5004"
+  name          String
   enrolledUsers UserCourse[]
 }
 
@@ -39,8 +39,8 @@ model UserCourse {
   createdAt DateTime @default(now())
 
   // References
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   // Course instances (years/semesters) created by this user for this course
   instances CourseInstance[]
@@ -51,12 +51,12 @@ model UserCourse {
 
 // Course instance represents a specific year/semester offering
 model CourseInstance {
-  id          String   @id @default(uuid())
-  year        Int
-  semester    Semester
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  year      Int
+  semester  Semester
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationship to UserCourse
   userCourseId String
@@ -70,15 +70,14 @@ model CourseInstance {
 }
 
 model Repository {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Members of the repository
-  members User[] @relation("RepositoryMembers")
-
-  // Relationship to course instance
+  id               String          @id @default(uuid())
+  username         String
+  repoName         String
+  url              String
+  platform         String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  members          User[]          @relation("RepositoryMembers")
   courseInstanceId String?
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id])
 }

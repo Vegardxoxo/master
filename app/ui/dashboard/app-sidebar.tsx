@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/tooltip";
 import UserProfile from "@/app/ui/user-profile";
 import { usePathname } from "next/navigation";
-import {handleSignOut} from "@/app/lib/actions";
+import {handleSignOut} from "@/app/lib/server-actions/actions";
+import {UserCourse} from "@/app/lib/definitions";
 
 function AddCourseButton() {
   return (
@@ -54,9 +55,7 @@ function AddCourseButton() {
   );
 }
 
-export function AppSidebar({ user, courses }: { user: any; courses: any }) {
-  const pathName = usePathname();
-
+export function AppSidebar({ user, courses }: { user: any; courses: UserCourse[] }) {
   return (
     <Sidebar collapsible="offcanvas">
       {/*Header*/}
@@ -96,7 +95,7 @@ export function AppSidebar({ user, courses }: { user: any; courses: any }) {
                   <SidebarGroupContent>
                     <SidebarMenu>
                       <Courses
-                        courses={courses.enrolledCourses}
+                        courses={courses}
                       />
                       <AddCourseButton />
                     </SidebarMenu>
