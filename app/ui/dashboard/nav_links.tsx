@@ -105,7 +105,7 @@ function CourseItem({
   return (
     <div className="w-full bg">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-sm font-medium mt-2">
           <SidebarMenuButton
             isActive={isCourseActive}
             className="flex-1 h-10"
