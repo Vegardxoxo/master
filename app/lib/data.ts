@@ -30,7 +30,7 @@ const octokit = new Octokit({
 export async function fetchRepoOverview(
   owner: string,
   repo: string,
-): Promise<repositoryOverview> {
+): Promise<{ data: repositoryOverview; error: string | null }> {
   try {
     const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
       owner,
@@ -55,17 +55,32 @@ export async function fetchRepoOverview(
     );
 
     return {
-      owner: repoInfo.data.owner.login,
-      name: repoInfo.data.name,
-      contributors: contributorsRes.data
-        .map((c) => c.login)
-        .filter((login): login is string => !!login),
-      openIssues: issuesRes.data.length,
-      url: repoInfo.data.html_url,
+      data: {
+        owner: repoInfo.data.owner.login,
+        name: repoInfo.data.name,
+        contributors: contributorsRes.data
+          .map((c) => c.login)
+          .filter((login): login is string => !!login),
+        openIssues: issuesRes.data.length,
+        url: repoInfo.data.html_url,
+      },
+      error: null,
     };
   } catch (err) {
     console.error("Error fetching repo data via REST:", err);
-    throw new Error("Failed to fetch repository overview.");
+    return {
+      data: {
+        contributors: [],
+        name: repo,
+        openIssues: 0,
+        owner: owner,
+        url: "",
+      },
+      error:
+        err instanceof Error && "status" in err && (err as any).status === 404
+          ? `Repository ${owner}/${repo} not found. Please check if the repository URL is correct.`
+          : `Failed to fetch data for ${owner}/${repo}. Please try again later.`,
+    };
   }
 }
 

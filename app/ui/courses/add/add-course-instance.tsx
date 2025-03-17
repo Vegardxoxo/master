@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Plus } from "lucide-react";
-import { addCourseInstance } from "@/app/lib/actions";
+import { addCourseInstance } from "@/app/lib/server-actions/actions";
 
 interface AddInstanceDialogProps {
   userCourseId: string;

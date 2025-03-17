@@ -2,10 +2,16 @@
 import { AuthError } from "next-auth";
 import { auth, signIn, signOut } from "@/auth";
 import { PrismaClient } from "@prisma/client";
-import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { Semester } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import {
+  CourseInstanceSchema,
+  CourseSchema,
+  EnrollCourseSchema,
+  RemoveEnrollmentSchema,
+  RepositorySchema,
+  SignupSchema, UpdateRepositorySchema,
+} from "@/app/lib/server-actions/zod-schemas";
 
 const prisma = new PrismaClient();
 
@@ -28,39 +34,90 @@ export async function authenticate(
   }
 }
 
-const SignupSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
-  userType: z.enum(["STUDENT", "EDUCATOR"]),
-  githubUrl: z.string().url().optional().or(z.literal("")),
-});
+export async function createRepository(prevState: any, formData: FormData) {
+  try {
+    const session = await auth();
+    if (!session || !session.user) {
+      return {
+        error:
+          "You must be logged in to add a repository to the selected course.",
+      };
+    }
 
-const CourseSchema = z.object({
-  name: z.string().min(1, "Course name is required"),
-  description: z.string().optional(),
-  year: z.coerce.number().int().min(1900).max(new Date().getFullYear()),
-  semester: z.enum(["SPRING", "AUTUMN"]),
-  courseSubjectId: z.string().optional(),
-});
+    const parsedFormData = RepositorySchema.safeParse({
+      courseInstanceId: formData.get("courseInstanceId"),
+      username: formData.get("username"),
+      repoName: formData.get("repoName"),
+      platform: formData.get("platform"),
+      url: formData.get("url"),
+    });
 
-const EnrollCourseSchema = z.object({
-  courseId: z.string().min(1, "Course ID is required"),
-});
+    if (!parsedFormData.success) {
+      const fieldErrors = parsedFormData.error.format();
+      return {
+        error: "Validation failed. Please check your input.",
+        fieldErrors,
+      };
+    }
 
-const RemoveEnrollmentSchema = z.object({
-  userCourseId: z.string().min(1, "User course ID is required"),
-});
+    const { courseInstanceId, url, platform, username, repoName } =
+      parsedFormData.data;
 
-const CourseInstanceSchema = z.object({
-  userCourseId: z.string().min(1, "User course ID is required"),
-  year: z.coerce
-    .number()
-    .int()
-    .min(1900)
-    .max(new Date().getFullYear() + 5),
-  semester: z.enum(["SPRING", "AUTUMN"]),
-});
+    const courseInstance = await prisma.courseInstance.findFirst({
+      where: {
+        id: courseInstanceId,
+        userCourse: {
+          userId: session.user.id,
+        },
+      },
+      include: {
+        userCourse: {
+          include: {
+            course: true,
+          },
+        },
+      },
+    });
+
+    if (!courseInstance) {
+      return {
+        error: "Course instance not found or you don't have permission",
+      };
+    }
+    const repository = await prisma.repository.create({
+      data: {
+        username: username,
+        repoName: repoName,
+        url: url,
+        platform: platform,
+        courseInstanceId: courseInstanceId,
+        members: {
+          connect: {
+            id: session.user.id,
+          },
+        },
+      },
+    });
+
+    // Get the course code for path revalidation
+    const courseCode = courseInstance.userCourse.course.code;
+    const year = courseInstance.year;
+    const semester = courseInstance.semester.toLowerCase();
+
+    revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);
+    console.log("repository", repository);
+    return {
+      success: true,
+      repository,
+      message: `Repository ${url} added successfully`,
+    };
+  } catch (e) {
+    console.error("Error adding repository:", e);
+    return {
+      error: "Database error: Failed to add the repository. Please try again.",
+    };
+  }
+}
 
 export async function enrollInCourse(prevstate: any, formData: FormData) {
   const session = await auth();
@@ -411,4 +468,145 @@ export async function createUser(prevState: any, formData: FormData) {
 
 export async function handleSignOut() {
   await signOut({ redirectTo: "/" });
+}
+
+export async function deleteRepository(
+  id: string,
+): Promise<{ error?: string; message?: string; success: boolean }> {
+  try {
+    const session = await auth();
+
+    if (!session || !session.user || !session.user.email) {
+      return {
+        error: "Not authenticated",
+        success: false,
+      };
+    }
+    const repo = await prisma.repository.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        courseInstance: {
+          include: {
+            userCourse: true,
+          },
+        },
+      },
+    });
+    if (!repo) {
+      return {
+        error: "Repository not found",
+        success: false,
+      };
+    }
+    if (repo.courseInstance?.userCourse.userId !== session.user.id) {
+      return {
+        error: "You don't have permission to delete this repository",
+        success: false,
+      };
+    }
+
+    await prisma.repository.delete({
+      where: {
+        id: id,
+      },
+    });
+    revalidatePath(`/courses/${repo.courseInstance?.userCourse.courseId}`);
+
+    return {
+      success: true,
+      message: `Repository ${repo.url} deleted successfully`,
+    };
+  } catch (e) {
+    console.error("Error deleting repository:", e);
+    return {
+      error:
+        "Database error: Failed to delete the repository. Please try again.",
+      success: false,
+    };
+  }
+}
+
+export async function updateRepository(prevState: any, formData: FormData): Promise<{
+  error?: string;
+  message?: string;
+  success: boolean;
+}> {
+  try {
+    const session = await auth();
+    if (!session || !session.user) {
+      return {
+        error:
+          "You must be logged in to add a repository to the selected course.",
+        success: false,
+      };
+    }
+
+    console.log("formData", formData);
+
+    const parsedFormData = UpdateRepositorySchema.safeParse({
+      id: formData.get("id"),
+      courseInstanceId: formData.get("courseInstanceId"),
+      username: formData.get("username"),
+      repoName: formData.get("repoName"),
+      platform: formData.get("platform"),
+      url: formData.get("url"),
+    });
+
+    if (!parsedFormData.success) {
+      return {
+        error: "Validation failed. Please check your input.",
+        success: false,
+      };
+    }
+
+    const { courseInstanceId, url, platform, username, repoName, id } =
+      parsedFormData.data;
+
+    const courseInstance = await prisma.courseInstance.findFirst({
+      where: {
+        id: courseInstanceId,
+        userCourse: {
+          userId: session.user.id,
+        },
+      },
+      include: {
+        userCourse: {
+          include: {
+            course: true,
+          },
+        },
+      },
+    });
+
+    if (!courseInstance) {
+      return {
+        error: "Course instance not found or you don't have permission",
+        success: false,
+      };
+    }
+    await prisma.repository.update({
+      where: {
+        id: id,
+      },
+      data: {
+        username: username,
+        repoName: repoName,
+        url: url,
+        platform: platform,
+      },
+    });
+    return {
+      success: true,
+      message: `Repository ${url} updated successfully`,
+    };
+  } catch (e) {
+    console.error("Error updating repository:", e);
+    return {
+      error:
+        "Database error: Failed to update the repository. Please try again.",
+      success: false,
+    };
+  }
 }

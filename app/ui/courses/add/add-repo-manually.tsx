@@ -1,67 +1,94 @@
-"use client";
-import { Button } from "@/app/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { FormEvent, useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CheckedState } from "@radix-ui/react-checkbox";
+"use client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react"
+import { Checkbox } from "@/components/ui/checkbox"
+import type { CheckedState } from "@radix-ui/react-checkbox"
+import { createRepository } from "@/app/lib/server-actions/actions"
+import { useActionState } from "react"
+import { CheckCircle2, AlertCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-export function AddRepository() {
-  const [platform, setPlatform] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [repo, setRepo] = useState<string>("");
-  const [result, setResult] = useState<string>("");
-  const [isEditable, setIsEditable] = useState(false);
+export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: string }) {
+  const router = useRouter()
+  const [formState, formAction, isPending] = useActionState(createRepository, undefined)
 
-  const isFormValid = platform && username && repo;
+  const [platform, setPlatform] = useState<string>("")
+  const [username, setUsername] = useState<string>("")
+  const [repoName, setRepoName] = useState<string>("")
+  const [url, setUrl] = useState<string>("")
+  const [isEditable, setIsEditable] = useState(false)
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (isFormValid) {
-      if (!isEditable) {
-        const res = `${platform}/${username}/${repo}`;
-        console.log("Adding repository: " + res);
-        return;
-      }
-      console.log("Adding repository: " + result);
+  const isFormValid = platform && username && repoName
+
+  // Reset URL when inputs change
+  useEffect(() => {
+    if (platform && username && repoName) {
+      setUrl(`https://${platform}.com/${username}/${repoName}`)
+    } else {
+      setUrl("")
     }
-  };
+  }, [platform, username, repoName])
+
+  // Reset form after successful submission
+  useEffect(() => {
+    if (formState?.success) {
+      setPlatform("")
+      setUsername("")
+      setRepoName("")
+      setUrl("")
+      setIsEditable(false)
+
+      // Refresh the page after a short delay
+      setTimeout(() => {
+        router.refresh()
+      }, 1500)
+    }
+  }, [formState, router])
 
   function handleCheck(value: CheckedState) {
-    setIsEditable(!!value);
-    setResult(`${platform}/${username}/${repo}`);
+    setIsEditable(!!value)
+  }
+
+  // Custom form submission handler to ensure all data is properly sent
+  const handleSubmit = async (formData: FormData) => {
+    // Add the courseInstanceId
+    formData.append("courseInstanceId", courseInstanceId)
+
+    // Make sure platform, username, and repoName are included
+    if (platform) formData.set("platform", platform)
+    if (username) formData.set("username", username)
+    if (repoName) formData.set("repoName", repoName)
+
+    // Set the URL (either from the input or constructed)
+    if (isEditable) {
+      formData.set("url", url)
+    } else {
+      formData.set("url", `https://${platform}.com/${username}/${repoName}`)
+    }
+
+    // Call the server action
+    return formAction(formData)
   }
 
   return (
     <Card className="w-[350px]">
-      <form onSubmit={handleSubmit}>
+      <form action={handleSubmit}>
         <CardHeader>
           <CardTitle>Manually Add Repository</CardTitle>
-          <CardDescription>
-            Add a GitHub or GitLab repository URL.
-          </CardDescription>
+          <CardDescription>Add a GitHub or GitLab repository URL.</CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="grid w-full items-center gap-4">
+            {/* We'll add the courseInstanceId in the handleSubmit function */}
+
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="platform">Platform</Label>
-              <Select value={platform} onValueChange={setPlatform}>
+              <Select name="platform" value={platform} onValueChange={setPlatform} disabled={isPending}>
                 <SelectTrigger id="platform">
                   <SelectValue placeholder="Select platform" />
                 </SelectTrigger>
@@ -71,69 +98,96 @@ export function AddRepository() {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
+                name="username"
                 placeholder="Repository owner"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                disabled={isPending}
               />
             </div>
+
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="repo">Repository</Label>
+              <Label htmlFor="repoName">Repository</Label>
               <Input
-                id="repo"
+                id="repoName"
+                name="repoName"
                 placeholder="Repository name"
-                value={repo}
-                onChange={(e) => setRepo(e.target.value)}
+                value={repoName}
+                onChange={(e) => setRepoName(e.target.value)}
+                disabled={isPending}
               />
             </div>
-            {platform && username && repo && (
-              <div className={"text-sm text-muted-foreground"}>
+
+            {platform && username && repoName && (
+              <div className="text-sm text-muted-foreground">
                 <Label htmlFor="preview">Preview</Label>
-                <div className={"flex justify-end gap-x-4"}>
+                <div className="flex justify-end gap-x-4">
                   <Checkbox
-                    id={"manual-edit"}
+                    id="manual-edit"
                     checked={isEditable}
-                    onCheckedChange={(value) => handleCheck(value)}
+                    onCheckedChange={handleCheck}
                     aria-label="Toggle manual editing"
+                    disabled={isPending}
                   />
                   <label htmlFor="manual-edit">Edit</label>
                 </div>
 
                 <Input
                   id="preview"
+                  name="url"
                   placeholder="Preview"
-                  value={
-                    isEditable ? result : `${platform}/${username}/${repo}`
-                  }
-                  disabled={!isEditable}
-                  onChange={(e) => setResult(e.target.value)}
+                  value={url}
+                  disabled={!isEditable || isPending}
+                  onChange={(e) => setUrl(e.target.value)}
                 />
               </div>
             )}
+
+            {/* Message container with fixed height to prevent layout shifts */}
+            <div className="min-h-[24px]">
+              {formState?.error && (
+                <div className="flex items-center text-red-500 text-sm">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  {formState.error}
+                </div>
+              )}
+              {formState?.success && (
+                <div className="flex items-center text-green-500 text-sm">
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  {formState.message || "Repository added successfully!"}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
 
         <CardFooter className="flex justify-between">
           <Button
-            type={"reset"}
-            className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+            type="reset"
+            variant="outline"
             onClick={() => {
-              setPlatform("");
-              setUsername("");
-              setRepo("");
+              setPlatform("")
+              setUsername("")
+              setRepoName("")
+              setUrl("")
+              setIsEditable(false)
             }}
+            disabled={isPending}
           >
             Clear
           </Button>
 
-          <Button type="submit" disabled={!isFormValid}>
-            Add Repository
+          <Button type="submit" disabled={!isFormValid || isPending}>
+            {isPending ? "Adding..." : "Add Repository"}
           </Button>
         </CardFooter>
       </form>
     </Card>
-  );
+  )
 }
+

@@ -4,9 +4,12 @@ import {
   EyeIcon,
   ClipboardIcon,
   TrashIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { deleteRepository } from "@/app/lib/server-actions/actions";
+import { getRepository } from "@/app/lib/database-functions";
 
 export function ViewProject({ repo, owner }: { repo: string; owner: string }) {
   const pathname = usePathname();
@@ -21,10 +24,10 @@ export function ViewProject({ repo, owner }: { repo: string; owner: string }) {
   );
 }
 
-export function DeleteFromList({ id }: { id: string }) {
-  // const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+export function DeleteRepoButton({ id }: { id: string }) {
+  const deleteRepo = deleteRepository.bind(null, id);
   return (
-    <form>
+    <form action={deleteRepo}>
       <button className="rounded-md border p-2 hover:bg-gray-100">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />
@@ -44,3 +47,18 @@ export function AddToClipboard({ url }: { url: string }) {
     </button>
   );
 }
+
+export function UpdateRepository({ id }: { id: string }) {
+  const pathname = usePathname();
+
+  return (
+    <Link
+      href={`${pathname}/edit/${id}`}
+      className={"rounded-md border p-2 hover:bg-gray-100"}
+    >
+      <span className="sr-only">Edit</span>
+      <PencilIcon className="w-5" />
+    </Link>
+  );
+}
+
