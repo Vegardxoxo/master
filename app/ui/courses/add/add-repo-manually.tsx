@@ -1,5 +1,6 @@
 "use client"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/app/ui/button"
+import {Button as Button2} from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -167,7 +168,7 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button
+          <Button2
             type="reset"
             variant="outline"
             onClick={() => {
@@ -180,7 +181,7 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
             disabled={isPending}
           >
             Clear
-          </Button>
+          </Button2>
 
           <Button type="submit" disabled={!isFormValid || isPending}>
             {isPending ? "Adding..." : "Add Repository"}

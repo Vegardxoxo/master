@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import {
   ColumnDef,
@@ -32,6 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Search, SlidersHorizontal } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -66,23 +67,30 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter repository name"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+    <div className={""}>
+      <div className="flex items-center py-4 gap-4 justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            placeholder="Filter repository name"
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="pl-8 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button className="bg-sky-500 hover:bg-sky-600 min-w-[160px]">
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
               Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            align="end"
+            className="bg-white border border-blue-100 shadow-lg"
+          >
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -103,14 +111,21 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
+
+      <div className="rounded-xl overflow-hidden border-2 ">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-sky-500">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className={"border-none hover:bg-transparent"}
+              >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={"text-white font-bold"}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -123,11 +138,12 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  className={"odd:bg-blue-white even:bg-gray-200"}
+                  className={"odd:bg-white even:bg-blue-50"}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
@@ -154,23 +170,31 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <span className="font-medium">
+            {table.getFilteredRowModel().rows.length}
+          </span>{" "}
+          repositories
+        </div>
+        <div className="space-x-2">
+          <Button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300"
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

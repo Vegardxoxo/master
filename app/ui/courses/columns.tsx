@@ -20,6 +20,7 @@ import {
   AddToClipboard,
   ViewProject, UpdateRepository,
 } from "@/app/ui/courses/buttons";
+import Link from "next/link";
 
 export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
   {
@@ -47,6 +48,17 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
   {
     accessorKey: "owner",
     header: "Repository owner",
+  },
+      {
+    accessorKey: "url",
+    header: "Url",
+    cell: ({ row }) => {
+      return (
+        <Link className={"hover:cursor-pointer hover:underline text-blue-600"} href={row.getValue("url")}>
+          {row.getValue("url")}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "name",

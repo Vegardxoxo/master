@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/app/ui/button";
+import {Button as Button2} from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -89,9 +90,9 @@ export function AddRepositoryClassroom({courseInstanceId}: {courseInstanceId: st
         </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button
+        <Button2
           type={"reset"}
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          variant={"outline"}
           onClick={() => {
             setOrganization("");
             setAssignment("");
@@ -99,7 +100,7 @@ export function AddRepositoryClassroom({courseInstanceId}: {courseInstanceId: st
           }}
         >
           Clear
-        </Button>
+        </Button2>
         <Button
           type="submit"
           disabled={!organization || !assignment || !file || isUploading}
