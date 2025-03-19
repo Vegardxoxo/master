@@ -10,8 +10,11 @@ import {
   EnrollCourseSchema,
   RemoveEnrollmentSchema,
   RepositorySchema,
-  SignupSchema, UpdateRepositorySchema,
+  SignupSchema,
+  UpdateRepositorySchema,
 } from "@/app/lib/server-actions/zod-schemas";
+import { fetchRepoId } from "@/app/lib/data";
+import {CoverageMetrics, FileCoverageData, FileData, FileSetResult} from "@/app/lib/definitions";
 
 const prisma = new PrismaClient();
 
@@ -84,11 +87,24 @@ export async function createRepository(prevState: any, formData: FormData) {
         error: "Course instance not found or you don't have permission",
       };
     }
+
+    let githubId = null;
+    const repoInfo = await fetchRepoId(username, repoName);
+
+    if (!repoInfo.success) {
+      return {
+        error: `Failed to fetch repository information: ${repoInfo.error}`,
+      };
+    }
+    githubId = repoInfo.id;
+    console.log("githubId", githubId);
+
     const repository = await prisma.repository.create({
       data: {
         username: username,
         repoName: repoName,
         url: url,
+        githubId,
         platform: platform,
         courseInstanceId: courseInstanceId,
         members: {
@@ -528,7 +544,10 @@ export async function deleteRepository(
   }
 }
 
-export async function updateRepository(prevState: any, formData: FormData): Promise<{
+export async function updateRepository(
+  prevState: any,
+  formData: FormData,
+): Promise<{
   error?: string;
   message?: string;
   success: boolean;
@@ -610,3 +629,177 @@ export async function updateRepository(prevState: any, formData: FormData): Prom
     };
   }
 }
+
+
+
+export async function saveCoverageReport(
+  githubRepoId: string,
+  commit: string,
+  branch: string, // Added branch parameter
+  metrics: CoverageMetrics,
+  filesCoverage: FileCoverageData[],
+) {
+  try {
+    // Find the repository by GitHub ID
+    const repository = await prisma.repository.findFirst({
+      where: {
+        githubId: githubRepoId,
+      },
+    });
+
+    if (!repository) {
+      throw new Error(`Repository with GitHub ID ${githubRepoId} not found`);
+    }
+
+    // Use the internal ID for all subsequent operations
+    const internalRepoId = repository.id;
+
+    // Check if there's an existing coverage report for this repository and branch
+    const existingReport = await prisma.coverageReport.findFirst({
+      where: {
+        repositoryId: internalRepoId,
+        branch: branch, // Use the branch from the parameter
+      },
+    });
+
+    let savedCoverageReport;
+
+    if (existingReport) {
+      // Update the existing report
+      // First delete all related file coverages
+      await prisma.fileCoverage.deleteMany({
+        where: {
+          coverageReportId: existingReport.id,
+        },
+      });
+
+      // Then update the report itself
+      savedCoverageReport = await prisma.coverageReport.update({
+        where: {
+          id: existingReport.id,
+        },
+        data: {
+          commit,
+          branch, // Update branch in case it changed
+          timestamp: new Date(),
+          statements: metrics.statements,
+          branches: metrics.branches,
+          functions: metrics.functions,
+          lines: metrics.lines,
+          overall: metrics.overall,
+          fileCoverages: {
+            create: filesCoverage.map((file) => ({
+              filePath: file.filePath,
+              statements: file.statements,
+              branches: file.branches,
+              functions: file.functions,
+              lines: file.lines,
+            })),
+          },
+        },
+        include: {
+          fileCoverages: true,
+        },
+      });
+    } else {
+      // Create a new coverage report
+      savedCoverageReport = await prisma.coverageReport.create({
+        data: {
+          repositoryId: internalRepoId,
+          commit,
+          branch: branch, // Use the provided branch name
+          statements: metrics.statements,
+          branches: metrics.branches,
+          functions: metrics.functions,
+          lines: metrics.lines,
+          overall: metrics.overall,
+          fileCoverages: {
+            create: filesCoverage.map((file) => ({
+              filePath: file.filePath,
+              statements: file.statements,
+              branches: file.branches,
+              functions: file.functions,
+              lines: file.lines,
+            })),
+          },
+        },
+        include: {
+          fileCoverages: true,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      coverageReport: savedCoverageReport,
+      repository: repository, // Include the repository info in the result
+    };
+  } catch (error) {
+    console.error("Error saving coverage report:", error);
+    throw error;
+  }
+}
+
+
+
+
+export async function updateRepositoryFiles(
+  repositoryId: string,
+  branch: string,
+  commit: string,
+  fileData: FileData[]
+): Promise<FileSetResult> {
+
+  // The transaction already knows the repository exists since we're passing its ID
+  return await prisma.$transaction(async (prisma) => {
+    // Try to find an existing file set for this repository and branch
+    const existingFileSet = await prisma.fileSet.findFirst({
+      where: {
+        repositoryId: repositoryId,
+        branch: branch,
+      },
+    });
+
+    if (existingFileSet) {
+      // Delete all existing files in this file set
+      await prisma.file.deleteMany({
+        where: {
+          fileSetId: existingFileSet.id,
+        },
+      });
+
+      // Update the existing file set
+      return await prisma.fileSet.update({
+        where: {
+          id: existingFileSet.id,
+        },
+        data: {
+          commit: commit,
+          lastUpdated: new Date(),
+          files: {
+            create: fileData,
+          },
+        },
+        include: {
+          files: true,
+        },
+      });
+    } else {
+      // Create a new file set
+      return await prisma.fileSet.create({
+        data: {
+          repositoryId: repositoryId,
+          branch: branch,
+          commit: commit,
+          files: {
+            create: fileData,
+          },
+        },
+        include: {
+          files: true,
+        },
+      });
+    }
+  });
+}
+

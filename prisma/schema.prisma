@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Semester {
+  SPRING
+  AUTUMN
+}
+
+enum UserType {
+  EDUCATOR
+  STUDENT
+}
+
 model User {
   id           String       @id @default(uuid())
   email        String       @unique
@@ -70,24 +80,66 @@ model CourseInstance {
 }
 
 model Repository {
-  id               String          @id @default(uuid())
+  id               String           @id @default(uuid())
+  githubId         String           @unique
   username         String
   repoName         String
   url              String
   platform         String
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  members          User[]          @relation("RepositoryMembers")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  members          User[]           @relation("RepositoryMembers")
   courseInstanceId String?
-  courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id])
+  courseInstance   CourseInstance?  @relation(fields: [courseInstanceId], references: [id])
+  coverageReport   CoverageReport[]
+  fileSets         FileSet[]
 }
 
-enum Semester {
-  SPRING
-  AUTUMN
+model CoverageReport {
+  id            String         @id @default(uuid())
+  repositoryId  String
+  repository    Repository     @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  commit        String
+  branch        String
+  timestamp     DateTime       @default(now())
+  statements    Float
+  branches      Float
+  functions     Float
+  lines         Float
+  overall       Float
+  fileCoverages FileCoverage[]
 }
 
-enum UserType {
-  EDUCATOR
-  STUDENT
+model FileCoverage {
+  id               String         @id @default(uuid())
+  coverageReportId String
+  coverageReport   CoverageReport @relation(fields: [coverageReportId], references: [id], onDelete: Cascade)
+  filePath         String
+  statements       Float
+  branches         Float
+  functions        Float
+  lines            Float
+}
+
+model FileSet {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  branch       String
+  commit       String
+  lastUpdated  DateTime   @default(now())
+  files        File[]
+
+  @@unique([repositoryId, branch]) // Ensure only one fileset per repository-branch combination
+}
+
+model File {
+  id        String  @id @default(uuid())
+  fileSet   FileSet @relation(fields: [fileSetId], references: [id], onDelete: Cascade)
+  fileSetId String
+  path      String
+  extension String
+
+  @@unique([fileSetId, path]) // Ensure file paths are unique within a file set
+  @@index([fileSetId])
 }

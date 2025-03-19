@@ -272,9 +272,18 @@ const prisma = new PrismaClient()
 
 
 async function main() {
-  await prisma.repository.deleteMany({});
+  console.log(`Starting to insert ${courses.length} unique courses into the database...`);
 
-  console.log("Purged repositories")
+  // Use createMany for bulk insertion with skipDuplicates to handle any existing courses
+  const result = await prisma.course.createMany({
+    data: courses.map(course => ({
+      code: course.code,
+      name: course.name
+    })),
+    skipDuplicates: true, // Skip records that already exist in the database
+  });
+
+  console.log(`Successfully inserted ${result.count} new courses into the database.`);
 }
 
 main()

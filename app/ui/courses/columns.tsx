@@ -18,7 +18,8 @@ import clsx from "clsx";
 import {
   DeleteRepoButton,
   AddToClipboard,
-  ViewProject, UpdateRepository,
+  ViewProject,
+  UpdateRepository,
 } from "@/app/ui/courses/buttons";
 import Link from "next/link";
 
@@ -49,12 +50,15 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     accessorKey: "owner",
     header: "Repository owner",
   },
-      {
+  {
     accessorKey: "url",
     header: "Url",
     cell: ({ row }) => {
       return (
-        <Link className={"hover:cursor-pointer hover:underline text-blue-600"} href={row.getValue("url")}>
+        <Link
+          className={"hover:cursor-pointer hover:underline text-blue-600"}
+          href={row.getValue("url")}
+        >
           {row.getValue("url")}
         </Link>
       );
@@ -78,7 +82,7 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-right" // optional if you still want the label right-aligned
+            className="text-right"
           >
             Open Issues
             <ChevronRight
@@ -107,7 +111,6 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     header: "",
     cell: ({ row }) => {
       const details = row.original;
-      console.log("details", details)
       return (
         <div className="flex justify-end gap-2">
           <ViewProject owner={details.owner} repo={details.name} />
