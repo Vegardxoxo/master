@@ -172,3 +172,37 @@ export type Repository = {
   courseInstance?: CourseInstance;
   members: User[];
 };
+
+export type FileData = {
+  path: string;
+  extension: string;
+};
+
+export type FileSetResult = {
+  id: string;
+  repositoryId: string;
+  branch: string;
+  commit: string;
+  files: {
+    id: string;
+    path: string;
+    extension: string;
+  }[];
+};
+
+export type CoverageMetrics = {
+  statements: number;
+  branches: number;
+  functions: number;
+  lines: number;
+  overall: number;
+};
+
+export type FileCoverageData = {
+  filePath: string;
+  statements: number;
+  branches: number;
+  functions: number;
+  lines: number;
+  overall?: number;
+};

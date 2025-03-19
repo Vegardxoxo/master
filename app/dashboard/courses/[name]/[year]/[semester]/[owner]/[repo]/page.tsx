@@ -11,6 +11,8 @@ import PullRequestsCommentsWrapper from "@/app/ui/dashboard/pull_requests/pull-r
 import PullRequestsMembersWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-members-wrapper";
 import PullRequestsOverviewWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-overview-wrapper";
 import PullRequestsReviewsWrapper from "@/app/ui/dashboard/pull_requests/pull-requests-reviews-wrapper";
+import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
+import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -28,6 +30,8 @@ export default async function Page(props: {
           </Suspense>
         ),
         projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+        files: <Files owner={owner} repo={repo} />,
+        coverage: <TestCoverage owner={owner} repo={repo} />,
         commitQuality: (
           <Suspense fallback={<CommitQualityChartSkeleton />}>
             <CommitQualityWrapper owner={owner} repo={repo} />

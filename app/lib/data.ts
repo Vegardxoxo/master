@@ -13,14 +13,14 @@ import {
 } from "@/app/lib/utils";
 import { cache } from "react";
 
-const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
-});
-
 // const octokit = new Octokit({
-//   auth: process.env.PERSONAL,
+//   auth: process.env.TOKEN,
+//   baseUrl: "https://git.ntnu.no/api/v3",
 // });
+
+const octokit = new Octokit({
+  auth: process.env.PERSONAL,
+});
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -269,6 +269,38 @@ export async function fetchAllCommits(owner: string, repo: string) {
   } catch (e) {
     console.log(e);
     return [];
+  }
+}
+
+export async function fetchRepoId(owner: string, repo: string) {
+  try {
+    const { data: repoData } = await octokit.request(
+      "GET /repos/{owner}/{repo}",
+      {
+        owner,
+        repo,
+      },
+    );
+    return {
+      id: repoData.id.toString(),
+      name: repoData.name,
+      fullName: repoData.full_name,
+      url: repoData.html_url,
+      success: true,
+    };
+  } catch (e) {
+    console.error("Error fetching repository info:", e);
+    return {
+      id: null,
+      name: null,
+      fullName: null,
+      url: null,
+      success: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Failed to fetch repository information",
+    };
   }
 }
 

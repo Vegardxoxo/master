@@ -13,6 +13,7 @@ import {
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import { cn } from "@/app/lib/utils";
 import { VisibleSections } from "@/app/lib/definitions";
+import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
 
 type DashboardProps = {
   owner: string;
@@ -20,6 +21,8 @@ type DashboardProps = {
   children: {
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
+    files: React.ReactNode;
+    coverage: React.ReactNode;
     commitQuality: React.ReactNode;
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
@@ -34,7 +37,13 @@ type DashboardProps = {
 export default function Dashboard({ owner, repo, children }: DashboardProps) {
   const [visibleSections, setVisibleSections] = React.useState<VisibleSections>(
     {
-      overview: true,
+      overview: {
+        visible: true,
+        contributors: true,
+        info: true,
+        files: true,
+        coverage: true,
+      },
       commits: {
         visible: true,
         quality: true,
@@ -117,7 +126,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
 
             {/*Card container*/}
             <div className="flex-grow space-y-6">
-              {visibleSections.overview && (
+              {visibleSections.overview.visible && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold">
@@ -127,11 +136,16 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       General information and contributors
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="grid md:grid-cols-2 gap-6">
-                    <div className="md:col-span-1">
-                      {children.contributorsList}
+                  <CardContent className="grid  gap-6">
+                    <div className={"grid grid-cols-2 gap-6"}>
+                      {visibleSections.overview.contributors &&
+                        children.contributorsList}
+                      {visibleSections.overview.info && children.projectInfo}
                     </div>
-                    <div className="md:col-span-1">{children.projectInfo}</div>
+                    <div className={"grid grid-cols-1 gap-6"}>
+                      {visibleSections.overview.files && children.files}
+                      {visibleSections.overview.coverage && children.coverage}
+                    </div>
                   </CardContent>
                 </Card>
               )}
