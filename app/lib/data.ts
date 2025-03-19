@@ -489,3 +489,40 @@ export const fetchPullRequests = cache(
     }
   },
 );
+
+export async function listWorkflowRuns(owner: string, repo: string) {
+  try {
+    // Use Octokit's paginate method to automatically handle pagination
+    const runs = await octokit.paginate(
+      "GET /repos/{owner}/{repo}/actions/runs",
+      {
+        owner,
+        repo,
+        per_page: 100,
+      },
+    );
+
+    const simplifiedRuns = runs.map((run) => ({
+      id: run.id,
+      name: run.name,
+      status: run.status,
+      conclusion: run.conclusion,
+      created_at: run.created_at,
+      updated_at: run.updated_at,
+      run_started_at: run.run_started_at,
+      run_number: run.run_number,
+    }));
+
+    const sorted_runs = simplifiedRuns.sort((a, b) => {
+      return b.run_number - a.run_number;
+    });
+
+    return {
+      workflow_runs: sorted_runs,
+      total_count: simplifiedRuns.length,
+    };
+  } catch (e) {
+    console.error("Error fetching workflow runs:", e);
+    return { workflow_runs: [], total_count: 0 };
+  }
+}

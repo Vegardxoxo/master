@@ -27,6 +27,7 @@ type DashboardProps = {
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
+    pipeline: React.ReactNode;
     pullRequestOverview: React.ReactNode;
     pullRequestMembers: React.ReactNode;
     pullRequestComments: React.ReactNode;
@@ -52,6 +53,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         contributions: true,
       },
       branches: true,
+      pipelines: true,
       pullRequests: {
         visible: true,
         overview: true,
@@ -63,13 +65,24 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
   );
 
   const toggleSection = (section: keyof VisibleSections) => {
-    setVisibleSections((prev) => ({
-      ...prev,
-      [section]:
-        typeof prev[section] === "object"
-          ? { ...(prev[section] as object), visible: !prev[section].visible }
-          : !prev[section],
-    }));
+    setVisibleSections((prev) => {
+      const sectionValue = prev[section];
+
+      if (typeof sectionValue === "object" && "visible" in sectionValue) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionValue,
+            visible: !sectionValue.visible,
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          [section]: !sectionValue,
+        };
+      }
+    });
   };
 
   const toggleSubsection = (
@@ -78,7 +91,11 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
   ) => {
     setVisibleSections((prev) => {
       const sectionValue = prev[section];
-      if (typeof sectionValue === "object" && "visible" in sectionValue) {
+      if (
+        typeof sectionValue === "object" &&
+        "visible" in sectionValue &&
+        subsection in sectionValue
+      ) {
         return {
           ...prev,
           [section]: {
@@ -186,6 +203,17 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                     <p className="text-gray-600">
                       Branch analysis content will be added here.
                     </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {visibleSections.pipelines && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">CI/CD</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {visibleSections.pipelines && children.pipeline}
                   </CardContent>
                 </Card>
               )}

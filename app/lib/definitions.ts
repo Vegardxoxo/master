@@ -130,14 +130,41 @@ export interface CommitStats {
   group_average: number;
 }
 
+// export type VisibleSections = {
+//   [key: string]:
+//     | boolean
+//     | {
+//         visible: boolean;
+//         [subKey: string]: boolean;
+//       };
+// };
+
 export type VisibleSections = {
-  [key: string]:
-    | boolean
-    | {
-        visible: boolean;
-        [subKey: string]: boolean;
-      };
+  overview: {
+    visible: boolean;
+    contributors: boolean;
+    info: boolean;
+    files: boolean;
+    coverage: boolean;
+  };
+  commits: {
+    visible: boolean;
+    quality: boolean;
+    frequency: boolean;
+    size: boolean;
+    contributions: boolean;
+  };
+  branches: boolean;
+  pipelines: boolean;
+  pullRequests: {
+    visible: boolean;
+    overview: boolean;
+    members: boolean;
+    comments: boolean;
+    reviews: boolean;
+  };
 };
+
 export type Review = {
   count: number;
   prs: any[];
