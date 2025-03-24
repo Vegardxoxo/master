@@ -14,6 +14,7 @@ import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import { cn } from "@/app/lib/utils";
 import { VisibleSections } from "@/app/lib/definitions";
 import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
+import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";
 
 type DashboardProps = {
   owner: string;
@@ -27,6 +28,8 @@ type DashboardProps = {
     commitFrequency: React.ReactNode;
     commitContribution: React.ReactNode;
     commitSize: React.ReactNode;
+    branch: React.ReactNode;
+    branchingStrategy: React.ReactNode;
     pipeline: React.ReactNode;
     pullRequestOverview: React.ReactNode;
     pullRequestMembers: React.ReactNode;
@@ -52,7 +55,11 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         size: true,
         contributions: true,
       },
-      branches: true,
+      branches: {
+        visible: true,
+        to_main: true,
+        strategy: true,
+      },
       pipelines: true,
       pullRequests: {
         visible: true,
@@ -146,14 +153,15 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
               {visibleSections.overview.visible && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold">
+                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <LayoutDashboard className="h-5 w-5" />
                       Repository Overview
                     </CardTitle>
                     <CardDescription>
                       General information and contributors
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="grid  gap-6">
+                  <CardContent className="grid gap-6">
                     <div className={"grid grid-cols-2 gap-6"}>
                       {visibleSections.overview.contributors &&
                         children.contributorsList}
@@ -170,7 +178,8 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
               {visibleSections.commits.visible && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold">
+                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <GitCommit className="h-5 w-5" />
                       Commit Analysis
                     </CardTitle>
                   </CardHeader>
@@ -191,26 +200,30 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 </Card>
               )}
 
-              {visibleSections.branches && (
+              {visibleSections.branches.visible && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold">
+                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <GitBranch className="h-5 w-5" />
                       Branching Strategy
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Add branch analysis content here */}
-                    <p className="text-gray-600">
-                      Branch analysis content will be added here.
-                    </p>
+                    <div className={"grid  gap-6"}>
+                      {visibleSections.branches.to_main && children.branch}
+                      {visibleSections.branches.strategy &&
+                        children.branchingStrategy}
+                    </div>
                   </CardContent>
                 </Card>
               )}
-
               {visibleSections.pipelines && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold">CI/CD</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <GitMerge className="h-5 w-5" />
+                      CI/CD
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {visibleSections.pipelines && children.pipeline}

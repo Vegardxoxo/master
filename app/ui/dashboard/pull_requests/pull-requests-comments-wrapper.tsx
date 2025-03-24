@@ -1,4 +1,4 @@
-import { fetchPullRequests } from "@/app/lib/data";
+import { fetchPullRequests } from "@/app/lib/data/data";
 import { PullRequestsComments } from "./pull-requests-comments";
 
 export default async function PullRequestsCommentsWrapper({

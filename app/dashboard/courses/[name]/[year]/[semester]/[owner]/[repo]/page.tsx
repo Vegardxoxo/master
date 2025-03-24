@@ -14,6 +14,8 @@ import PullRequestsReviewsWrapper from "@/app/ui/dashboard/pull_requests/pull-re
 import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
 import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage";
 import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
+import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
+import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -43,9 +45,9 @@ export default async function Page(props: {
         commitContribution: (
           <CommitContributionsWrapper owner={owner} repo={repo} />
         ),
-        pipeline: (
-            <PipelineActions owner={owner} repo={repo} />
-        ),
+        branch: <DirectCommits owner={owner} repo={repo} />,
+        branchingStrategy: <DevelopmentBranches owner={owner} repo={repo} />,
+        pipeline: <PipelineActions owner={owner} repo={repo} />,
         pullRequestOverview: (
           <PullRequestsOverviewWrapper owner={owner} repo={repo} />
         ),
@@ -56,8 +58,8 @@ export default async function Page(props: {
           <PullRequestsCommentsWrapper owner={owner} repo={repo} />
         ),
         pullRequestReviews: (
-            <PullRequestsReviewsWrapper owner={owner} repo={repo}/>
-        )
+          <PullRequestsReviewsWrapper owner={owner} repo={repo} />
+        ),
       }}
     </Dashboard>
   );

@@ -1,0 +1,163 @@
+import { fetchBranches, fetchIssues } from "@/app/lib/data/data";
+import { extractIssueFromBranchName } from "@/app/ui/dashboard/branches/branches.lib";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { GitBranch } from "lucide-react";
+import { CommitsTable } from "@/app/ui/courses/tables/commits-to-main-table";
+import { DevelopmentBranchColumns } from "@/app/ui/courses/columns";
+import Warning from "@/app/ui/dashboard/alerts/warning";
+import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+
+export default async function DevelopmentBranches({
+  owner,
+  repo,
+}: {
+  owner: string;
+  repo: string;
+}) {
+  // Fetch branches and issues
+  const branches = await fetchBranches(owner, repo);
+  const issues = await fetchIssues(owner, repo);
+
+  if (!branches) {
+    return (
+      <Warning
+        title={"No branches found"}
+        message={"No branches found for this repository."}
+      />
+    );
+  }
+
+  // Filter out main/master branches
+  const developmentBranches = branches.filter(
+    (branch) => branch.name !== "main" && branch.name !== "master",
+  );
+
+  // Extract issue numbers from branch names
+  const branchConnections = developmentBranches.map((branch) => {
+    const issueNumber = extractIssueFromBranchName(branch.name);
+    const linkedIssue = issueNumber
+      ? issues.find(
+          (issue: { number: number }) => issue.number === parseInt(issueNumber),
+        )
+      : null;
+
+    return {
+      branchName: branch.name,
+      issueNumber: issueNumber,
+      url: linkedIssue?.url || "#",
+      isLinked: !!linkedIssue,
+      issueTitle: linkedIssue?.title || null,
+    };
+  });
+
+  // Calculate statistics
+  const totalBranches = branchConnections.length;
+  const linkedBranches = branchConnections.filter((b) => b.isLinked).length;
+  const unlinkedBranches = totalBranches - linkedBranches;
+  const linkPercentage =
+    totalBranches > 0 ? Math.round((linkedBranches / totalBranches) * 100) : 0;
+
+  // Get linked issues for display
+  const linkedIssues = issues.filter((issue) =>
+    branchConnections.some(
+      (branch) =>
+        branch.issueNumber && parseInt(branch.issueNumber) === issue.number,
+    ),
+  );
+
+  console.log("Linked issue", branchConnections);
+
+  return (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <GitBranch className="h-5 w-5" />
+          Branch-Issue Connection Analysis
+        </CardTitle>
+        <CardDescription>
+          Analyzing how development branches are connected to issues in {owner}/
+          {repo}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Summary Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-muted/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Total Branches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalBranches}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-muted/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Linked to Issues</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {linkedBranches}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-muted/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Unlinked Branches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">
+                  {unlinkedBranches}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Branch-Issue Connection Rate</span>
+              <span className="font-medium">{linkPercentage}%</span>
+            </div>
+            <Progress value={linkPercentage} className="h-2" />
+          </div>
+
+          {/* Branches Table */}
+          <div className="rounded-md border">
+            <CommitsTable
+              columns={DevelopmentBranchColumns}
+              data={branchConnections}
+            />
+          </div>
+          <BestPractices title={"Branch Naming Best Practices"}>
+            <ul className="space-y-1 list-disc pl-5">
+              <li>
+                Use branch naming conventions that include issue numbers (e.g.,{" "}
+                <code>issue-123-feature-name</code>)
+              </li>
+              <li>
+                Common patterns: <code>issue-123</code>, <code>issue/123</code>,{" "}
+                <code>123-feature-name</code>
+              </li>
+              <li>
+                Create branches directly from issues in GitHub to automatically
+                establish a connection
+              </li>
+              <li>
+                Consistently use the same naming pattern across the project
+              </li>
+            </ul>
+          </BestPractices>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,6 +1,7 @@
 import { getCoverageReport } from "@/app/lib/database-functions";
 import { TestCoverageMetrics } from "@/app/ui/dashboard/project_info/test-coverage/test-coverage-metrics";
 import { FileCoverageTable } from "@/app/ui/dashboard/project_info/test-coverage/coverage-table";
+import Warning from "@/app/ui/dashboard/alerts/warning";
 
 export default async function TestCoverage({
   owner,
@@ -13,14 +14,10 @@ export default async function TestCoverage({
 
   if (coverage.error || !coverage.metrics || !coverage.fileData) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-        <h2 className="text-xl font-bold text-red-700 mb-2">
-          Coverage Report Unavailable: {coverage.error}
-        </h2>
-        <p className="text-red-600">
-          Unable to retrieve coverage data for this repository.
-        </p>
-      </div>
+      <Warning
+        title={`Coverage Report Unavailable: ${coverage.error}`}
+        message="Unable to retrieve coverage data for this repository."
+      />
     );
   }
 

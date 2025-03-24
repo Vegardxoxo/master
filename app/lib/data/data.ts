@@ -1,6 +1,7 @@
 import { Octokit } from "octokit";
 import {
   _Branches,
+  Commit,
   CommitMessageLong,
   PullRequestData,
   repositoryOverview,
@@ -12,6 +13,7 @@ import {
   parsePullRequests,
 } from "@/app/lib/utils";
 import { cache } from "react";
+import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 
 // const octokit = new Octokit({
 //   auth: process.env.TOKEN,
@@ -109,7 +111,7 @@ export async function fetchBranches(owner: string, repo: string) {
  * Fetches details for a single branch (including its latest commit info).
  * @param owner - GitHub owner/organization
  * @param repo  - Repository name
- * @param branch - Branch name
+ * @param branch - DirectCommits name
  */
 export async function fetchBranchDetails(
   owner: string,
@@ -474,9 +476,11 @@ export const fetchPullRequests = cache(
                   : 0,
               reviewers,
               commenters,
+              labels: pr.labels || []
+
             };
           } catch (e) {
-            console.log("failed to fetch");
+            console.error("GitHub api error: failed to fetch pull requests");
             return [];
           }
         }),
@@ -524,5 +528,98 @@ export async function listWorkflowRuns(owner: string, repo: string) {
   } catch (e) {
     console.error("Error fetching workflow runs:", e);
     return { workflow_runs: [], total_count: 0 };
+  }
+}
+
+export async function getMainCommits(
+  owner: string,
+  repo: string,
+): Promise<Commit[] | null> {
+  try {
+    const branchesToCheck = ["master", "main"];
+
+    for (const branch of branchesToCheck) {
+      try {
+        const branchResponse = await octokit.request(
+          "GET /repos/{owner}/{repo}/branches/{branch}",
+          {
+            owner,
+            repo,
+            branch,
+          },
+        );
+
+        if (branchResponse.status === 200) {
+          const response = await octokit.graphql(getCommitsOnMain, {
+            owner,
+            repo,
+            branch,
+          });
+
+          // @ts-ignore - Type safety for the response
+          const commits =
+            response?.repository?.ref?.target?.history?.nodes || [];
+
+          const directCommits = commits.filter(
+            (commit: any) => commit.associatedPullRequests.nodes.length === 0,
+          );
+
+          if (directCommits.length > 0) {
+            return directCommits.map((commit: any) => ({
+              author: commit.author.name || "Unknown",
+              message: commit.message,
+              date: commit.author.date,
+              url: commit.commitUrl,
+              sha: commit.oid,
+            }));
+          } else {
+            console.log(`No direct commits found in branch '${branch}'`);
+          }
+        }
+      } catch (err) {
+        console.log(`Error with branch '${branch}', trying next:`, err);
+        continue;
+      }
+    }
+
+    console.log(
+      "No direct commits found in either 'master' or 'main' branches.",
+    );
+    return null;
+  } catch (e: any) {
+    console.error("GitHub GraphQL API error:", e);
+    return null;
+  }
+}
+
+
+interface GitHubIssue {
+  error?: string;
+  title: string;
+  number: number;
+  url: string;
+}
+
+
+export async function fetchIssues(owner: string, repo: string): Promise<GitHubIssue[]> {
+  try {
+    const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
+      owner,
+      repo,
+      state: "all",
+    });
+    return issues.map((issue) => ({
+      title: issue.title,
+      number: issue.number,
+      url: issue.html_url,
+    }));
+  } catch (e) {
+    console.log("Errir fetching issues:", e)
+    return {
+      error: "GitHub API error: Failed to fetch issues.",
+      title: null,
+      number: null,
+      url: null,
+    };
   }
 }

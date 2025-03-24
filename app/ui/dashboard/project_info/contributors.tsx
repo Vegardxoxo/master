@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { fetchContributors } from "@/app/lib/data";
+import { fetchContributors } from "@/app/lib/data/data";
 
 export default async function ContributorsList({
   owner,
