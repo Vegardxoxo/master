@@ -149,6 +149,7 @@ export type VisibleSections = {
   overview: {
     visible: boolean;
     contributors: boolean;
+    milestones: boolean;
     info: boolean;
     files: boolean;
     coverage: boolean;

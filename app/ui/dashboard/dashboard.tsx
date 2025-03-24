@@ -22,6 +22,7 @@ type DashboardProps = {
   children: {
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
+    milestones: React.ReactNode;
     files: React.ReactNode;
     coverage: React.ReactNode;
     commitQuality: React.ReactNode;
@@ -44,6 +45,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
       overview: {
         visible: true,
         contributors: true,
+        milestones: true,
         info: true,
         files: true,
         coverage: true,
@@ -168,6 +170,8 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       {visibleSections.overview.info && children.projectInfo}
                     </div>
                     <div className={"grid grid-cols-1 gap-6"}>
+                      {visibleSections.overview.milestones &&
+                        children.milestones}
                       {visibleSections.overview.files && children.files}
                       {visibleSections.overview.coverage && children.coverage}
                     </div>

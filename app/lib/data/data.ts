@@ -476,8 +476,7 @@ export const fetchPullRequests = cache(
                   : 0,
               reviewers,
               commenters,
-              labels: pr.labels || []
-
+              labels: pr.labels || [],
             };
           } catch (e) {
             console.error("GitHub api error: failed to fetch pull requests");
@@ -592,7 +591,6 @@ export async function getMainCommits(
   }
 }
 
-
 interface GitHubIssue {
   error?: string;
   title: string;
@@ -600,8 +598,10 @@ interface GitHubIssue {
   url: string;
 }
 
-
-export async function fetchIssues(owner: string, repo: string): Promise<GitHubIssue[]> {
+export async function fetchIssues(
+  owner: string,
+  repo: string,
+): Promise<GitHubIssue[]> {
   try {
     const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
       owner,
@@ -614,12 +614,41 @@ export async function fetchIssues(owner: string, repo: string): Promise<GitHubIs
       url: issue.html_url,
     }));
   } catch (e) {
-    console.log("Errir fetching issues:", e)
+    console.log("Errir fetching issues:", e);
     return {
       error: "GitHub API error: Failed to fetch issues.",
       title: null,
       number: null,
       url: null,
     };
+  }
+}
+
+export default async function fetchMilestones(owner: string, repo: string) {
+  try {
+    const milestones = await octokit.paginate(
+      octokit.rest.issues.listMilestones,
+      {
+        owner,
+        repo,
+        state: "all",
+      },
+    );
+    return milestones.map((milestone) => ({
+      id: milestone.id,
+      title: milestone.title,
+      description: milestone.description || "No description provided",
+      state: milestone.state,
+      closedIssues: milestone.closed_issues,
+      openIssues: milestone.open_issues,
+      totalIssues: milestone.closed_issues + milestone.open_issues,
+      dueDate: milestone.due_on,
+      createdAt: milestone.created_at,
+      updatedAt: milestone.updated_at,
+      url: milestone.html_url,
+    }));
+  } catch (e) {
+    console.error("GitHub api error: Failed to fetch milestones:", e);
+    return [];
   }
 }

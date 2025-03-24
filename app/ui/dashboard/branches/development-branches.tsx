@@ -83,7 +83,7 @@ export default async function DevelopmentBranches({
           Branch-Issue Connection Analysis
         </CardTitle>
         <CardDescription>
-          Analyzing how development branches are connected to issues in {owner}/
+          Analyzing how development branches are connected to issues in {owner}. Note: main and master branches are not analyzed./
           {repo}
         </CardDescription>
       </CardHeader>

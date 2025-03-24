@@ -16,6 +16,7 @@ import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage
 import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
 import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
+import Milestones from "@/app/ui/dashboard/project_info/milestones";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -33,6 +34,7 @@ export default async function Page(props: {
           </Suspense>
         ),
         projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+        milestones: <Milestones owner={owner} repo={repo} />,
         files: <Files owner={owner} repo={repo} />,
         coverage: <TestCoverage owner={owner} repo={repo} />,
         commitQuality: (
