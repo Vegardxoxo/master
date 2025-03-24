@@ -12,6 +12,7 @@ import { useCallback, useState } from "react";
 import CommitQualityTable from "@/app/ui/dashboard/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
+import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
 
 interface ActiveShape {
   cx: number;
@@ -145,7 +146,7 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle className="text-xl font-bold">
           Commit Message Quality
@@ -210,6 +211,45 @@ export default function CommitQuality({ data }: { data: LLMResponse[] }) {
             <CommitQualityTable data={filteredData} />
           </DialogContent>
         </Dialog>
+        <div className={"mt-4"}>
+          <BestPractices
+            title={"Write descriptive commit messages"}
+            icon={"commit"}
+            variant={"success"}
+          >
+            <ul className="space-y-1 list-disc pl-5">
+              <li>
+                Write descriptive commit messages that start with a verb in
+                present tense, imperative mood (e.g., "Add feature" not "Added
+                feature")
+              </li>
+              <li>
+                Each commit should have a single, clear purpose explained in the
+                message
+              </li>
+              <li>
+                Write as if giving instructions to the codebase (e.g., "Make
+                xyzzy do frotz")
+              </li>
+              <li>
+                Ensure your explanation can be understood without external
+                resources
+              </li>
+              <li>
+                Summarize relevant points instead of just linking to external
+                discussions
+              </li>
+              <li>
+                Clear commit messages force teams to understand the value each
+                change brings
+              </li>
+              <li>
+                If you can't describe the value of a commit, reconsider if the
+                change is necessary
+              </li>
+            </ul>
+          </BestPractices>
+        </div>
       </CardContent>
     </Card>
   );

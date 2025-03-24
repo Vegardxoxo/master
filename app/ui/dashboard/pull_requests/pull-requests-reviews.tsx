@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 import { useState } from "react";
+import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
 
 const COLORS = [
   "#0088FE",
@@ -102,6 +103,46 @@ export default function PullRequestsReviews({
             <PullRequestsMembersTable data={selectedData || []} />
           </DialogContent>
         </Dialog>
+        <div className={"mt-4"}>
+          <BestPractices
+            title={"Obtain feedback through code reviews"}
+            icon={"merge"}
+            variant={"success"}
+          >
+            <ul className="space-y-1 list-disc pl-5">
+              <li>
+                Request feedback through code reviews to ensure code quality
+              </li>
+              <li>
+                Code reviews help identify whether a solution is the most
+                effective approach
+              </li>
+              <li>
+                Involve team members with different perspectives and expertise
+              </li>
+              <li>
+                Invite specific stakeholders to reviews when code touches their
+                domain knowledge
+              </li>
+              <li>
+                Cross-team reviews help identify security implications or
+                domain-specific considerations
+              </li>
+              <li>
+                Create faster feedback loops to prevent problems later in
+                development
+              </li>
+              <li>
+                Senior developers can transfer knowledge to junior developers
+                through reviews
+              </li>
+              <li>
+                Reviews provide practical, hands-on learning opportunities for
+                the team
+              </li>
+            </ul>
+          </BestPractices>
+        </div>
       </CardContent>
     </Card>
   );

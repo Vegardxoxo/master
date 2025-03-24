@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import CommitSizeTable from "@/app/ui/dashboard/commits/commit-size-table";
+import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
 
 export default function CommitSize({ data }: { data: any[] }) {
   const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
@@ -202,6 +203,39 @@ export default function CommitSize({ data }: { data: any[] }) {
         </ChartContainer>
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Click on a point to view detailed commit information
+        </div>
+
+        <div className={"mt-4"}>
+          <BestPractices title={"Keep Commits Atomic"} icon={"check"} variant={"success"}>
+            <ul className="space-y-1 list-disc pl-5">
+              <li>
+                Make each commit a single unit of work focused on one task or
+                fix
+              </li>
+              <li>
+                Atomic commits make code reviews faster and reverts easier
+              </li>
+              <li>
+                Isolate changes by purpose: separate refactoring from feature
+                additions
+              </li>
+              <li>
+                Group commits by context rather than creating monolithic changes
+              </li>
+              <li>
+                Atomic changes can be applied or reverted without unintended
+                side effects
+              </li>
+              <li>
+                The goal isn't to create hundreds of commits but to organize
+                changes logically
+              </li>
+              <li>
+                When fixing multiple issues, create separate commits for each
+                fix
+              </li>
+            </ul>
+          </BestPractices>
         </div>
       </CardContent>
       {/*Drill-down*/}
