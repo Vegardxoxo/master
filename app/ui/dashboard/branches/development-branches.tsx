@@ -83,7 +83,8 @@ export default async function DevelopmentBranches({
           Branch-Issue Connection Analysis
         </CardTitle>
         <CardDescription>
-          Analyzing how development branches are connected to issues in {owner}. Note: main and master branches are not analyzed./
+          Analyzing how development branches are connected to issues in {owner}.
+          Note: main and master branches are not analyzed./
           {repo}
         </CardDescription>
       </CardHeader>
@@ -137,22 +138,36 @@ export default async function DevelopmentBranches({
               data={branchConnections}
             />
           </div>
-          <BestPractices title={"Branch Naming Best Practices"}>
+          <BestPractices
+            title={"Develop Using Branches"}
+            icon={"branch"}
+            variant={"info"}
+          >
             <ul className="space-y-1 list-disc pl-5">
               <li>
-                Use branch naming conventions that include issue numbers (e.g.,{" "}
-                <code>issue-123-feature-name</code>)
+                Use branches to make changes without affecting the main codeline
               </li>
               <li>
-                Common patterns: <code>issue-123</code>, <code>issue/123</code>,{" "}
-                <code>123-feature-name</code>
+                Track the running history of changes in a dedicated branch
               </li>
               <li>
-                Create branches directly from issues in GitHub to automatically
-                establish a connection
+                Merge code into the main branch only when it's ready and tested
               </li>
               <li>
-                Consistently use the same naming pattern across the project
+                Branching organizes development and keeps work-in-progress
+                separate from stable code
+              </li>
+              <li>
+                Protect users from bugs and vulnerabilities by testing changes
+                in branches first
+              </li>
+              <li>
+                Identify and fix issues more easily in isolated branch
+                environments
+              </li>
+              <li>
+                Maintain a stable main branch that always contains
+                production-ready code
               </li>
             </ul>
           </BestPractices>

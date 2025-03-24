@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import CommitFrequencyTable from "@/app/ui/dashboard/commits/commit-frequency-table";
+import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
 
 export default function CommitFrequency({
   authors,
@@ -174,6 +175,39 @@ export default function CommitFrequency({
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>
+        <div className={"mt-4"}>
+          <BestPractices title={"Make incremental, small changes"} icon={"commit"} variant={"info"}>
+            <ul className="space-y-1 list-disc pl-5">
+              <li>
+                Write the smallest amount of code possible to solve a problem
+              </li>
+              <li>
+                Divide updates into small batches that can be easily tested and
+                rolled back if needed
+              </li>
+              <li>
+                Small, frequent commits decrease the likelihood of integration
+                conflicts
+              </li>
+              <li>
+                The longer a branch lives separated from the main branch, the
+                more likely conflicts will arise
+              </li>
+              <li>
+                Incremental changes help team members easily revert if merge
+                conflicts happen
+              </li>
+              <li>
+                Pair small commits with descriptive messages for better
+                documentation
+              </li>
+              <li>
+                Small batches of value allow for rapid testing with end users to
+                validate solutions
+              </li>
+            </ul>
+          </BestPractices>
+        </div>
       </CardContent>
 
       {/*Drill-down*/}

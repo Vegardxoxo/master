@@ -58,7 +58,7 @@ export default async function DirectCommits({
           </div>
 
           <CommitsTable columns={commitsColumns} data={commits} />
-          <BestPractices title={"Best Practices"}>
+          <BestPractices title={"Dont commit directly to main"} icon={"commit"} variant={"warning"}>
             <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 list-disc pl-5">
               <li>
                 Use feature branches and pull requests instead of committing
