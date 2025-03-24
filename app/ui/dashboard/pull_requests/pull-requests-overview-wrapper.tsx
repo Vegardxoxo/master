@@ -1,4 +1,4 @@
-import { fetchPullRequests } from "@/app/lib/data";
+import { fetchPullRequests } from "@/app/lib/data/data";
 import PullRequestsOverview from "@/app/ui/dashboard/pull_requests/pull-requests-overview";
 
 export default async function PullRequestsOverviewWrapper({

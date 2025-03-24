@@ -3,9 +3,9 @@ import {
   getCourseInstance,
   getRepositories,
 } from "@/app/lib/database-functions";
-import { DataTable } from "@/app/ui/courses/table";
+import { DataTable } from "@/app/ui/courses/tables/overview-table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
-import { fetchRepoOverview } from "@/app/lib/data";
+import { fetchRepoOverview } from "@/app/lib/data/data";
 
 interface pageProps {
   name: string;

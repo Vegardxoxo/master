@@ -1,4 +1,4 @@
-import { fetchPullRequests } from "@/app/lib/data";
+import { fetchPullRequests } from "@/app/lib/data/data";
 import { PullRequestsMembers } from "@/app/ui/dashboard/pull_requests/pull-requests-members";
 
 export default async function PullRequestsMembersWrapper({

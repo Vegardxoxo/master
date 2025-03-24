@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Star, GitFork, Eye, AlertCircle } from "lucide-react";
-import { fetchProjectInfo } from "@/app/lib/data";
+import { fetchProjectInfo } from "@/app/lib/data/data";
 
 export default async function ProjectInfo({
   owner,

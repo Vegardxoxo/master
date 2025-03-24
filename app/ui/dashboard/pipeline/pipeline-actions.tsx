@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, XCircle, Clock, Activity } from "lucide-react";
-import { listWorkflowRuns } from "@/app/lib/data";
+import { listWorkflowRuns } from "@/app/lib/data/data";
 import {
   Tooltip,
   TooltipContent,

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 
 type DialogData = {
   title: string;
@@ -106,56 +107,69 @@ export default function PullRequestsOverview({
           </CardContent>
         </Card>
 
-              {/* Average Time to Merge */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Avg. Time to Merge
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {data.averageTimeToMerge
-                  ? `${data.averageTimeToMerge.toFixed(2)} hrs`
-                  : "N/A"}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Average Time to Merge */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Avg. Time to Merge
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {data.averageTimeToMerge
+                ? `${data.averageTimeToMerge.toFixed(2)} hrs`
+                : "N/A"}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Label Counts */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Label Counts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {data.labelCounts ? Object.keys(data.labelCounts).length : 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Total distinct labels used
-              </p>
-            </CardContent>
-          </Card>
+        {/* Label Counts */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Label Counts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {data.labelCounts ? Object.keys(data.labelCounts).length : 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total distinct labels used
+            </p>
+            <div className="flex flex-wrap gap-1 mt-3">
+              {data.labelCounts &&
+                Object.entries(data.labelCounts).map(
+                  ([labelName, labelInfo]) => (
+                    <Badge
+                      key={labelName}
+                      variant="outline"
+                      className="bg-opacity-20"
+                      style={{
+                        backgroundColor: `#${labelInfo.color || "ededed"}20`,
+                        borderColor: `#${labelInfo.color || "ededed"}`,
+                      }}
+                    >
+                      {labelName} ({labelInfo.count})
+                    </Badge>
+                  ),
+                )}
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Total Comments */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Comments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {data.totalComments || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Across all pull requests
-              </p>
-            </CardContent>
-          </Card>
-
+        {/* Total Comments */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Comments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.totalComments || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Across all pull requests
+            </p>
+          </CardContent>
+        </Card>
       </div>
       {/*Slider*/}
       <div className="space-y-2">

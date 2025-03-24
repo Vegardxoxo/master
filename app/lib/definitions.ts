@@ -44,6 +44,12 @@ export type User = {
   id: string;
   email: string;
 };
+export type Commit = {
+  author: string;
+  message: string;
+  date: string | null;
+  url: string;
+};
 
 export type _Branches = {
   name: string;
@@ -154,7 +160,11 @@ export type VisibleSections = {
     size: boolean;
     contributions: boolean;
   };
-  branches: boolean;
+  branches: {
+    visible: boolean;
+    to_main: boolean;
+    strategy: boolean;
+  };
   pipelines: boolean;
   pullRequests: {
     visible: boolean;
@@ -183,7 +193,7 @@ export type PullRequestData = {
   prsWithoutReview: number;
   averageCommentsPerPR: number;
   percentageLinkedToIssues: number;
-  labelCounts: Record<string, number>;
+  labelCounts: Record<string, { count: number; color: string }>;
   fastMergedPRs: any[];
   totalComments: number;
 };
@@ -233,3 +243,11 @@ export type FileCoverageData = {
   lines: number;
   overall?: number;
 };
+
+export interface BranchConnection {
+  branchName: string;
+  issueNumber: string | null;
+  isLinked: boolean;
+  issueTitle: string | null;
+  url: string;
+}

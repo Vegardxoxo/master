@@ -413,7 +413,8 @@ export function parsePullRequests(data: any[]): PullRequestData {
   let prsWithReview = 0;
   let prsWithoutReview = 0;
   let prsLinkedToIssues = 0;
-  const labelCounts: Record<string, number> = {};
+  const labelCounts: Record<string, { count: number, color: string }> = {};
+
   const milestones: Set<string> = new Set();
 
   data.forEach((pr) => {
@@ -457,11 +458,15 @@ export function parsePullRequests(data: any[]): PullRequestData {
     }
 
     // Label usage
-    if (pr.labels) {
-      pr.labels.forEach((label: { name: string }) => {
-        labelCounts[label.name] = (labelCounts[label.name] || 0) + 1;
-      });
+   if (pr.labels) {
+  pr.labels.forEach((label: { name: string, color: string }) => {
+    if (!labelCounts[label.name]) {
+      labelCounts[label.name] = { count: 0, color: label.color };
     }
+    labelCounts[label.name].count += 1;
+  });
+}
+
 
     milestones.add(pr.milestone);
   });
