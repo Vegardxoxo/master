@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { ChevronRight, ChevronDown } from "lucide-react"
 import { FileIcon, isSensitiveFile, isWarningFile } from "./file-icon"
-import { cn } from "@/app/lib/utils"
+import { cn } from "@/app/lib/utils/utils"
 
 type FileNode = {
   id: string

@@ -1,4 +1,4 @@
-import { parseCommitData } from "@/app/lib/utils";
+import { parseCommitData } from "@/app/lib/utils/utils";
 import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data/data";
 import CommitSize from "@/app/ui/dashboard/commits/commit-size";
 

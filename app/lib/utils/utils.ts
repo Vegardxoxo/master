@@ -51,16 +51,17 @@ export function formatTimestamp(timestamp: string): string {
 
 function parseCoAuthorLine(line: string): { name: string; email: string } {
   const clean = line.replace("Co-authored-by:", "").trim();
-  // console.log(clean)
-  // const match = clean.match(/^(.*?)<(.*?)>$/);
-  //
-  // if (!match) {
-  //   return { name: clean, email: "unknown@invalid.com" };
-  // }
-  // const name = match[1].trim();
-  // const email = match[2].trim().toLowerCase();
-  const name = "doe";
-  const email = clean.trim().toLowerCase();
+
+  // Match the pattern "Name <email>"
+  const match = clean.match(/^(.*?)\s*<([^>]+)>/);
+
+  if (!match) {
+    return { name: clean, email: "unknown@invalid.com" };
+  }
+
+  const name = match[1].trim();
+  const email = match[2].trim().toLowerCase();
+
   return { name, email };
 }
 
@@ -301,8 +302,8 @@ export function parseCommitStatsGraphQL(data: any[]) {
   data.forEach((commit) => {
     if (!commit) return;
 
-    const authorEmail: string = commit.author?.email || "unknown";
-    const name: string = commit.author?.name || "unknown";
+    const authorEmail: string = commit.author?.email;
+    const name: string = commit.author?.name;
     const commitTotal: number =
       (commit.additions || 0) + (commit.deletions || 0);
     const commitUrl: string = commit.url || "";
@@ -339,8 +340,13 @@ export function parseCommitStatsGraphQL(data: any[]) {
     coAuthorLines = coAuthorLines.filter((line: string) => line.length > 0);
 
     for (const line of coAuthorLines) {
-      const { email } = parseCoAuthorLine(line);
-      if (!email) continue;
+      const { email, name } = parseCoAuthorLine(line);
+
+      // Skip if the email is the default unknown one
+      if (email === "unknown@invalid.com") {
+        console.warn("Skipping unrecognized co-author format:", line);
+        continue;
+      }
 
       // Create an entry if co-author doesn't exist yet
       if (!statMap[email]) {
@@ -349,7 +355,7 @@ export function parseCommitStatsGraphQL(data: any[]) {
           additions: 0,
           deletions: 0,
           commits: 0,
-          name: "Unknown Co-Author",
+          name: name || "Unknown Co-Author", // Use the parsed name if available
           biggest_commit: 0,
           biggest_commit_url: "",
           co_authored_lines: 0,
@@ -397,6 +403,14 @@ export function parseCommitStatsGraphQL(data: any[]) {
     stats.group_average = projectAverage;
   }
 
+  console.log("--- Contributors Summary ---");
+  console.log("Total contributors:", Object.keys(statMap).length);
+  Object.entries(statMap).forEach(([email, stats]) => {
+    console.log(`Email: ${email}, Name: ${stats.name}, Commits: ${stats.commits}, Co-authored Lines: ${stats.co_authored_lines}`);
+  });
+  console.log("-------------------------");
+
+
   return statMap;
 }
 
@@ -413,7 +427,7 @@ export function parsePullRequests(data: any[]): PullRequestData {
   let prsWithReview = 0;
   let prsWithoutReview = 0;
   let prsLinkedToIssues = 0;
-  const labelCounts: Record<string, { count: number, color: string }> = {};
+  const labelCounts: Record<string, { count: number; color: string }> = {};
 
   const milestones: Set<string> = new Set();
 
@@ -458,15 +472,14 @@ export function parsePullRequests(data: any[]): PullRequestData {
     }
 
     // Label usage
-   if (pr.labels) {
-  pr.labels.forEach((label: { name: string, color: string }) => {
-    if (!labelCounts[label.name]) {
-      labelCounts[label.name] = { count: 0, color: label.color };
+    if (pr.labels) {
+      pr.labels.forEach((label: { name: string; color: string }) => {
+        if (!labelCounts[label.name]) {
+          labelCounts[label.name] = { count: 0, color: label.color };
+        }
+        labelCounts[label.name].count += 1;
+      });
     }
-    labelCounts[label.name].count += 1;
-  });
-}
-
 
     milestones.add(pr.milestone);
   });

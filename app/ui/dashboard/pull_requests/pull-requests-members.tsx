@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
-import { createChartData } from "@/app/lib/utils";
+import { createChartData } from "@/app/lib/utils/utils";
 
 type DialogData = {
   title: string;

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { parseCSV } from "@/app/lib/utils";
+import { parseCSV } from "@/app/lib/utils/utils";
 
 export function AddRepositoryClassroom({courseInstanceId}: {courseInstanceId: string}) {
   const [organization, setOrganization] = React.useState("");

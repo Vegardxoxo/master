@@ -1,6 +1,6 @@
 import CommitFrequency from "@/app/ui/dashboard/commits/commit-frequency";
 import { fetchAllCommits } from "@/app/lib/data/data";
-import { parseCommitData } from "@/app/lib/utils";
+import { parseCommitData } from "@/app/lib/utils/utils";
 
 export default async function CommitFrequencyWrapper({
   owner,
