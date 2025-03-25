@@ -7,7 +7,7 @@ import {
   GitMerge,
   Info,
 } from "lucide-react";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/app/lib/utils/utils";
 
 interface BestPracticesProps {
   title: string;

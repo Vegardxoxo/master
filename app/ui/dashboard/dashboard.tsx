@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/app/lib/utils/utils";
 import { VisibleSections } from "@/app/lib/definitions";
 import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
 import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Calendar, CheckCircle2, Clock, Target } from "lucide-react";
 import Warning from "@/app/ui/dashboard/alerts/warning";
+import Link from "next/link";
 
 export default async function Milestones({
   owner,
@@ -40,9 +41,14 @@ export default async function Milestones({
             {milestones.map((milestone) => (
               <div key={milestone.id} className="border rounded-lg p-3">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium text-gray-800">
+                  <Link
+                    href={milestone.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
                     {milestone.title}
-                  </h3>
+                  </Link>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${
                       milestone.state === "open"

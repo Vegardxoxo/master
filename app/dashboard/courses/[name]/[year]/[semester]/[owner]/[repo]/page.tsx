@@ -26,7 +26,8 @@ export default async function Page(props: {
   const repo = params.repo;
 
   return (
-    <Dashboard owner={owner} repo={repo}>
+      <>
+        <Dashboard owner={owner} repo={repo}>
       {{
         contributorsList: (
           <Suspense fallback={<div>Loading contributors...</div>}>
@@ -64,5 +65,8 @@ export default async function Page(props: {
         ),
       }}
     </Dashboard>
+      </>
+
+
   );
 }

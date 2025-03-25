@@ -1,5 +1,5 @@
 import { CommitMessageShort } from "@/app/lib/definitions";
-import { parseModelResponse } from "@/app/lib/utils";
+import { parseModelResponse } from "@/app/lib/utils/utils";
 
 const API_KEY = process.env.API_KEY;
 const apiUrl = "http://127.0.0.1:8080/api";

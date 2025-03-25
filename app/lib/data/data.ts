@@ -11,18 +11,19 @@ import {
   parseCommitStats,
   parseCommitStatsGraphQL,
   parsePullRequests,
-} from "@/app/lib/utils";
+} from "@/app/lib/utils/utils";
 import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
-
-// const octokit = new Octokit({
-//   auth: process.env.TOKEN,
-//   baseUrl: "https://git.ntnu.no/api/v3",
-// });
+import {parseCommitStatsGraphQLEnhanched} from "@/app/lib/utils/email-similarity";
 
 const octokit = new Octokit({
-  auth: process.env.PERSONAL,
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
+
+// const octokit = new Octokit({
+//   auth: process.env.PERSONAL,
+// });
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -371,7 +372,8 @@ export async function fetchCommitStatsGraphQL(
   try {
     const response = await octokit.graphql(query, { owner, repo });
     const commits = Object.values(response.repository);
-    const parsedCommits = parseCommitStatsGraphQL(commits);
+    // const parsedCommits = parseCommitStatsGraphQL(commits);
+    const parsedCommits = parseCommitStatsGraphQLEnhanched(commits);
     return { parsedCommits, commits };
   } catch (e) {
     console.error("GraphQL Error:", e);
