@@ -1,5 +1,6 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Dashboard from "@/app/ui/dashboard/dashboard";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { CommitQualityChartSkeleton } from "@/app/ui/skeletons";
 import CommitQualityWrapper from "@/app/ui/dashboard/commits/commit-quality-wrapper";
 import CommitFrequencyWrapper from "@/app/ui/dashboard/commits/commit-frequency-wrapper";
@@ -17,6 +18,11 @@ import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
 import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
+import { ReportProvider } from "@/app/contexts/report-context";
+import GenerateReport from "@/app/ui/dashboard/report/report";
+import Link from "next/link";
+import { cn } from "@/app/lib/utils/utils";
+import { lusitana } from "@/app/ui/fonts";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -26,47 +32,81 @@ export default async function Page(props: {
   const repo = params.repo;
 
   return (
-      <>
-        <Dashboard owner={owner} repo={repo}>
-      {{
-        contributorsList: (
-          <Suspense fallback={<div>Loading contributors...</div>}>
-            <ContributorsList owner={owner} repo={repo} />
-          </Suspense>
-        ),
-        projectInfo: <ProjectInfo owner={owner} repo={repo} />,
-        milestones: <Milestones owner={owner} repo={repo} />,
-        files: <Files owner={owner} repo={repo} />,
-        coverage: <TestCoverage owner={owner} repo={repo} />,
-        commitQuality: (
-          <Suspense fallback={<CommitQualityChartSkeleton />}>
-            <CommitQualityWrapper owner={owner} repo={repo} />
-          </Suspense>
-        ),
-        commitFrequency: <CommitFrequencyWrapper owner={owner} repo={repo} />,
-        commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
-        commitContribution: (
-          <CommitContributionsWrapper owner={owner} repo={repo} />
-        ),
-        branch: <DirectCommits owner={owner} repo={repo} />,
-        branchingStrategy: <DevelopmentBranches owner={owner} repo={repo} />,
-        pipeline: <PipelineActions owner={owner} repo={repo} />,
-        pullRequestOverview: (
-          <PullRequestsOverviewWrapper owner={owner} repo={repo} />
-        ),
-        pullRequestMembers: (
-          <PullRequestsMembersWrapper owner={owner} repo={repo} />
-        ),
-        pullRequestComments: (
-          <PullRequestsCommentsWrapper owner={owner} repo={repo} />
-        ),
-        pullRequestReviews: (
-          <PullRequestsReviewsWrapper owner={owner} repo={repo} />
-        ),
-      }}
-    </Dashboard>
-      </>
+    <ReportProvider>
+      <div className="container mx-auto py-6">
+        {/*Project subject and group.*/}
+        <header>
+          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              <Link
+                href={`https://git.ntnu.no/${owner}/${repo}`}
+                className={cn(
+                  lusitana.className,
+                  "hover:underline text-blue-600",
+                )}
+              >
+                {owner}/{repo} Dashboard
+              </Link>
+            </h1>
+          </div>
+        </header>
 
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="report">Report</TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="overview">
+            <Dashboard owner={owner} repo={repo}>
+              {{
+                contributorsList: (
+                  <Suspense fallback={<div>Loading contributors...</div>}>
+                    <ContributorsList owner={owner} repo={repo} />
+                  </Suspense>
+                ),
+                projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+                milestones: <Milestones owner={owner} repo={repo} />,
+                files: <Files owner={owner} repo={repo} />,
+                coverage: <TestCoverage owner={owner} repo={repo} />,
+                commitQuality: (
+                  <Suspense fallback={<CommitQualityChartSkeleton />}>
+                    <CommitQualityWrapper owner={owner} repo={repo} />
+                  </Suspense>
+                ),
+                commitFrequency: (
+                  <CommitFrequencyWrapper owner={owner} repo={repo} />
+                ),
+                commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
+                commitContribution: (
+                  <CommitContributionsWrapper owner={owner} repo={repo} />
+                ),
+                branch: <DirectCommits owner={owner} repo={repo} />,
+                branchingStrategy: (
+                  <DevelopmentBranches owner={owner} repo={repo} />
+                ),
+                pipeline: <PipelineActions owner={owner} repo={repo} />,
+                pullRequestOverview: (
+                  <PullRequestsOverviewWrapper owner={owner} repo={repo} />
+                ),
+                pullRequestMembers: (
+                  <PullRequestsMembersWrapper owner={owner} repo={repo} />
+                ),
+                pullRequestComments: (
+                  <PullRequestsCommentsWrapper owner={owner} repo={repo} />
+                ),
+                pullRequestReviews: (
+                  <PullRequestsReviewsWrapper owner={owner} repo={repo} />
+                ),
+              }}
+            </Dashboard>
+          </TabsContent>
+
+          <TabsContent value="report">
+            <GenerateReport owner={owner} repo={repo} />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ReportProvider>
   );
 }

@@ -119,23 +119,6 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
 
   return (
     <div className="min-h-screen">
-      {/*Project subject and group.*/}
-      <header>
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            <Link
-              href={`https://git.ntnu.no/${owner}/${repo}`}
-              className={cn(
-                lusitana.className,
-                "hover:underline text-blue-600",
-              )}
-            >
-              {owner}/{repo} Dashboard
-            </Link>
-          </h1>
-        </div>
-      </header>
-
       <main className="py-6">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:space-x-4">
