@@ -51,61 +51,48 @@ export default async function Page(props: {
           </div>
         </header>
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="report">Report</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <Dashboard owner={owner} repo={repo}>
-              {{
-                contributorsList: (
-                  <Suspense fallback={<div>Loading contributors...</div>}>
-                    <ContributorsList owner={owner} repo={repo} />
-                  </Suspense>
-                ),
-                projectInfo: <ProjectInfo owner={owner} repo={repo} />,
-                milestones: <Milestones owner={owner} repo={repo} />,
-                files: <Files owner={owner} repo={repo} />,
-                coverage: <TestCoverage owner={owner} repo={repo} />,
-                commitQuality: (
-                  <Suspense fallback={<CommitQualityChartSkeleton />}>
-                    <CommitQualityWrapper owner={owner} repo={repo} />
-                  </Suspense>
-                ),
-                commitFrequency: (
-                  <CommitFrequencyWrapper owner={owner} repo={repo} />
-                ),
-                commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
-                commitContribution: (
-                  <CommitContributionsWrapper owner={owner} repo={repo} />
-                ),
-                branch: <DirectCommits owner={owner} repo={repo} />,
-                branchingStrategy: (
-                  <DevelopmentBranches owner={owner} repo={repo} />
-                ),
-                pipeline: <PipelineActions owner={owner} repo={repo} />,
-                pullRequestOverview: (
-                  <PullRequestsOverviewWrapper owner={owner} repo={repo} />
-                ),
-                pullRequestMembers: (
-                  <PullRequestsMembersWrapper owner={owner} repo={repo} />
-                ),
-                pullRequestComments: (
-                  <PullRequestsCommentsWrapper owner={owner} repo={repo} />
-                ),
-                pullRequestReviews: (
-                  <PullRequestsReviewsWrapper owner={owner} repo={repo} />
-                ),
-              }}
-            </Dashboard>
-          </TabsContent>
-
-          <TabsContent value="report">
-            <GenerateReport owner={owner} repo={repo} />
-          </TabsContent>
-        </Tabs>
+        <Dashboard owner={owner} repo={repo}>
+          {{
+            contributorsList: (
+              <Suspense fallback={<div>Loading contributors...</div>}>
+                <ContributorsList owner={owner} repo={repo} />
+              </Suspense>
+            ),
+            projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+            milestones: <Milestones owner={owner} repo={repo} />,
+            files: <Files owner={owner} repo={repo} />,
+            coverage: <TestCoverage owner={owner} repo={repo} />,
+            commitQuality: (
+              <Suspense fallback={<CommitQualityChartSkeleton />}>
+                <CommitQualityWrapper owner={owner} repo={repo} />
+              </Suspense>
+            ),
+            commitFrequency: (
+              <CommitFrequencyWrapper owner={owner} repo={repo} />
+            ),
+            commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
+            commitContribution: (
+              <CommitContributionsWrapper owner={owner} repo={repo} />
+            ),
+            branch: <DirectCommits owner={owner} repo={repo} />,
+            branchingStrategy: (
+              <DevelopmentBranches owner={owner} repo={repo} />
+            ),
+            pipeline: <PipelineActions owner={owner} repo={repo} />,
+            pullRequestOverview: (
+              <PullRequestsOverviewWrapper owner={owner} repo={repo} />
+            ),
+            pullRequestMembers: (
+              <PullRequestsMembersWrapper owner={owner} repo={repo} />
+            ),
+            pullRequestComments: (
+              <PullRequestsCommentsWrapper owner={owner} repo={repo} />
+            ),
+            pullRequestReviews: (
+              <PullRequestsReviewsWrapper owner={owner} repo={repo} />
+            ),
+          }}
+        </Dashboard>
       </div>
     </ReportProvider>
   );

@@ -3,7 +3,7 @@ import Warning from "@/app/ui/dashboard/alerts/warning";
 import Good from "@/app/ui/dashboard/alerts/good";
 import { Commit } from "@/app/lib/definitions";
 import { Badge } from "@/components/ui/badge";
-import { CommitsTable } from "@/app/ui/courses/tables/commits-to-main-table";
+import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitsColumns } from "@/app/ui/courses/columns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
@@ -57,7 +57,7 @@ export default async function DirectCommits({
             ))}
           </div>
 
-          <CommitsTable columns={commitsColumns} data={commits} />
+          <GenericDataTable columns={commitsColumns} data={commits} />
           <BestPractices title={"Dont commit directly to main"} icon={"commit"} variant={"warning"}>
             <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 list-disc pl-5">
               <li>

@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { GitBranch } from "lucide-react";
-import { CommitsTable } from "@/app/ui/courses/tables/commits-to-main-table";
+import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { DevelopmentBranchColumns } from "@/app/ui/courses/columns";
 import Warning from "@/app/ui/dashboard/alerts/warning";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
@@ -133,7 +133,7 @@ export default async function DevelopmentBranches({
 
           {/* Branches Table */}
           <div className="rounded-md border">
-            <CommitsTable
+            <GenericDataTable
               columns={DevelopmentBranchColumns}
               data={branchConnections}
             />

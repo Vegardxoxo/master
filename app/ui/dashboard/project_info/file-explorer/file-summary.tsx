@@ -1,15 +1,26 @@
-import { Lock, AlertTriangle } from "lucide-react"
-import { isSensitiveFile, isWarningFile } from "./file-icon"
+import { Lock, AlertTriangle } from "lucide-react";
+import { isSensitiveFile, isWarningFile } from "./file-icon";
+import { useReport } from "@/app/contexts/report-context";
+import { useEffect } from "react";
 
 type RepoFile = {
-  id: string
-  path: string
-  extension: string
-}
+  id: string;
+  path: string;
+  extension: string;
+};
 
 export function FileSummary({ files }: { files: RepoFile[] }) {
-  const sensitiveFiles = files.filter((file) => isSensitiveFile(file.path))
-  const warningFiles = files.filter((file) => isWarningFile(file.path))
+  const { addMetricData } = useReport();
+  const sensitiveFiles = files.filter((file) => isSensitiveFile(file.path));
+  const warningFiles = files.filter((file) => isWarningFile(file.path));
+
+  useEffect(() => {
+    addMetricData(
+      "sensitiveFiles",
+      [sensitiveFiles, warningFiles],
+      warningFiles,
+    );
+  }, [files]);
 
   return (
     <div className="border rounded-md shadow-sm h-full">
@@ -31,13 +42,18 @@ export function FileSummary({ files }: { files: RepoFile[] }) {
         {sensitiveFiles.length > 0 ? (
           <ul className="mb-6 text-sm space-y-1 max-h-[200px] overflow-y-auto">
             {sensitiveFiles.map((file) => (
-              <li key={file.id} className="text-red-700 dark:text-red-400 truncate pl-6">
+              <li
+                key={file.id}
+                className="text-red-700 dark:text-red-400 truncate pl-6"
+              >
                 {file.path}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-500 mb-6 pl-6">No sensitive files detected</p>
+          <p className="text-sm text-gray-500 mb-6 pl-6">
+            No sensitive files detected
+          </p>
         )}
 
         <div className="flex items-center justify-between mb-2">
@@ -53,13 +69,18 @@ export function FileSummary({ files }: { files: RepoFile[] }) {
         {warningFiles.length > 0 ? (
           <ul className="text-sm space-y-1 max-h-[200px] overflow-y-auto">
             {warningFiles.map((file) => (
-              <li key={file.id} className="text-amber-700 dark:text-amber-400 truncate pl-6">
+              <li
+                key={file.id}
+                className="text-amber-700 dark:text-amber-400 truncate pl-6"
+              >
                 {file.path}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-500 pl-6">No warning files detected</p>
+          <p className="text-sm text-gray-500 pl-6">
+            No warning files detected
+          </p>
         )}
       </div>
 
@@ -69,11 +90,11 @@ export function FileSummary({ files }: { files: RepoFile[] }) {
             <strong>Total Files:</strong> {files.length}
           </p>
           <p>
-            <strong>Clean Files:</strong> {files.length - sensitiveFiles.length - warningFiles.length}
+            <strong>Clean Files:</strong>{" "}
+            {files.length - sensitiveFiles.length - warningFiles.length}
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

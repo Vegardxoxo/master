@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CoverageProgressBar } from "./coverage-progress-bar";
 import { ArrowUpDown, FileCode } from "lucide-react";
 import {
@@ -8,6 +8,7 @@ import {
   getShortFilePath,
 } from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
 import { FileCoverageData } from "@/app/lib/definitions";
+import { useReport } from "@/app/contexts/report-context";
 
 type SortField = "filePath" | "statements" | "branches" | "functions" | "lines";
 type SortDirection = "asc" | "desc";
@@ -19,6 +20,19 @@ export function FileCoverageTable({
 }) {
   const [sortField, setSortField] = useState<SortField>("filePath");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const { addMetricData } = useReport();
+
+  useEffect(() => {
+    const metrics = fileData.map((file) => ({
+      filePath: getShortFilePath(file.filePath),
+      statements: file.statements.toFixed(1),
+      branches: file.branches.toFixed(1),
+      functions: file.functions.toFixed(1),
+      lines: file.lines,
+      lastUpdated: new Date().toISOString(),
+    }));
+    addMetricData("FileCoverage", fileData, metrics);
+  }, [fileData]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
