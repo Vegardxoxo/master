@@ -8,11 +8,14 @@ export interface ReportData {
   fileCoverage: any
   sensitiveFiles: any
   sensitiveFilesRecommendations: string
+  directCommits?: any
+  directCommitsRecommendations?: string
   additionalNotes: string
   includedSections: {
     commitQuality: boolean
     testCoverage: boolean
     sensitiveFiles: boolean
+    directCommits: boolean
   }
 }
 
@@ -27,6 +30,8 @@ export function reportMarkdown(data: ReportData): string {
     fileCoverage,
     sensitiveFiles,
     sensitiveFilesRecommendations,
+    directCommits,
+    directCommitsRecommendations,
     additionalNotes,
     includedSections,
   } = data
@@ -141,6 +146,46 @@ ${lowCoverageFiles
 ${coverageRecommendations}
 
 `
+  }
+
+  // Direct Commits Section
+  if (includedSections.directCommits && directCommits) {
+    const sortedAuthors = directCommits[0] || []
+    const authorCount = directCommits[1] || {}
+    const totalDirectCommits = sortedAuthors.reduce(
+      (total: number, author: string) => total + (authorCount[author] || 0),
+      0,
+    )
+
+    markdown += `## Direct Commits to the Main Branch
+
+${totalDirectCommits} commit${totalDirectCommits !== 1 ? "s" : ""} made directly to the main branch without going through pull requests.
+
+`
+
+    if (sortedAuthors.length > 0) {
+      markdown += `### Contributors with Direct Commits
+
+| Contributor | Number of Direct Commits |
+|-------------|--------------------------|
+`
+
+      // Add each contributor with their commit count
+      sortedAuthors.forEach((author: string) => {
+        const escapedAuthor = author.replace(/\|/g, "\\|")
+        markdown += `| ${escapedAuthor} | ${authorCount[author] || 0} |\n`
+      })
+
+      markdown += "\n"
+    }
+
+    if (directCommitsRecommendations) {
+      markdown += `### Recommendations
+
+${directCommitsRecommendations}
+
+`
+    }
   }
 
   // Sensitive Files Section

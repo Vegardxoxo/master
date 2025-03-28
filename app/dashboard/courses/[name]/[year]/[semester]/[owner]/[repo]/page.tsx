@@ -15,7 +15,7 @@ import PullRequestsReviewsWrapper from "@/app/ui/dashboard/pull_requests/pull-re
 import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
 import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage";
 import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
-import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
+import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wrapper";
 import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
 import { ReportProvider } from "@/app/contexts/report-context";
@@ -74,7 +74,7 @@ export default async function Page(props: {
             commitContribution: (
               <CommitContributionsWrapper owner={owner} repo={repo} />
             ),
-            branch: <DirectCommits owner={owner} repo={repo} />,
+            branch: <DirectCommitsWrapper owner={owner} repo={repo} />,
             branchingStrategy: (
               <DevelopmentBranches owner={owner} repo={repo} />
             ),

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { GitPullRequest, FileText } from "lucide-react"
+import { FileText } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -16,6 +16,7 @@ import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown"
 import { CommitQualitySection } from "@/app/ui/dashboard/report/report-sections/commit-quality"
 import SensitiveFilesSection from "@/app/ui/dashboard/report/report-sections/sensitive-files"
 import TestCoverageSection from "@/app/ui/dashboard/report/report-sections/test-coverage"
+import DirectCommitsSection from "@/app/ui/dashboard/report/report-sections/direct-commits"
 
 export default function GenerateReport({
   owner,
@@ -33,12 +34,14 @@ export default function GenerateReport({
   const testCoverage = allMetrics.TestCoverage?.metrics
   const fileCoverage = allMetrics.FileCoverage?.data
   const sensitiveFiles = allMetrics.sensitiveFiles?.data
+  const directCommits = allMetrics.directCommits?.metrics
 
   // State for included sections
   const [includedSections, setIncludedSections] = useState({
     commitQuality: true,
     testCoverage: true,
     sensitiveFiles: true,
+    directCommits: true,
   })
 
   // State for report content
@@ -64,6 +67,10 @@ export default function GenerateReport({
   const [sensitiveFilesRecommendations, setSensitiveFilesRecommendations] = useState(
     "Review the identified sensitive files and ensure they are properly handled. Consider adding them to .gitignore if they contain sensitive information.",
   )
+
+  const [directCommitsRecommendations, setDirectCommitsRecommendations] = useState(
+    "Avoid committing directly to the main branch. Use feature branches and pull requests instead to ensure code quality and facilitate code reviews.",
+  )
   const [additionalNotes, setAdditionalNotes] = useState("")
 
   // Generate markdown content based on the metrics and user input
@@ -78,11 +85,12 @@ export default function GenerateReport({
       fileCoverage,
       sensitiveFiles,
       sensitiveFilesRecommendations,
+      directCommits,
+      directCommitsRecommendations,
       additionalNotes,
       includedSections,
     })
   }
-
 
   // Toggle section inclusion
   const toggleSection = (section: keyof typeof includedSections) => {
@@ -93,7 +101,7 @@ export default function GenerateReport({
   }
 
   // Check if we have any metrics data
-  const hasAnyData = commitQuality || testCoverage || fileCoverage || sensitiveFiles
+  const hasAnyData = commitQuality || testCoverage || fileCoverage || sensitiveFiles || directCommits
 
   if (!hasAnyData) {
     return (
@@ -177,37 +185,63 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
+              {directCommits && directCommits.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-direct"
+                    checked={includedSections.directCommits}
+                    onCheckedChange={() => toggleSection("directCommits")}
+                  />
+                  <Label htmlFor="include-direct" className="cursor-pointer">
+                    Direct Commits
+                  </Label>
+                </div>
+              )}
             </div>
           </div>
 
           <Separator />
 
-          <Tabs defaultValue="commits" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger className={"data-[state=active]:bg-sky-500 data-[state=active]:text-white "} value="commits">
+          <Tabs defaultValue="commits" className="w-full ">
+            <TabsList className="w-full flex flex-wrap mb-10 gap-y-2 md:gap-y-0">
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="commits"
+              >
                 Commit Quality
               </TabsTrigger>
               <TabsTrigger
-                className={"data-[state=active]:bg-sky-500 data-[state=active]:text-white "}
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="coverage"
               >
                 Test Coverage
               </TabsTrigger>
               <TabsTrigger
-                className={"data-[state=active]:bg-sky-500 data-[state=active]:text-white "}
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="sensitive"
               >
                 Sensitive Files
               </TabsTrigger>
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="directCommits"
+              >
+                Direct Commits
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="commits">
-              <CommitQualitySection
+              <div className={"mb-10"}>
+                 <CommitQualitySection
                 fileData={commitQuality}
                 recommendations={commitRecommendations}
                 setRecommendations={setCommitRecommendations}
                 include={includedSections.commitQuality}
               />
+
+              </div>
+
             </TabsContent>
 
             <TabsContent value="coverage">
@@ -228,6 +262,15 @@ export default function GenerateReport({
                 include={includedSections.sensitiveFiles}
               />
             </TabsContent>
+
+            <TabsContent value="directCommits">
+              <DirectCommitsSection
+                fileData={directCommits}
+                recommendations={directCommitsRecommendations}
+                setRecommendations={setDirectCommitsRecommendations}
+                include={includedSections.directCommits}
+              />
+            </TabsContent>
           </Tabs>
 
           <Separator />
@@ -243,6 +286,24 @@ export default function GenerateReport({
             />
           </div>
         </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="outline" onClick={clearMetricsData}>
+            Clear Metrics
+          </Button>
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(getMarkdown())
+              toast({
+                title: "Copied to clipboard",
+                description: "The markdown report has been copied to your clipboard.",
+              })
+            }}
+            className="flex items-center gap-1"
+          >
+            <FileText className="h-4 w-4" />
+            Copy Report
+          </Button>
+        </CardFooter>
       </Card>
 
       {/* Right side - Markdown Preview */}

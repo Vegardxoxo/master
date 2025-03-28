@@ -112,7 +112,7 @@ export async function fetchBranches(owner: string, repo: string) {
  * Fetches details for a single branch (including its latest commit info).
  * @param owner - GitHub owner/organization
  * @param repo  - Repository name
- * @param branch - DirectCommits name
+ * @param branch - DirectCommitsWrapper name
  */
 export async function fetchBranchDetails(
   owner: string,

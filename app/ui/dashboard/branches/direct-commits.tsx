@@ -1,35 +1,42 @@
-import { getMainCommits } from "@/app/lib/data/data";
+"use client";
+
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Warning from "@/app/ui/dashboard/alerts/warning";
-import Good from "@/app/ui/dashboard/alerts/good";
-import { Commit } from "@/app/lib/definitions";
 import { Badge } from "@/components/ui/badge";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitsColumns } from "@/app/ui/courses/columns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import { Commit } from "@/app/lib/definitions";
+import { useReport } from "@/app/contexts/report-context";
+import { useEffect } from "react";
 
-export default async function DirectCommits({
-  owner,
-  repo,
-}: {
-  owner: string;
-  repo: string;
-}) {
-  const commits = await getMainCommits(owner, repo);
+interface DirectCommitsProps {
+  commits: Commit[];
+  sortedAuthors: string[];
+  authorCount: Record<string, number>;
+}
 
-  if (!commits || commits.length === 0) {
-    return <Good message={"Great job! No commits directly to main 👍"} />;
-  }
-
-  const authorCount: Record<string, number> = {};
-
-  commits.forEach((commit) => {
-    authorCount[commit.author] = (authorCount[commit.author] || 0) + 1;
-  });
-
-  const sortedAuthors = Object.keys(authorCount).sort(
-    (a, b) => authorCount[b] - authorCount[a],
-  );
+/**
+ *
+ /**
+ * The DirectCommits component is used to display a summary of commits made directly
+ * to the main branch, their authors, and provides best practice recommendations
+ * to avoid such direct commits.
+ *
+ * @param commits - Array of commit objects representing direct commits.
+ * @param sortedAuthors - Array of author names sorted alphabetically or by contribution count.
+ * @param authorCount - Record mapping author names to their respective commit counts.
+ * @constructor
+ */
+export default function DirectCommits({
+  commits,
+  sortedAuthors,
+  authorCount,
+}: DirectCommitsProps) {
+  const { addMetricData } = useReport();
+  useEffect(() => {
+    addMetricData("directCommits", commits.length, [sortedAuthors, authorCount]);
+  }, [commits, sortedAuthors, authorCount]);
 
   return (
     <Card className="shadow-sm">
@@ -56,9 +63,13 @@ export default async function DirectCommits({
               </Badge>
             ))}
           </div>
-
+          |
           <GenericDataTable columns={commitsColumns} data={commits} />
-          <BestPractices title={"Dont commit directly to main"} icon={"commit"} variant={"warning"}>
+          <BestPractices
+            title={"Dont commit directly to main"}
+            icon={"commit"}
+            variant={"warning"}
+          >
             <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 list-disc pl-5">
               <li>
                 Use feature branches and pull requests instead of committing
