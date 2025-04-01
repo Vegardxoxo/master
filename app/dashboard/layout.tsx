@@ -1,7 +1,7 @@
 import { AppSidebar, CustomTrigger } from "@/app/ui/dashboard/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/auth";
-import {getUserCourses} from "@/app/lib/database-functions";
+import { getUserCourses } from "@/app/lib/database-functions";
 
 export default async function Layout({
   children,
@@ -10,7 +10,7 @@ export default async function Layout({
 }) {
   const session = await auth();
   const user = session?.user ?? { name: "Guest" };
-  const {success, error, enrolledCourses} = await getUserCourses();
+  const { success, error, enrolledCourses } = await getUserCourses();
   console.log("user", user);
 
   return (

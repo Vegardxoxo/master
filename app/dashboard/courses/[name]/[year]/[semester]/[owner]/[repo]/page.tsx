@@ -18,7 +18,7 @@ import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wrapper";
 import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
-import { ReportProvider } from "@/app/contexts/report-context";
+import { ReportProvider, useReport } from "@/app/contexts/report-context";
 import GenerateReport from "@/app/ui/dashboard/report/report";
 import Link from "next/link";
 import { cn } from "@/app/lib/utils/utils";
@@ -30,6 +30,7 @@ export default async function Page(props: {
   const params = await props.params;
   const owner = params.owner;
   const repo = params.repo;
+
 
   return (
     <ReportProvider>

@@ -2,7 +2,9 @@ export interface ReportData {
   reportTitle: string
   summary: string
   commitQuality: any
-  commitRecommendations: string
+  commitQualityRecommendations: string
+  commitFrequency: any
+  commitFrequencyRecommendations: string
   testCoverage: any
   coverageRecommendations: string
   fileCoverage: any
@@ -13,6 +15,7 @@ export interface ReportData {
   additionalNotes: string
   includedSections: {
     commitQuality: boolean
+    commitFrequency?: boolean
     testCoverage: boolean
     sensitiveFiles: boolean
     directCommits: boolean
@@ -24,7 +27,9 @@ export function reportMarkdown(data: ReportData): string {
     reportTitle,
     summary,
     commitQuality,
-    commitRecommendations,
+    commitQualityRecommendations,
+    commitFrequency,
+    commitFrequencyRecommendations,
     testCoverage,
     coverageRecommendations,
     fileCoverage,
@@ -76,7 +81,7 @@ ${summary}
         const escapedMessage = messageField?.replace(/\|/g, "\\|") || ""
         const escapedReason = item.reason?.replace(/\|/g, "\\|") || ""
 
-        markdown += `| ${escapedMessage} | ${item.classification} | ${escapedReason} |\n`
+        markdown += `| ${escapedMessage} | ${item.category} | ${escapedReason} |\n`
       })
 
       markdown += "\n"
@@ -84,9 +89,32 @@ ${summary}
 
     markdown += `### Recommendations
 
-${commitRecommendations}
+${commitQualityRecommendations}
 
 `
+  }
+
+  // Commit Frequency Section
+  if (includedSections.commitFrequency && commitFrequency) {
+    markdown += `## Commit Frequency Analysis\n\n`
+
+    // Check if we should include the image
+    // The includeImage property is directly on the commitFrequency object
+    const shouldIncludeImage = commitFrequency.includeImage !== false
+
+    // If we should include the image and we have image data
+    if (shouldIncludeImage && commitFrequency.url) {
+      console.log("commitFrequency MARKDOWN", commitFrequency)
+      // Create an absolute URL if baseUrl is provided
+      const imageUrl = commitFrequency.url
+      console.log("imageUrl", imageUrl)
+      markdown += `![Commit Frequency Chart](${imageUrl})\n\n`
+    }
+
+    // Add recommendations
+    if (commitFrequencyRecommendations) {
+      markdown += `### Recommendations\n\n${commitFrequencyRecommendations}\n\n`
+    }
   }
 
   // Combined Test Coverage Section

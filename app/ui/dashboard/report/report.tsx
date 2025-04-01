@@ -17,6 +17,7 @@ import { CommitQualitySection } from "@/app/ui/dashboard/report/report-sections/
 import SensitiveFilesSection from "@/app/ui/dashboard/report/report-sections/sensitive-files"
 import TestCoverageSection from "@/app/ui/dashboard/report/report-sections/test-coverage"
 import DirectCommitsSection from "@/app/ui/dashboard/report/report-sections/direct-commits"
+import CommitFrequency from "@/app/ui/dashboard/report/report-sections/commit-frequency"
 
 export default function GenerateReport({
   owner,
@@ -35,10 +36,14 @@ export default function GenerateReport({
   const fileCoverage = allMetrics.FileCoverage?.data
   const sensitiveFiles = allMetrics.sensitiveFiles?.data
   const directCommits = allMetrics.directCommits?.metrics
+  const commitFrequency = allMetrics.commitFrequency?.metrics
+
+  console.log("commitFrequency in generate-report", JSON.stringify(commitFrequency, null, 2))
 
   // State for included sections
   const [includedSections, setIncludedSections] = useState({
     commitQuality: true,
+    commitFrequency: true,
     testCoverage: true,
     sensitiveFiles: true,
     directCommits: true,
@@ -49,13 +54,19 @@ export default function GenerateReport({
   const [summary, setSummary] = useState(
     `This report provides an analysis of the repository ${owner}/${repo}, focusing on commit quality, test coverage, and potential sensitive files.`,
   )
-  const [commitRecommendations, setCommitRecommendations] = useState(
+  const [commitQualityRecommendations, setCommitQualityRecommendations] = useState(
     commitQuality?.qualityStatus === "good"
       ? "Great job on your commit messages! They are clear, descriptive, and follow best practices."
       : commitQuality?.qualityStatus === "moderate"
         ? "Your commit messages are adequate but could be improved. Try to be more descriptive about what changes were made and why."
         : "Your commit messages need improvement. Use the imperative mood and include both what changes were made and why they were necessary.",
   )
+  const [commitFrequencyRecommendations, setCommitFrequencyRecommendations] = useState(
+    commitFrequency
+      ? "Maintain a consistent commit frequency to ensure steady progress and easier code reviews. Aim for smaller, more frequent commits rather than large, infrequent ones to reduce merge conflicts and improve collaboration."
+      : "No commit frequency data available. Consider analyzing commit patterns to identify potential workflow improvements.",
+  )
+
   const [coverageRecommendations, setCoverageRecommendations] = useState(
     testCoverage?.status === "good"
       ? "Excellent test coverage! Keep up the good work maintaining high test coverage across the codebase."
@@ -79,7 +90,9 @@ export default function GenerateReport({
       reportTitle,
       summary,
       commitQuality,
-      commitRecommendations,
+      commitQualityRecommendations,
+      commitFrequency,
+      commitFrequencyRecommendations,
       testCoverage,
       coverageRecommendations,
       fileCoverage,
@@ -130,6 +143,7 @@ export default function GenerateReport({
         <CardHeader>
           <CardTitle>Repository Analysis Report</CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="report-title">Report Title</Label>
@@ -198,6 +212,19 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
+              {commitFrequency && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-frequency"
+                    checked={includedSections.commitFrequency}
+                    onCheckedChange={() => toggleSection("commitFrequency")}
+                  />
+                  <Label htmlFor="include-frequency" className="cursor-pointer">
+                    Commit Frequency
+                  </Label>
+                </div>
+              )}
             </div>
           </div>
 
@@ -211,37 +238,45 @@ export default function GenerateReport({
               >
                 Commit Quality
               </TabsTrigger>
+
               <TabsTrigger
                 className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="coverage"
               >
                 Test Coverage
               </TabsTrigger>
+
               <TabsTrigger
                 className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="sensitive"
               >
                 Sensitive Files
               </TabsTrigger>
+
               <TabsTrigger
                 className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="directCommits"
               >
                 Direct Commits
               </TabsTrigger>
+
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="frequency"
+              >
+                Commit Frequency
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="commits">
               <div className={"mb-10"}>
-                 <CommitQualitySection
-                fileData={commitQuality}
-                recommendations={commitRecommendations}
-                setRecommendations={setCommitRecommendations}
-                include={includedSections.commitQuality}
-              />
-
+                <CommitQualitySection
+                  fileData={commitQuality}
+                  recommendations={commitQualityRecommendations}
+                  setRecommendations={setCommitQualityRecommendations}
+                  include={includedSections.commitQuality}
+                />
               </div>
-
             </TabsContent>
 
             <TabsContent value="coverage">
@@ -271,6 +306,15 @@ export default function GenerateReport({
                 include={includedSections.directCommits}
               />
             </TabsContent>
+
+            <TabsContent value="frequency">
+              <CommitFrequency
+                fileData={commitFrequency}
+                recommendations={commitFrequencyRecommendations}
+                setRecommendations={setCommitFrequencyRecommendations}
+                include={includedSections.commitFrequency}
+              />
+            </TabsContent>
           </Tabs>
 
           <Separator />
@@ -289,19 +333,6 @@ export default function GenerateReport({
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={clearMetricsData}>
             Clear Metrics
-          </Button>
-          <Button
-            onClick={() => {
-              navigator.clipboard.writeText(getMarkdown())
-              toast({
-                title: "Copied to clipboard",
-                description: "The markdown report has been copied to your clipboard.",
-              })
-            }}
-            className="flex items-center gap-1"
-          >
-            <FileText className="h-4 w-4" />
-            Copy Report
           </Button>
         </CardFooter>
       </Card>

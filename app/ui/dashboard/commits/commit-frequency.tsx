@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import type { CommitByDate, DayEntry } from "@/app/lib/definitions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -28,20 +28,46 @@ import {
 } from "@/components/ui/dialog";
 import CommitFrequencyTable from "@/app/ui/dashboard/commits/commit-frequency-table";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import { Download } from "lucide-react";
+import { Button } from "@/app/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useReport } from "@/app/contexts/report-context";
+import { uploadChartToServer } from "@/app/ui/chart-utils";
 
 export default function CommitFrequency({
   authors,
   data,
   total,
   dates,
+  image_url,
 }: {
   total: number;
   authors: Record<string, string>;
   data: DayEntry[];
   dates: CommitByDate[];
+  image_url: string | undefined;
 }) {
   const [selectedAuthors, setSelectedAuthors] = useState(["TOTAL@commits"]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageURL, setImageURL] = useState<string | undefined>(image_url);
+  const { getRepositoryInfo, addMetricData } = useReport();
+  const info = getRepositoryInfo();
+
+  const metrics = useMemo(() => {
+    return {
+      total,
+      authors,
+      includeImage: !!imageURL,
+      url: imageURL,
+    };
+  }, [data, dates]);
+
+  useEffect(() => {
+    addMetricData("commitFrequency", data, metrics);
+    console.log(imageURL);
+  }, [imageURL, data]);
 
   const handleClick = (e: any) => {
     if (e?.activeLabel) {
@@ -90,11 +116,34 @@ export default function CommitFrequency({
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">Commit Frequency</CardTitle>
-        <CardDescription className="text-lg font-semibold">
-          Total number of commits: {total}
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="flex items-center">
+          <div>
+            <CardTitle className="text-2xl font-bold">
+              GitHub Commit History
+            </CardTitle>
+            <CardDescription>Total number of commits: {total}</CardDescription>
+          </div>
+        </div>
+        <Button
+          onClick={() => {
+            uploadChartToServer({
+              chartType: "COMMIT_FREQUENCY",
+              chartRef: chartRef,
+              setIsUploading: setIsUploading,
+              owner: info.owner,
+              repo: info.repo,
+            }).then((r) => {
+              if (typeof r === "string") {
+                setImageURL(r);
+              }
+            });
+          }}
+          disabled={isUploading}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {isUploading ? "Uploading..." : "Upload Chart"}
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="mb-6 flex flex-wrap gap-4">
@@ -125,7 +174,7 @@ export default function CommitFrequency({
           ))}
         </div>
         {/*Chart*/}
-        <ChartContainer config={{}} className="h-[400px] w-full">
+        <ChartContainer config={{}} className="h-[400px] w-full" ref={chartRef}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
@@ -168,15 +217,26 @@ export default function CommitFrequency({
                     ]
                   }
                   strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 8 }}
+                  dot={{
+                    fill: colors[
+                      authorEntries.findIndex(([e]) => e === email) %
+                        colors.length
+                    ],
+                    r: 4,
+                  }}
+                  activeDot={{ r: 8, strokeWidth: 2 }}
                 />
               ))}
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>
+
         <div className={"mt-4"}>
-          <BestPractices title={"Make incremental, small changes"} icon={"commit"} variant={"info"}>
+          <BestPractices
+            title={"Make incremental, small changes"}
+            icon={"commit"}
+            variant={"info"}
+          >
             <ul className="space-y-1 list-disc pl-5">
               <li>
                 Write the smallest amount of code possible to solve a problem

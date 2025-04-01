@@ -14,7 +14,6 @@ export function CommitQualitySection({
   include,
 }: ReportSectionProps) {
   const [qualityScore, setQualityScore] = useState<number>(0);
-  console.log("fileData", fileData);
 
   useEffect(() => {
     if (fileData?.qualityScore) {

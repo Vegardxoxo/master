@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import type { VisibleSections } from "@/app/lib/definitions";
 import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";
 import GenerateReport from "@/app/ui/dashboard/report/report";
+import { useReport } from "@/app/contexts/report-context";
 
 type DashboardProps = {
   owner: string;
@@ -114,6 +115,15 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
       return prev;
     });
   };
+
+  const { setRepositoryInfo } = useReport();
+
+  useEffect(() => {
+    setRepositoryInfo({
+      owner: owner,
+      repo: repo,
+    });
+  }, [owner, repo]);
 
   return (
     <div className="min-h-screen">

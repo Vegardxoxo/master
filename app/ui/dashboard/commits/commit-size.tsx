@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ReferenceLine,
@@ -32,10 +32,18 @@ import {
 } from "@/components/ui/select";
 import CommitSizeTable from "@/app/ui/dashboard/commits/commit-size-table";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import {exportChart, uploadChartToServer} from "@/app/ui/chart-utils";
+import { Download } from "lucide-react";
+import { Button } from "@/app/ui/button";
+import {useReport} from "@/app/contexts/report-context";
 
 export default function CommitSize({ data }: { data: any[] }) {
   const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const {getRepositoryInfo} = useReport();
+  const info = getRepositoryInfo();
 
   const processedData = useMemo(() => {
     return data.map((commit) => {
@@ -98,28 +106,46 @@ export default function CommitSize({ data }: { data: any[] }) {
         <CardTitle className="text-2xl font-bold">
           Commit Size Scatter Plot
         </CardTitle>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">All</SelectItem>
-              {months.map((month) => (
-                <SelectItem key={month} value={month}>
-                  {new Date(month).toLocaleString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className={"flex items-center space-x-2"}>
+                 <Button
+          onClick={() => {
+            uploadChartToServer({
+              chartType: "COMMIT_SIZE",
+              chartRef: chartRef,
+              setIsUploading: setIsUploading,
+              owner: info.owner,
+              repo: info.repo,
+            });
+          }}
+          disabled={isUploading}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {isUploading ? "Uploading..." : "Upload Chart"}
+        </Button>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="all">All</SelectItem>
+                {months.map((month) => (
+                  <SelectItem key={month} value={month}>
+                    {new Date(month).toLocaleString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         {/*Chart*/}
         <ChartContainer
+          ref={chartRef}
           config={{
             totalChanges: {
               label: "Total Changes",
@@ -201,12 +227,17 @@ export default function CommitSize({ data }: { data: any[] }) {
             </ScatterChart>
           </ResponsiveContainer>
         </ChartContainer>
+
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Click on a point to view detailed commit information
         </div>
 
         <div className={"mt-4"}>
-          <BestPractices title={"Keep Commits Atomic"} icon={"check"} variant={"success"}>
+          <BestPractices
+            title={"Keep Commits Atomic"}
+            icon={"check"}
+            variant={"success"}
+          >
             <ul className="space-y-1 list-disc pl-5">
               <li>
                 Make each commit a single unit of work focused on one task or

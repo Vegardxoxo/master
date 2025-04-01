@@ -203,14 +203,14 @@ export type PullRequestData = {
 
 export type Repository = {
   id: string;
-  name: string;
+  username: string;
+  repoName: string;
   url: string;
   platform: string;
   createdAt: Date;
   updatedAt: Date;
-  courseInstanceId?: string;
-  courseInstance?: CourseInstance;
-  members: User[];
+  courseInstanceId: string;
+  githubId: string;
 };
 
 export type FileData = {

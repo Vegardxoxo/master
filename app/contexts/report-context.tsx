@@ -1,5 +1,4 @@
 "use client";
-
 import {
   createContext,
   useContext,
@@ -14,11 +13,19 @@ type MetricData = {
   timestamp: string;
 };
 
+type RepositoryInfo = {
+  owner: string;
+  repo: string;
+};
+
 type ReportContextType = {
   addMetricData: (key: string, data: any, metrics: Record<string, any>) => void;
   getMetricData: (key: string) => MetricData | undefined;
   getAllMetricsData: () => Record<string, MetricData>;
   clearMetricsData: () => void;
+  setRepositoryInfo: (info: RepositoryInfo) => void;
+  getRepositoryInfo: () => RepositoryInfo;
+  clearRepositoryInfo: () => void;
 };
 
 const ReportContext = createContext<ReportContextType | undefined>(undefined);
@@ -27,6 +34,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
   const [metricsData, setMetricsData] = useState<Record<string, MetricData>>(
     {},
   );
+  const [repositoryInfo, setRepositoryInfoState] = useState<
+    RepositoryInfo | undefined
+  >(undefined);
 
   const addMetricData = useCallback(
     (key: string, data: any, metrics: Record<string, any>) => {
@@ -60,6 +70,18 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     setMetricsData({});
   }, []);
 
+  const setRepositoryInfo = useCallback((info: RepositoryInfo) => {
+    setRepositoryInfoState(info);
+  }, []);
+
+  const getRepositoryInfo = useCallback(() => {
+    return repositoryInfo;
+  }, [repositoryInfo]);
+
+  const clearRepositoryInfo = useCallback(() => {
+    setRepositoryInfoState(undefined);
+  }, []);
+
   return (
     <ReportContext.Provider
       value={{
@@ -67,6 +89,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
         getMetricData,
         getAllMetricsData,
         clearMetricsData,
+        setRepositoryInfo,
+        getRepositoryInfo,
+        clearRepositoryInfo,
       }}
     >
       {children}
@@ -76,10 +101,8 @@ export function ReportProvider({ children }: { children: ReactNode }) {
 
 export function useReport() {
   const context = useContext(ReportContext);
-
   if (context === undefined) {
     throw new Error("useReport must be used within a ReportProvider");
   }
-
   return context;
 }
