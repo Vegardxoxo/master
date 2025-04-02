@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useReport } from "@/app/contexts/report-context"
+import { useReport } from "../../../contexts/report-context" // Fixed import path
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,12 +12,13 @@ import { FileText } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox"
-import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown"
-import { CommitQualitySection } from "@/app/ui/dashboard/report/report-sections/commit-quality"
-import SensitiveFilesSection from "@/app/ui/dashboard/report/report-sections/sensitive-files"
-import TestCoverageSection from "@/app/ui/dashboard/report/report-sections/test-coverage"
-import DirectCommitsSection from "@/app/ui/dashboard/report/report-sections/direct-commits"
-import CommitFrequency from "@/app/ui/dashboard/report/report-sections/commit-frequency"
+import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown" // Fixed import path
+import { CommitQualitySection } from "./report-sections/commit-quality" // Fixed import path
+import SensitiveFilesSection from "./report-sections/sensitive-files" // Fixed import path
+import TestCoverageSection from "./report-sections/test-coverage" // Fixed import path
+import DirectCommitsSection from "./report-sections/direct-commits" // Fixed import path
+import CommitFrequency from "./report-sections/commit-frequency" // Fixed import path
+import MarkdownPreview from "./markdown-preview"
 
 export default function GenerateReport({
   owner,
@@ -33,12 +34,10 @@ export default function GenerateReport({
   // Extract metrics data
   const commitQuality = allMetrics.commitQuality?.metrics
   const testCoverage = allMetrics.TestCoverage?.metrics
-  const fileCoverage = allMetrics.FileCoverage?.data
+  const fileCoverage = allMetrics.FileCoverage?.metrics
   const sensitiveFiles = allMetrics.sensitiveFiles?.data
   const directCommits = allMetrics.directCommits?.metrics
   const commitFrequency = allMetrics.commitFrequency?.metrics
-
-  console.log("commitFrequency in generate-report", JSON.stringify(commitFrequency, null, 2))
 
   // State for included sections
   const [includedSections, setIncludedSections] = useState({
@@ -334,36 +333,24 @@ export default function GenerateReport({
           <Button variant="outline" onClick={clearMetricsData}>
             Clear Metrics
           </Button>
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(getMarkdown())
+              toast({
+                title: "Copied to clipboard",
+                description: "The markdown report has been copied to your clipboard.",
+              })
+            }}
+            className="flex items-center gap-1"
+          >
+            <FileText className="h-4 w-4" />
+            Copy Report
+          </Button>
         </CardFooter>
       </Card>
 
       {/* Right side - Markdown Preview */}
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Markdown Preview</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                navigator.clipboard.writeText(getMarkdown())
-                toast({
-                  title: "Copied to clipboard",
-                  description: "The markdown report has been copied to your clipboard.",
-                })
-              }}
-            >
-              <FileText className="h-4 w-4 mr-1" />
-              Copy Markdown
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-muted rounded-md h-[calc(100vh-12rem)] overflow-auto">
-            <pre className="text-xs p-4 whitespace-pre-wrap">{getMarkdown()}</pre>
-          </div>
-        </CardContent>
-      </Card>
+      <MarkdownPreview markdown={getMarkdown()} title="Report Preview" />
     </div>
   )
 }

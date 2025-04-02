@@ -13,26 +13,13 @@ import { useReport } from "@/app/contexts/report-context";
 type SortField = "filePath" | "statements" | "branches" | "functions" | "lines";
 type SortDirection = "asc" | "desc";
 
-export function FileCoverageTable({
+export function CoverageTableReport({
   fileData,
 }: {
   fileData: FileCoverageData[];
 }) {
   const [sortField, setSortField] = useState<SortField>("filePath");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const { addMetricData } = useReport();
-
-  useEffect(() => {
-    const metrics = fileData.map((file) => ({
-      filePath: file.filePath,
-      statements: file.statements,
-      branches: file.branches,
-      functions: file.functions,
-      lines: file.lines,
-      lastUpdated: new Date().toISOString(),
-    }));
-    addMetricData("FileCoverage", fileData, metrics);
-  }, [fileData, addMetricData]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {

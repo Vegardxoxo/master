@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
 import type { VisibleSections } from "@/app/lib/definitions";
 import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";
-import GenerateReport from "@/app/ui/dashboard/report/report";
+import GenerateReport from "@/app/ui/dashboard/report/generate-report";
 import { useReport } from "@/app/contexts/report-context";
 
 type DashboardProps = {

@@ -19,7 +19,7 @@ import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wra
 import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
 import { ReportProvider, useReport } from "@/app/contexts/report-context";
-import GenerateReport from "@/app/ui/dashboard/report/report";
+import GenerateReport from "@/app/ui/dashboard/report/generate-report";
 import Link from "next/link";
 import { cn } from "@/app/lib/utils/utils";
 import { lusitana } from "@/app/ui/fonts";

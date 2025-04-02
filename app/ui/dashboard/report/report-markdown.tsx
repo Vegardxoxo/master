@@ -1,3 +1,5 @@
+import {getShortFilePath} from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
+
 export interface ReportData {
   reportTitle: string
   summary: string
@@ -81,7 +83,8 @@ ${summary}
         const escapedMessage = messageField?.replace(/\|/g, "\\|") || ""
         const escapedReason = item.reason?.replace(/\|/g, "\\|") || ""
 
-        markdown += `| ${escapedMessage} | ${item.category} | ${escapedReason} |\n`
+        markdown += `| ${escapedMessage} | ${item.category} | ${escapedReason} |
+`
       })
 
       markdown += "\n"
@@ -96,7 +99,9 @@ ${commitQualityRecommendations}
 
   // Commit Frequency Section
   if (includedSections.commitFrequency && commitFrequency) {
-    markdown += `## Commit Frequency Analysis\n\n`
+    markdown += `## Commit Frequency Analysis
+
+`
 
     // Check if we should include the image
     // The includeImage property is directly on the commitFrequency object
@@ -108,22 +113,26 @@ ${commitQualityRecommendations}
       // Create an absolute URL if baseUrl is provided
       const imageUrl = commitFrequency.url
       console.log("imageUrl", imageUrl)
-      markdown += `![Commit Frequency Chart](${imageUrl})\n\n`
+      markdown += `![Commit Frequency Chart](${imageUrl})
+
+`
     }
 
     // Add recommendations
     if (commitFrequencyRecommendations) {
-      markdown += `### Recommendations\n\n${commitFrequencyRecommendations}\n\n`
+      markdown += `### Recommendations
+
+${commitFrequencyRecommendations}
+
+`
     }
   }
 
   // Combined Test Coverage Section
   if (includedSections.testCoverage && (testCoverage || (fileCoverage && fileCoverage.length > 0))) {
-    markdown += `## Test Coverage Analysis
+    markdown += `## Test Coverage Analysis\n\n`
 
-`
-
-    // Overall test coverage metrics
+    // Overall test coverage metrics in a table
     if (testCoverage) {
       // Safely access properties with fallbacks
       const overall = testCoverage.overall || testCoverage.percentage || 0
@@ -132,18 +141,19 @@ ${commitQualityRecommendations}
       const functions = testCoverage.functions || 0
       const lines = testCoverage.lines || 0
 
-      markdown += `### Overall Coverage Metrics
+      markdown += `### Overall Coverage Metrics\n\n`
 
-- **Overall Coverage**: ${overall.toFixed(1)}%
-- **Statements**: ${statements.toFixed(1)}%
-- **Branches**: ${branches.toFixed(1)}%
-- **Functions**: ${functions.toFixed(1)}%
-- **Lines**: ${lines.toFixed(1)}%
-
-`
+      // Create a table for overall metrics
+      markdown += `| Metric | Coverage |\n`
+      markdown += `|--------|----------|\n`
+      markdown += `| Overall | ${overall.toFixed(1)}% |\n`
+      markdown += `| Statements | ${statements.toFixed(1)}% |\n`
+      markdown += `| Branches | ${branches.toFixed(1)}% |\n`
+      markdown += `| Functions | ${functions.toFixed(1)}% |\n`
+      markdown += `| Lines | ${lines.toFixed(1)}% |\n\n`
     }
 
-    // File-specific coverage
+    // File-specific coverage in a table
     if (fileCoverage && fileCoverage.length > 0) {
       const lowCoverageThreshold = 70
       const lowCoverageFiles = fileCoverage.filter((file: any) => {
@@ -154,26 +164,23 @@ ${commitQualityRecommendations}
       })
 
       if (lowCoverageFiles.length > 0) {
-        markdown += `### Files with Low Coverage
+        markdown += `### Files with Low Coverage\n\n`
 
-${lowCoverageFiles
-  .map(
-    (file: any) =>
-      `- **${file.filePath}**: Statements: ${file.statements}%, Branches: ${file.branches}%, Functions: ${file.functions}%`,
-  )
-  .join("\n")}
+        // Create a table for files with low coverage
+        markdown += `| File | Statements | Branches | Functions |\n`
+        markdown += `|------|------------|----------|----------|\n`
 
-`
+        lowCoverageFiles.forEach((file: any) => {
+          markdown += `| \`${getShortFilePath(file.filePath)}\` | ${file.statements}% | ${file.branches}% | ${file.functions}% |\n`
+        })
+
+        markdown += `\n`
       } else {
-        markdown += "### File Coverage\n\nAll files have good coverage levels.\n\n"
+        markdown += `### File Coverage\n\nAll files have good coverage levels.\n\n`
       }
     }
 
-    markdown += `### Recommendations
-
-${coverageRecommendations}
-
-`
+    markdown += `### Recommendations\n\n${coverageRecommendations}\n\n`
   }
 
   // Direct Commits Section
@@ -201,7 +208,8 @@ ${totalDirectCommits} commit${totalDirectCommits !== 1 ? "s" : ""} made directly
       // Add each contributor with their commit count
       sortedAuthors.forEach((author: string) => {
         const escapedAuthor = author.replace(/\|/g, "\\|")
-        markdown += `| ${escapedAuthor} | ${authorCount[author] || 0} |\n`
+        markdown += `| ${escapedAuthor} | ${authorCount[author] || 0} |
+`
       })
 
       markdown += "\n"
@@ -248,7 +256,14 @@ ${sensitiveFilesRecommendations}
 
 These files may contain credentials, tokens, or other secrets and should be handled with care:
 
-${sensFiles.map((file: any) => `- \`${file.path}\``).join("\n")}
+| File Path |
+|-----------|
+${sensFiles
+  .map((file: any) => {
+    const escapedPath = file.path.replace(/\|/g, "\\|")
+    return `| \`${escapedPath}\` |`
+  })
+  .join("\n")}
 
 `
       }
@@ -258,7 +273,14 @@ ${sensFiles.map((file: any) => `- \`${file.path}\``).join("\n")}
 
 These files may contain temporary data or system-specific configurations:
 
-${warnFiles.map((file: any) => `- \`${file.path}\``).join("\n")}
+| File Path |
+|-----------|
+${warnFiles
+  .map((file: any) => {
+    const escapedPath = file.path.replace(/\|/g, "\\|")
+    return `| \`${escapedPath}\` |`
+  })
+  .join("\n")}
 
 `
       }
