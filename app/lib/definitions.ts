@@ -257,7 +257,7 @@ export interface BranchConnection {
 }
 
 export interface ReportSectionProps {
-  fileData: any;
+  metrics: any;
   additionalData?: any;
   recommendations: string;
   setRecommendations: (value: string) => void;

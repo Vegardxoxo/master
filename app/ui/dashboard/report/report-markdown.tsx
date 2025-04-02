@@ -1,4 +1,4 @@
-import {getShortFilePath} from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
+import { getShortFilePath } from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils"
 
 export interface ReportData {
   reportTitle: string
@@ -7,6 +7,8 @@ export interface ReportData {
   commitQualityRecommendations: string
   commitFrequency: any
   commitFrequencyRecommendations: string
+  commitContributions?: any
+  commitContributionsRecommendations?: string
   testCoverage: any
   coverageRecommendations: string
   fileCoverage: any
@@ -18,6 +20,7 @@ export interface ReportData {
   includedSections: {
     commitQuality: boolean
     commitFrequency?: boolean
+    commitContributions?: boolean
     testCoverage: boolean
     sensitiveFiles: boolean
     directCommits: boolean
@@ -32,6 +35,8 @@ export function reportMarkdown(data: ReportData): string {
     commitQualityRecommendations,
     commitFrequency,
     commitFrequencyRecommendations,
+    commitContributions,
+    commitContributionsRecommendations,
     testCoverage,
     coverageRecommendations,
     fileCoverage,
@@ -125,6 +130,42 @@ ${commitQualityRecommendations}
 ${commitFrequencyRecommendations}
 
 `
+    }
+  }
+
+  // Commit Contributions Section
+  if (includedSections.commitContributions && commitContributions) {
+    markdown += `## Commit Contributions Analysis\n\n`
+
+    // Check if we should include the image
+    const shouldIncludeImage = commitContributions.includeImage !== false
+
+    // If we should include the image and we have image data
+    if (shouldIncludeImage && commitContributions.url) {
+      const imageUrl = commitContributions.url
+      markdown += `![Commit Contributions Chart](${imageUrl})\n\n`
+    }
+
+    // Add contributors table if available
+    if (commitContributions.contributors && commitContributions.contributors.length > 0) {
+      markdown += `### Contributors\n\n`
+      markdown += `| Contributor | Email | Additions | Deletions | Total |\n`
+      markdown += `|-------------|-------|-----------|-----------|-------|\n`
+
+      // Add each contributor with their stats
+      commitContributions.contributors.forEach((contributor: any) => {
+        const escapedName = (contributor.name || "").replace(/\|/g, "\\|")
+        const escapedEmail = (contributor.email || "").replace(/\|/g, "\\|")
+
+        markdown += `| ${escapedName} | ${escapedEmail} | +${contributor.additions || 0} | -${contributor.deletions || 0} | ${contributor.total || 0} |\n`
+      })
+
+      markdown += `\n`
+    }
+
+    // Add recommendations
+    if (commitContributionsRecommendations) {
+      markdown += `### Recommendations\n\n${commitContributionsRecommendations}\n\n`
     }
   }
 

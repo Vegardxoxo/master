@@ -11,7 +11,7 @@ interface TestCoverageProps extends ReportSectionProps {
 }
 
 export default function TestCoverageSection({
-  fileData,
+  metrics,
   fileCoverage,
   recommendations,
   setRecommendations,
@@ -20,7 +20,7 @@ export default function TestCoverageSection({
   // Check if fileData exists and if section should be included
 
   console.log("filecoverage", fileCoverage)
-  if (!fileData || !include || !fileCoverage) {
+  if (!metrics || !include || !fileCoverage) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -41,7 +41,7 @@ export default function TestCoverageSection({
     functions = 0,
     lines = 0,
     percentage = 0,
-  } = fileData || {};
+  } = metrics || {};
 
   return (
     <div className="space-y-6">

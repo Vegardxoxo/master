@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import CommitContributionsTable from "@/app/ui/dashboard/commits/commit-contribu
 import { Button } from "@/app/ui/button";
 import { exportChart, uploadChartToServer } from "@/app/ui/chart-utils";
 import { Download } from "lucide-react";
-import {useReport} from "@/app/contexts/report-context";
+import { useReport } from "@/app/contexts/report-context";
 
 const CustomBar = (props: any) => {
   const { x, y, width, height, fill } = props;
@@ -46,17 +46,20 @@ const CustomBar = (props: any) => {
 
 export default function CommitContributions({
   data,
+  url,
 }: {
   data: Record<string, CommitStats>;
+  url: string | undefined;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<CommitStats | null>(null);
+  const [imageUrl, setImageUrl] = useState(url);
+  const [isUploading, setIsUploading] = useState(false);
+  // context store
+  const { getRepositoryInfo, addMetricData } = useReport();
+  const info = getRepositoryInfo();
 
-    const [isUploading, setIsUploading] = useState(false);
-    const { getRepositoryInfo } = useReport();
-    const info = getRepositoryInfo();
-
-    const chartData = Object.keys(data).map((key) => ({
+  const chartData = Object.keys(data).map((key) => ({
     name: data[key].name,
     additions: data[key].additions,
     deletions: data[key].deletions,
@@ -67,7 +70,25 @@ export default function CommitContributions({
     commits: data[key].commits,
   }));
   const chartRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    const metrics = {
+      contributors: chartData.map((entry) => {
+        return {
+          name: entry.name,
+          additions: entry.additions,
+          co_authored_lines: entry.co_authored_lines,
+          deletions: entry.deletions,
+          email: entry.email,
+          total: entry.total,
+        };
+      }),
+      url: imageUrl,
+      includeImage: !!imageUrl,
+    };
+
+    addMetricData("commitContributions", data, metrics);
+  }, [data]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -114,6 +135,10 @@ export default function CommitContributions({
               setIsUploading: setIsUploading,
               owner: info.owner,
               repo: info.repo,
+            }).then((r) => {
+              if (typeof r === "string") {
+                setImageUrl(r);
+              }
             });
           }}
           disabled={isUploading}

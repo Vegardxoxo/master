@@ -13,13 +13,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileData, ReportSectionProps } from "@/app/lib/definitions";
 
 export default function SensitiveFilesSection({
-  fileData,
+  metrics,
   recommendations,
   setRecommendations,
   include,
 }: ReportSectionProps) {
-  const sensitiveFiles = fileData.length > 0 ? fileData[0] || [] : [];
-  const warningFiles = fileData.length > 1 ? fileData[1] || [] : [];
+  const sensitiveFiles = metrics.length > 0 ? metrics[0] || [] : [];
+  const warningFiles = metrics.length > 1 ? metrics[1] || [] : [];
 
   if (!include || (!sensitiveFiles?.length && !warningFiles?.length)) {
     return (

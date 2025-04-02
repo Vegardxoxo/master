@@ -34,7 +34,7 @@ export default async function Page(props: {
 
   return (
     <ReportProvider>
-      <div className="container mx-auto py-6">
+      <div className="max-w-[2000px] mx-auto py-6">
         {/*Project subject and group.*/}
         <header>
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
