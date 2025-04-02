@@ -19,6 +19,7 @@ import TestCoverageSection from "./report-sections/test-coverage" // Fixed impor
 import DirectCommitsSection from "./report-sections/direct-commits" // Fixed import path
 import CommitFrequency from "./report-sections/commit-frequency" // Fixed import path
 import MarkdownPreview from "./markdown-preview"
+import CommitContributions from "@/app/ui/dashboard/report/report-sections/commit-contributions"
 
 export default function GenerateReport({
   owner,
@@ -39,6 +40,8 @@ export default function GenerateReport({
   const directCommits = allMetrics.directCommits?.metrics
   const commitFrequency = allMetrics.commitFrequency?.metrics
 
+  const commitContributions = allMetrics.commitContributions?.metrics
+
   // State for included sections
   const [includedSections, setIncludedSections] = useState({
     commitQuality: true,
@@ -46,6 +49,7 @@ export default function GenerateReport({
     testCoverage: true,
     sensitiveFiles: true,
     directCommits: true,
+    commitContributions: true,
   })
 
   // State for report content
@@ -81,6 +85,13 @@ export default function GenerateReport({
   const [directCommitsRecommendations, setDirectCommitsRecommendations] = useState(
     "Avoid committing directly to the main branch. Use feature branches and pull requests instead to ensure code quality and facilitate code reviews.",
   )
+
+  // Change the useState for contributionsRecommendations to include default text
+  const [contributionsRecommendations, setContributionsRecommendations] = useState(
+    commitContributions
+      ? "The distribution of contributions shows how work is shared across the team. Ensure that knowledge isn't siloed with a few contributors and promote collaborative practices like pair programming and code reviews to spread expertise."
+      : "No commit contributions data available. Consider analyzing how work is distributed across the team to identify potential bottlenecks or knowledge silos.",
+  )
   const [additionalNotes, setAdditionalNotes] = useState("")
 
   // Generate markdown content based on the metrics and user input
@@ -92,6 +103,8 @@ export default function GenerateReport({
       commitQualityRecommendations,
       commitFrequency,
       commitFrequencyRecommendations,
+      commitContributions,
+      commitContributionsRecommendations: contributionsRecommendations,
       testCoverage,
       coverageRecommendations,
       fileCoverage,
@@ -224,6 +237,19 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
+              {commitContributions && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-contributions"
+                    checked={includedSections.commitContributions}
+                    onCheckedChange={() => toggleSection("commitContributions")}
+                  />
+                  <Label htmlFor="include-contributions" className="cursor-pointer">
+                    Commit Contributions
+                  </Label>
+                </div>
+              )}
             </div>
           </div>
 
@@ -265,12 +291,19 @@ export default function GenerateReport({
               >
                 Commit Frequency
               </TabsTrigger>
+
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="contributions"
+              >
+                Contributions
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="commits">
               <div className={"mb-10"}>
                 <CommitQualitySection
-                  fileData={commitQuality}
+                  metrics={commitQuality}
                   recommendations={commitQualityRecommendations}
                   setRecommendations={setCommitQualityRecommendations}
                   include={includedSections.commitQuality}
@@ -280,7 +313,7 @@ export default function GenerateReport({
 
             <TabsContent value="coverage">
               <TestCoverageSection
-                fileData={testCoverage}
+                metrics={testCoverage}
                 fileCoverage={fileCoverage}
                 recommendations={coverageRecommendations}
                 setRecommendations={setCoverageRecommendations}
@@ -290,7 +323,7 @@ export default function GenerateReport({
 
             <TabsContent value="sensitive">
               <SensitiveFilesSection
-                fileData={sensitiveFiles}
+                metrics={sensitiveFiles}
                 recommendations={sensitiveFilesRecommendations}
                 setRecommendations={setSensitiveFilesRecommendations}
                 include={includedSections.sensitiveFiles}
@@ -299,7 +332,7 @@ export default function GenerateReport({
 
             <TabsContent value="directCommits">
               <DirectCommitsSection
-                fileData={directCommits}
+                metrics={directCommits}
                 recommendations={directCommitsRecommendations}
                 setRecommendations={setDirectCommitsRecommendations}
                 include={includedSections.directCommits}
@@ -308,10 +341,19 @@ export default function GenerateReport({
 
             <TabsContent value="frequency">
               <CommitFrequency
-                fileData={commitFrequency}
+                metrics={commitFrequency}
                 recommendations={commitFrequencyRecommendations}
                 setRecommendations={setCommitFrequencyRecommendations}
                 include={includedSections.commitFrequency}
+              />
+            </TabsContent>
+
+            <TabsContent value="contributions">
+              <CommitContributions
+                metrics={commitContributions}
+                recommendations={contributionsRecommendations}
+                setRecommendations={setContributionsRecommendations}
+                include={includedSections.commitContributions}
               />
             </TabsContent>
           </Tabs>

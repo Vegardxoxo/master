@@ -11,20 +11,20 @@ import { Info, ImageOff } from "lucide-react";
 import Image from "next/image";
 
 export default function CommitFrequency({
-  fileData,
+  metrics,
   recommendations,
   setRecommendations,
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
-  const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState(fileData?.includeImage || false);
+  const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState(metrics?.includeImage || false);
 
   // Update the report context when the checkbox changes
   const handleIncludeImageChange = (checked: boolean) => {
     setIncludeImageInMarkdown(checked);
-      if (fileData) {
+      if (metrics) {
         addMetricData("commitFrequency", null, {
-          ...fileData,
+          ...metrics,
           includeImage: checked,
         })
       }
@@ -51,12 +51,12 @@ export default function CommitFrequency({
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-2">
-          {fileData && fileData.url ? (
+          {metrics && metrics.url ? (
             <div className="space-y-4">
               <div className="relative rounded-lg border overflow-hidden bg-muted/20">
                 {/* Image container with aspect ratio */}
-                <div className="relative aspect-[16/9] w-full">
-                  <Image src={fileData.url} alt={"Commit Frequency Chart"} height={800} width={2174} />
+                <div className="relative aspect-[16/9] w-full h-full">
+                  <Image src={metrics.url} alt={"Commit Frequency Chart"} height={1200} width={1200} />
                 </div>
 
                 {/* Image info overlay */}

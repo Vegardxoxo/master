@@ -1,80 +1,72 @@
-"use client";
+"use client"
 
-import React, { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import type { VisibleSections } from "@/app/lib/definitions";
-import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";
-import GenerateReport from "@/app/ui/dashboard/report/generate-report";
-import { useReport } from "@/app/contexts/report-context";
+import React, { useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation"
+import type { VisibleSections } from "@/app/lib/definitions"
+import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react"
+import GenerateReport from "@/app/ui/dashboard/report/generate-report"
+import { useReport } from "@/app/contexts/report-context"
 
 type DashboardProps = {
-  owner: string;
-  repo: string;
+  owner: string
+  repo: string
   children: {
-    contributorsList: React.ReactNode;
-    projectInfo: React.ReactNode;
-    milestones: React.ReactNode;
-    files: React.ReactNode;
-    coverage: React.ReactNode;
-    commitQuality: React.ReactNode;
-    commitFrequency: React.ReactNode;
-    commitContribution: React.ReactNode;
-    commitSize: React.ReactNode;
-    branch: React.ReactNode;
-    branchingStrategy: React.ReactNode;
-    pipeline: React.ReactNode;
-    pullRequestOverview: React.ReactNode;
-    pullRequestMembers: React.ReactNode;
-    pullRequestComments: React.ReactNode;
-    pullRequestReviews: React.ReactNode;
-  };
-};
+    contributorsList: React.ReactNode
+    projectInfo: React.ReactNode
+    milestones: React.ReactNode
+    files: React.ReactNode
+    coverage: React.ReactNode
+    commitQuality: React.ReactNode
+    commitFrequency: React.ReactNode
+    commitContribution: React.ReactNode
+    commitSize: React.ReactNode
+    branch: React.ReactNode
+    branchingStrategy: React.ReactNode
+    pipeline: React.ReactNode
+    pullRequestOverview: React.ReactNode
+    pullRequestMembers: React.ReactNode
+    pullRequestComments: React.ReactNode
+    pullRequestReviews: React.ReactNode
+  }
+}
 
 export default function Dashboard({ owner, repo, children }: DashboardProps) {
-  const [visibleSections, setVisibleSections] = React.useState<VisibleSections>(
-    {
-      overview: {
-        visible: true,
-        contributors: true,
-        milestones: true,
-        info: true,
-        files: true,
-        coverage: true,
-      },
-      commits: {
-        visible: true,
-        quality: true,
-        frequency: true,
-        size: true,
-        contributions: true,
-      },
-      branches: {
-        visible: true,
-        to_main: true,
-        strategy: true,
-      },
-      pipelines: true,
-      pullRequests: {
-        visible: true,
-        overview: true,
-        members: true,
-        comments: true,
-        reviews: true,
-      },
+  const [visibleSections, setVisibleSections] = React.useState<VisibleSections>({
+    overview: {
+      visible: true,
+      contributors: true,
+      milestones: true,
+      info: true,
+      files: true,
+      coverage: true,
     },
-  );
+    commits: {
+      visible: true,
+      quality: true,
+      frequency: true,
+      size: true,
+      contributions: true,
+    },
+    branches: {
+      visible: true,
+      to_main: true,
+      strategy: true,
+    },
+    pipelines: true,
+    pullRequests: {
+      visible: true,
+      overview: true,
+      members: true,
+      comments: true,
+      reviews: true,
+    },
+  })
 
   const toggleSection = (section: keyof VisibleSections) => {
     setVisibleSections((prev) => {
-      const sectionValue = prev[section];
+      const sectionValue = prev[section]
 
       if (typeof sectionValue === "object" && "visible" in sectionValue) {
         return {
@@ -83,54 +75,47 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
             ...sectionValue,
             visible: !sectionValue.visible,
           },
-        };
+        }
       } else {
         return {
           ...prev,
           [section]: !sectionValue,
-        };
+        }
       }
-    });
-  };
+    })
+  }
 
-  const toggleSubsection = (
-    section: keyof VisibleSections,
-    subsection: string,
-  ) => {
+  const toggleSubsection = (section: keyof VisibleSections, subsection: string) => {
     setVisibleSections((prev) => {
-      const sectionValue = prev[section];
-      if (
-        typeof sectionValue === "object" &&
-        "visible" in sectionValue &&
-        subsection in sectionValue
-      ) {
+      const sectionValue = prev[section]
+      if (typeof sectionValue === "object" && "visible" in sectionValue && subsection in sectionValue) {
         return {
           ...prev,
           [section]: {
             ...sectionValue,
             [subsection]: !sectionValue[subsection],
           },
-        };
+        }
       }
-      return prev;
-    });
-  };
+      return prev
+    })
+  }
 
-  const { setRepositoryInfo } = useReport();
+  const { setRepositoryInfo } = useReport()
 
   useEffect(() => {
     setRepositoryInfo({
       owner: owner,
       repo: repo,
-    });
-  }, [owner, repo]);
+    })
+  }, [owner, repo])
 
   return (
     <div className="min-h-screen">
       <main className="py-6">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className=" mx-auto w-full px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="mb-6 bg-white border border-gray-200 rounded-lg p-1 w-fit">
+            <TabsList className="mb-6 bg-white border border-gray-200 rounded-lg p-0 w-fit">
               <TabsTrigger
                 value="overview"
                 className="text-sm font-medium px-4 py-2 data-[state=active]:bg-sky-500 data-[state=active]:text-white rounded-md transition-all"
@@ -167,23 +152,17 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                           <LayoutDashboard className="h-5 w-5" />
                           Repository Overview
                         </CardTitle>
-                        <CardDescription>
-                          General information and contributors
-                        </CardDescription>
+                        <CardDescription>General information and contributors</CardDescription>
                       </CardHeader>
                       <CardContent className="grid gap-6">
                         <div className={"grid grid-cols-2 gap-6"}>
-                          {visibleSections.overview.contributors &&
-                            children.contributorsList}
-                          {visibleSections.overview.info &&
-                            children.projectInfo}
+                          {visibleSections.overview.contributors && children.contributorsList}
+                          {visibleSections.overview.info && children.projectInfo}
                         </div>
                         <div className={"grid grid-cols-1 gap-6"}>
-                          {visibleSections.overview.milestones &&
-                            children.milestones}
+                          {visibleSections.overview.milestones && children.milestones}
                           {visibleSections.overview.files && children.files}
-                          {visibleSections.overview.coverage &&
-                            children.coverage}
+                          {visibleSections.overview.coverage && children.coverage}
                         </div>
                       </CardContent>
                     </Card>
@@ -198,18 +177,10 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        {visibleSections.commits.quality && (
-                          <div>{children.commitQuality}</div>
-                        )}
-                        {visibleSections.commits.frequency && (
-                          <div>{children.commitFrequency}</div>
-                        )}
-                        {visibleSections.commits.size && (
-                          <div>{children.commitSize}</div>
-                        )}
-                        {visibleSections.commits.contributions && (
-                          <div>{children.commitContribution}</div>
-                        )}
+                        {visibleSections.commits.quality && <div>{children.commitQuality}</div>}
+                        {visibleSections.commits.frequency && <div>{children.commitFrequency}</div>}
+                        {visibleSections.commits.size && <div>{children.commitSize}</div>}
+                        {visibleSections.commits.contributions && <div>{children.commitContribution}</div>}
                       </CardContent>
                     </Card>
                   )}
@@ -225,8 +196,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       <CardContent>
                         <div className={"grid  gap-6"}>
                           {visibleSections.branches.to_main && children.branch}
-                          {visibleSections.branches.strategy &&
-                            children.branchingStrategy}
+                          {visibleSections.branches.strategy && children.branchingStrategy}
                         </div>
                       </CardContent>
                     </Card>
@@ -239,33 +209,21 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                           CI/CD
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        {visibleSections.pipelines && children.pipeline}
-                      </CardContent>
+                      <CardContent>{visibleSections.pipelines && children.pipeline}</CardContent>
                     </Card>
                   )}
 
                   {visibleSections.pullRequests.visible && (
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-2xl font-bold">
-                          Pull Request Analysis
-                        </CardTitle>
+                        <CardTitle className="text-2xl font-bold">Pull Request Analysis</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        {visibleSections.pullRequests.overview && (
-                          <div>{children.pullRequestOverview}</div>
-                        )}
-                        {visibleSections.pullRequests.members && (
-                          <div> {children.pullRequestMembers}</div>
-                        )}
-                        {visibleSections.pullRequests.comments && (
-                          <div>{children.pullRequestComments}</div>
-                        )}
+                        {visibleSections.pullRequests.overview && <div>{children.pullRequestOverview}</div>}
+                        {visibleSections.pullRequests.members && <div> {children.pullRequestMembers}</div>}
+                        {visibleSections.pullRequests.comments && <div>{children.pullRequestComments}</div>}
 
-                        {visibleSections.pullRequests.reviews && (
-                          <div>{children.pullRequestReviews}</div>
-                        )}
+                        {visibleSections.pullRequests.reviews && <div>{children.pullRequestReviews}</div>}
                       </CardContent>
                     </Card>
                   )}
@@ -274,7 +232,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
             </TabsContent>
 
             <TabsContent value="report">
-              <div className="flex-grow space-y-6">
+              <div className="flex-grow space-y-6 w-full">
                 <GenerateReport owner={owner} repo={repo} />
               </div>
             </TabsContent>
@@ -282,5 +240,6 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
         </div>
       </main>
     </div>
-  );
+  )
 }
+

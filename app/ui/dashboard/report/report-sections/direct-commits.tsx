@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 
 export default function DirectCommitsSection({
-  fileData,
+  metrics,
   recommendations,
   setRecommendations,
   include,
 }: ReportSectionProps) {
-  if (!include || !fileData) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -24,8 +24,8 @@ export default function DirectCommitsSection({
     );
   }
 
-  const sortedAuthors = fileData[0] ? fileData[0] : [];
-  const authorCount = fileData[1] ? fileData[1] : {};
+  const sortedAuthors = metrics[0] ? metrics[0] : [];
+  const authorCount = metrics[1] ? metrics[1] : {};
 
   return (
     <div className="space-y-6">

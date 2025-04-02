@@ -8,7 +8,7 @@ import { commitMessageClassification } from "@/app/ui/courses/columns";
 import { ReportSectionProps } from "@/app/lib/definitions";
 
 export function CommitQualitySection({
-  fileData,
+  metrics,
   recommendations,
   setRecommendations,
   include,
@@ -16,12 +16,12 @@ export function CommitQualitySection({
   const [qualityScore, setQualityScore] = useState<number>(0);
 
   useEffect(() => {
-    if (fileData?.qualityScore) {
-      setQualityScore(Number.parseFloat(fileData.qualityScore));
+    if (metrics?.qualityScore) {
+      setQualityScore(Number.parseFloat(metrics.qualityScore));
     }
-  }, [fileData]);
+  }, [metrics]);
 
-  if (!include || !fileData) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -37,7 +37,7 @@ export function CommitQualitySection({
 
   // Get status icon based on quality status
   const getStatusIcon = () => {
-    switch (fileData.qualityStatus) {
+    switch (metrics.qualityStatus) {
       case "good":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "moderate":
@@ -51,7 +51,7 @@ export function CommitQualitySection({
 
   // Get badge variant based on quality status
   const getBadgeVariant = () => {
-    switch (fileData.qualityStatus) {
+    switch (metrics.qualityStatus) {
       case "good":
         return "outline" as const;
       case "moderate":
@@ -83,8 +83,8 @@ export function CommitQualitySection({
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-green-700 dark:text-green-400">
-              {fileData.categoryCounts?.Excellent || 0} commits (
-              {fileData.excellentPercentage}%)
+              {metrics.categoryCounts?.Excellent || 0} commits (
+              {metrics.excellentPercentage}%)
             </p>
           </CardContent>
         </Card>
@@ -97,8 +97,8 @@ export function CommitQualitySection({
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-yellow-700 dark:text-yellow-400">
-              {fileData.categoryCounts?.Good || 0} commits (
-              {fileData.goodPercentage}%)
+              {metrics.categoryCounts?.Good || 0} commits (
+              {metrics.goodPercentage}%)
             </p>
           </CardContent>
         </Card>
@@ -111,15 +111,15 @@ export function CommitQualitySection({
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-red-700 dark:text-red-400">
-              {fileData.categoryCounts?.["Needs Improvement"] || 0} commits (
-              {fileData.needsImprovementPercentage}%)
+              {metrics.categoryCounts?.["Needs Improvement"] || 0} commits (
+              {metrics.needsImprovementPercentage}%)
             </p>
           </CardContent>
         </Card>
       </div>
 
       <GenericDataTable
-        data={fileData.justifications}
+        data={metrics.justifications}
         columns={commitMessageClassification}
       />
 
