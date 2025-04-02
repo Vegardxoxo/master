@@ -6,6 +6,7 @@ import {
 import { DataTable } from "@/app/ui/courses/tables/overview-table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
 import { fetchRepoOverview } from "@/app/lib/data/data";
+import { ReportProvider } from "@/app/contexts/report-context";
 
 interface pageProps {
   name: string;
@@ -35,7 +36,7 @@ export default async function CoursePage(props: {
     );
   }
 
-  // Fetch repositories from database
+  //Fetch repositories from database
   const { repositories, error: repoError } = await getRepositories(
     courseInstance.id,
   );

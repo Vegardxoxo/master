@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Dialog,
   DialogContent,
@@ -8,11 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from "recharts";
 import type { LLMResponse } from "@/app/lib/definitions";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import CommitQualityTable from "@/app/ui/dashboard/commits/commit-quality-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import { useReport } from "@/app/contexts/report-context";
 
 interface ActiveShape {
   cx: number;
@@ -29,9 +31,63 @@ interface ActiveShape {
 }
 
 export default function CommitQuality({ data }: { data: LLMResponse[] }) {
+  const { addMetricData } = useReport();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Process data and add to report context
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    // Calculate category counts
+    const categoryCounts = data.reduce<Record<string, number>>(
+      (acc, commit) => {
+        if (!acc[commit.category]) {
+          acc[commit.category] = 0;
+        }
+        acc[commit.category]++;
+        return acc;
+      },
+      {},
+    );
+
+    // Calculate metrics
+    const totalCommits = data.length;
+    const excellentPercentage =
+      ((categoryCounts["Excellent"] || 0) / totalCommits) * 100;
+    const goodPercentage = ((categoryCounts["Good"] || 0) / totalCommits) * 100;
+    const needsImprovementPercentage =
+      ((categoryCounts["Needs Improvement"] || 0) / totalCommits) * 100;
+
+    // Calculate overall quality score (0-10)
+    const qualityScore =
+      (excellentPercentage * 1 +
+        goodPercentage * 0.6 +
+        needsImprovementPercentage * 0.2) /
+      10;
+
+    // Prepare metrics for report
+    const metrics = {
+      totalCommits,
+      categoryCounts,
+      excellentPercentage: excellentPercentage.toFixed(1),
+      goodPercentage: goodPercentage.toFixed(1),
+      needsImprovementPercentage: needsImprovementPercentage.toFixed(1),
+      qualityScore: qualityScore.toFixed(1),
+      qualityStatus:
+        qualityScore >= 7 ? "good" : qualityScore >= 4 ? "moderate" : "poor",
+      justifications: data.map((value) => ({
+        commit_message: value.commit_message,
+        reason: value.reason,
+        category: value.category,
+        url: value.url,
+      })),
+    };
+
+    // Add data and metrics to the report context
+    addMetricData("commitQuality", data, metrics);
+  }, [data, addMetricData]);
 
   const onPieEnter = useCallback((_: any, index: number) => {
     setActiveIndex(index);

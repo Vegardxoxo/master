@@ -16,14 +16,14 @@ import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 import {parseCommitStatsGraphQLEnhanched} from "@/app/lib/utils/email-similarity";
 
-const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
-});
-
 // const octokit = new Octokit({
-//   auth: process.env.PERSONAL,
+//   auth: process.env.TOKEN,
+//   baseUrl: "https://git.ntnu.no/api/v3",
 // });
+
+const octokit = new Octokit({
+  auth: process.env.PERSONAL,
+});
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -112,7 +112,7 @@ export async function fetchBranches(owner: string, repo: string) {
  * Fetches details for a single branch (including its latest commit info).
  * @param owner - GitHub owner/organization
  * @param repo  - Repository name
- * @param branch - DirectCommits name
+ * @param branch - DirectCommitsWrapper name
  */
 export async function fetchBranchDetails(
   owner: string,

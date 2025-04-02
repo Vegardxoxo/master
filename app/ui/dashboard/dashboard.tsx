@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react";
-import { lusitana } from "@/app/ui/fonts";
-import Link from "next/link";
+import React, { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -10,11 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardNavigation } from "@/app/ui/dashboard/dashboard-navigation";
-import { cn } from "@/app/lib/utils/utils";
-import { VisibleSections } from "@/app/lib/definitions";
-import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
+import type { VisibleSections } from "@/app/lib/definitions";
 import { GitBranch, GitCommit, LayoutDashboard, GitMerge } from "lucide-react";
+import GenerateReport from "@/app/ui/dashboard/report/generate-report";
+import { useReport } from "@/app/contexts/report-context";
 
 type DashboardProps = {
   owner: string;
@@ -117,150 +116,169 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
     });
   };
 
+  const { setRepositoryInfo } = useReport();
+
+  useEffect(() => {
+    setRepositoryInfo({
+      owner: owner,
+      repo: repo,
+    });
+  }, [owner, repo]);
+
   return (
     <div className="min-h-screen">
-      {/*Project subject and group.*/}
-      <header>
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            <Link
-              href={`https://git.ntnu.no/${owner}/${repo}`}
-              className={cn(
-                lusitana.className,
-                "hover:underline text-blue-600",
-              )}
-            >
-              {owner}/{repo} Dashboard
-            </Link>
-          </h1>
-        </div>
-      </header>
-
       <main className="py-6">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:space-x-4">
-            {/*Sticky navigation*/}
-            <div className="lg:min-w-fit mb-6 lg:mb-0">
-              <div className="sticky top-6">
-                <DashboardNavigation
-                  onToggle={toggleSection}
-                  onToggleSubsection={toggleSubsection}
-                  visibleSections={visibleSections}
-                />
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="mb-6 bg-white border border-gray-200 rounded-lg p-1 w-fit">
+              <TabsTrigger
+                value="overview"
+                className="text-sm font-medium px-4 py-2 data-[state=active]:bg-sky-500 data-[state=active]:text-white rounded-md transition-all"
+              >
+                Repository Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="report"
+                className="text-sm font-medium px-4 py-2 data-[state=active]:bg-sky-500 data-[state=active]:text-white rounded-md transition-all"
+              >
+                Generate Report
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview">
+              <div className="flex flex-col lg:flex-row lg:space-x-4">
+                {/*Sticky navigation*/}
+                <div className="lg:min-w-fit mb-6 lg:mb-0">
+                  <div className="sticky top-6">
+                    <DashboardNavigation
+                      onToggle={toggleSection}
+                      onToggleSubsection={toggleSubsection}
+                      visibleSections={visibleSections}
+                    />
+                  </div>
+                </div>
+
+                {/*Card container*/}
+                <div className="flex-grow space-y-6">
+                  {visibleSections.overview.visible && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                          <LayoutDashboard className="h-5 w-5" />
+                          Repository Overview
+                        </CardTitle>
+                        <CardDescription>
+                          General information and contributors
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid gap-6">
+                        <div className={"grid grid-cols-2 gap-6"}>
+                          {visibleSections.overview.contributors &&
+                            children.contributorsList}
+                          {visibleSections.overview.info &&
+                            children.projectInfo}
+                        </div>
+                        <div className={"grid grid-cols-1 gap-6"}>
+                          {visibleSections.overview.milestones &&
+                            children.milestones}
+                          {visibleSections.overview.files && children.files}
+                          {visibleSections.overview.coverage &&
+                            children.coverage}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {visibleSections.commits.visible && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                          <GitCommit className="h-5 w-5" />
+                          Commit Analysis
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {visibleSections.commits.quality && (
+                          <div>{children.commitQuality}</div>
+                        )}
+                        {visibleSections.commits.frequency && (
+                          <div>{children.commitFrequency}</div>
+                        )}
+                        {visibleSections.commits.size && (
+                          <div>{children.commitSize}</div>
+                        )}
+                        {visibleSections.commits.contributions && (
+                          <div>{children.commitContribution}</div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {visibleSections.branches.visible && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                          <GitBranch className="h-5 w-5" />
+                          Branching Strategy
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className={"grid  gap-6"}>
+                          {visibleSections.branches.to_main && children.branch}
+                          {visibleSections.branches.strategy &&
+                            children.branchingStrategy}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {visibleSections.pipelines && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                          <GitMerge className="h-5 w-5" />
+                          CI/CD
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {visibleSections.pipelines && children.pipeline}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {visibleSections.pullRequests.visible && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-2xl font-bold">
+                          Pull Request Analysis
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {visibleSections.pullRequests.overview && (
+                          <div>{children.pullRequestOverview}</div>
+                        )}
+                        {visibleSections.pullRequests.members && (
+                          <div> {children.pullRequestMembers}</div>
+                        )}
+                        {visibleSections.pullRequests.comments && (
+                          <div>{children.pullRequestComments}</div>
+                        )}
+
+                        {visibleSections.pullRequests.reviews && (
+                          <div>{children.pullRequestReviews}</div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
-            </div>
+            </TabsContent>
 
-            {/*Card container*/}
-            <div className="flex-grow space-y-6">
-              {visibleSections.overview.visible && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                      <LayoutDashboard className="h-5 w-5" />
-                      Repository Overview
-                    </CardTitle>
-                    <CardDescription>
-                      General information and contributors
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-6">
-                    <div className={"grid grid-cols-2 gap-6"}>
-                      {visibleSections.overview.contributors &&
-                        children.contributorsList}
-                      {visibleSections.overview.info && children.projectInfo}
-                    </div>
-                    <div className={"grid grid-cols-1 gap-6"}>
-                      {visibleSections.overview.milestones &&
-                        children.milestones}
-                      {visibleSections.overview.files && children.files}
-                      {visibleSections.overview.coverage && children.coverage}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {visibleSections.commits.visible && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                      <GitCommit className="h-5 w-5" />
-                      Commit Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {visibleSections.commits.quality && (
-                      <div>{children.commitQuality}</div>
-                    )}
-                    {visibleSections.commits.frequency && (
-                      <div>{children.commitFrequency}</div>
-                    )}
-                    {visibleSections.commits.size && (
-                      <div>{children.commitSize}</div>
-                    )}
-                    {visibleSections.commits.contributions && (
-                      <div>{children.commitContribution}</div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {visibleSections.branches.visible && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                      <GitBranch className="h-5 w-5" />
-                      Branching Strategy
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={"grid  gap-6"}>
-                      {visibleSections.branches.to_main && children.branch}
-                      {visibleSections.branches.strategy &&
-                        children.branchingStrategy}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              {visibleSections.pipelines && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                      <GitMerge className="h-5 w-5" />
-                      CI/CD
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {visibleSections.pipelines && children.pipeline}
-                  </CardContent>
-                </Card>
-              )}
-
-              {visibleSections.pullRequests.visible && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold">
-                      Pull Request Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {visibleSections.pullRequests.overview && (
-                      <div>{children.pullRequestOverview}</div>
-                    )}
-                    {visibleSections.pullRequests.members && (
-                      <div> {children.pullRequestMembers}</div>
-                    )}
-                    {visibleSections.pullRequests.comments && (
-                      <div>{children.pullRequestComments}</div>
-                    )}
-
-                    {visibleSections.pullRequests.reviews && (
-                      <div>{children.pullRequestReviews}</div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
+            <TabsContent value="report">
+              <div className="flex-grow space-y-6">
+                <GenerateReport owner={owner} repo={repo} />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

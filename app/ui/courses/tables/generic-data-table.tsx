@@ -36,7 +36,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export function CommitsTable<TData, TValue>({
+export function GenericDataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {

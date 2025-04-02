@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  EyeIcon,
   ClipboardIcon,
-  TrashIcon,
+  EyeIcon,
   PencilIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function ViewProject({ repo, owner }: { repo: string; owner: string }) {
+export function ViewProject({
+  repo,
+  owner,
+  databaseId,
+}: {
+  repo: string;
+  owner: string;
+  databaseId: string;
+}) {
   const pathname = usePathname();
 
   return (

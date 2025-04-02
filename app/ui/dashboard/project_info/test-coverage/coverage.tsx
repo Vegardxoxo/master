@@ -11,7 +11,6 @@ export default async function TestCoverage({
   repo: string;
 }) {
   const coverage = await getCoverageReport(owner, repo);
-
   if (coverage.error || !coverage.metrics || !coverage.fileData) {
     return (
       <Warning

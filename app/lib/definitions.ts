@@ -1,3 +1,5 @@
+import {ReportSectionProps} from "@/app/ui/dashboard/report/report-sections/sensitive-files";
+
 export type repositoryOverview = {
   databaseId: string;
   owner: string;
@@ -116,7 +118,7 @@ export type CommitEval = {
 };
 
 export type LLMResponse = {
-  url: string;
+  url?: string;
   commit_message: string;
   category: "Excellent" | "Good" | "Needs Improvement";
   reason: string;
@@ -201,17 +203,18 @@ export type PullRequestData = {
 
 export type Repository = {
   id: string;
-  name: string;
+  username: string;
+  repoName: string;
   url: string;
   platform: string;
   createdAt: Date;
   updatedAt: Date;
-  courseInstanceId?: string;
-  courseInstance?: CourseInstance;
-  members: User[];
+  courseInstanceId: string;
+  githubId: string;
 };
 
 export type FileData = {
+  id: string;
   path: string;
   extension: string;
 };
@@ -251,4 +254,12 @@ export interface BranchConnection {
   isLinked: boolean;
   issueTitle: string | null;
   url: string;
+}
+
+export interface ReportSectionProps {
+  fileData: any;
+  additionalData?: any;
+  recommendations: string;
+  setRecommendations: (value: string) => void;
+  include: boolean;
 }

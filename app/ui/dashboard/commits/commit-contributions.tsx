@@ -1,38 +1,73 @@
-"use client"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LabelList } from "recharts"
-import { ChartContainer } from "@/components/ui/chart"
-import type { CommitStats } from "@/app/lib/definitions"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import CommitContributionsTable from "@/app/ui/dashboard/commits/commit-contributions-table"
+"use client";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  LabelList,
+} from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import type { CommitStats } from "@/app/lib/definitions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import React, { useRef, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import CommitContributionsTable from "@/app/ui/dashboard/commits/commit-contributions-table";
+import { Button } from "@/app/ui/button";
+import { exportChart, uploadChartToServer } from "@/app/ui/chart-utils";
+import { Download } from "lucide-react";
+import {useReport} from "@/app/contexts/report-context";
 
 const CustomBar = (props: any) => {
-  const { x, y, width, height, fill } = props
-  const minHeight = 5
-  const barHeight = Math.max(height, minHeight)
+  const { x, y, width, height, fill } = props;
+  const minHeight = 5;
+  const barHeight = Math.max(height, minHeight);
 
-  const adjustedY = height < minHeight ? y - (minHeight - height) : y
+  const adjustedY = height < minHeight ? y - (minHeight - height) : y;
 
-  return <rect x={x} y={adjustedY} width={width} height={barHeight} fill={fill} />
-}
+  return (
+    <rect x={x} y={adjustedY} width={width} height={barHeight} fill={fill} />
+  );
+};
 
 export default function CommitContributions({
   data,
 }: {
-  data: Record<string, CommitStats>
+  data: Record<string, CommitStats>;
 }) {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedUser, setSelectedUser] = useState<CommitStats | null>(null)
-  const chartData = Object.keys(data).map((key) => ({
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<CommitStats | null>(null);
+
+    const [isUploading, setIsUploading] = useState(false);
+    const { getRepositoryInfo } = useReport();
+    const info = getRepositoryInfo();
+
+    const chartData = Object.keys(data).map((key) => ({
     name: data[key].name,
     additions: data[key].additions,
     deletions: data[key].deletions,
     co_authored_lines: data[key].co_authored_lines,
-    total: data[key].additions + data[key].deletions + data[key].co_authored_lines,
+    total:
+      data[key].additions + data[key].deletions + data[key].co_authored_lines,
     email: key,
     commits: data[key].commits,
-  }))
+  }));
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -41,27 +76,55 @@ export default function CommitContributions({
           <p className="font-bold">{label}</p>
           <p className="text-green-500">Additions: {payload[0].value}</p>
           <p className="text-red-500">Deletions: {payload[1].value}</p>
-          <p className="text-orange-500">Co-authored lines: {payload[2].value}</p>
-          <p className="font-semibold">Total: {payload[0].value + payload[1].value + payload[2].value}</p>
+          <p className="text-orange-500">
+            Co-authored lines: {payload[2].value}
+          </p>
+          <p className="font-semibold">
+            Total: {payload[0].value + payload[1].value + payload[2].value}
+          </p>
         </div>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   const handleBarClick = (barData: any) => {
-    setSelectedUser(data[barData.email])
-    setIsOpen(true)
-  }
+    setSelectedUser(data[barData.email]);
+    setIsOpen(true);
+  };
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Contributions per Group Member</CardTitle>
-        <CardDescription>Distribution of additions, deletions, and co-authored lines</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="flex items-center">
+          <div>
+            <CardTitle className="text-2xl font-bold">
+              Contributions per Group Member
+            </CardTitle>
+            <CardDescription>
+              Distribution of additions, deletions, and co-authored lines
+            </CardDescription>
+          </div>
+        </div>
+        <Button
+          onClick={() => {
+            uploadChartToServer({
+              chartType: "CONTRIBUTIONS",
+              chartRef: chartRef,
+              setIsUploading: setIsUploading,
+              owner: info.owner,
+              repo: info.repo,
+            });
+          }}
+          disabled={isUploading}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {isUploading ? "Uploading..." : "Upload Chart"}
+        </Button>
       </CardHeader>
       <CardContent>
         <ChartContainer
+          ref={chartRef}
           config={{
             additions: {
               label: "Additions",
@@ -79,7 +142,10 @@ export default function CommitContributions({
           className="h-[600px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 30, right: 40, left: 60, bottom: 80 }}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 30, right: 40, left: 60, bottom: 80 }}
+            >
               <XAxis
                 dataKey="name"
                 angle={-45}
@@ -87,18 +153,27 @@ export default function CommitContributions({
                 height={100}
                 interval={0}
                 tick={(props) => {
-                  const { x, y, payload } = props
-                  const name = payload.value
-                  const displayName = name.length > 15 ? `${name.substring(0, 12)}...` : name
+                  const { x, y, payload } = props;
+                  const name = payload.value;
+                  const displayName =
+                    name.length > 15 ? `${name.substring(0, 12)}...` : name;
 
                   return (
                     <g transform={`translate(${x},${y})`}>
-                      <text x={0} y={0} dy={16} textAnchor="end" fill="#666" fontSize={13} transform="rotate(-45)">
+                      <text
+                        x={0}
+                        y={0}
+                        dy={16}
+                        textAnchor="end"
+                        fill="#666"
+                        fontSize={13}
+                        transform="rotate(-45)"
+                      >
                         {displayName}
                       </text>
                       <title>{name}</title>
                     </g>
-                  )
+                  );
                 }}
               />
               <YAxis
@@ -106,7 +181,7 @@ export default function CommitContributions({
                   value: "Lines of Code",
                   angle: -90,
                   position: "insideLeft",
-                    offset: -45,
+                  offset: -45,
                   style: { fontSize: "14px", textAnchor: "middle" },
                 }}
                 tick={{ fontSize: 13 }}
@@ -166,7 +241,9 @@ export default function CommitContributions({
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
             <DialogHeader className="h-fit">
-              <DialogTitle className="text-2xl font-bold">Commit Details</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                Commit Details
+              </DialogTitle>
               <DialogDescription className="text-lg font-semibold">
                 Detailed information for {selectedUser && selectedUser.name}.
               </DialogDescription>
@@ -176,6 +253,5 @@ export default function CommitContributions({
         </Dialog>
       </CardContent>
     </Card>
-  )
+  );
 }
-

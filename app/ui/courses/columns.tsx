@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import {BranchConnection, Commit, repositoryOverview} from "@/app/lib/definitions";
+import {BranchConnection, Commit, LLMResponse, repositoryOverview} from "@/app/lib/definitions";
 import {
   AlertCircle,
   CheckCircle2,
@@ -114,7 +114,7 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
       const details = row.original;
       return (
         <div className="flex justify-end gap-2">
-          <ViewProject owner={details.owner} repo={details.name} />
+          <ViewProject owner={details.owner} repo={details.name} databaseId={details.databaseId} />
           <AddToClipboard url={details.url} />
           <DeleteRepoButton id={details.databaseId} />
           <UpdateRepository id={details.databaseId} />
@@ -325,4 +325,51 @@ export const DevelopmentBranchColumns: ColumnDef<BranchConnection>[] = [
       },
     },
   ];
+
+export const commitMessageClassification: ColumnDef<LLMResponse>[] = [
+  {
+    accessorKey: "commit_message",
+    header: "Commit Message",
+    cell: ({ row }) => (
+      <Link href={row.original.url} className="font-medium text-blue-600 underline hover:cursor-pointer">{row.original.commit_message}</Link>
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        Category
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const category = row.original.category;
+      const badgeStyle = {
+        Excellent: "bg-green-100 text-green-700 border-green-300",
+        Good: "bg-blue-100 text-blue-700 border-blue-300",
+        "Needs Improvement": "bg-red-100 text-red-700 border-red-300",
+      }[category];
+
+      return (
+        <Badge variant="outline" className={badgeStyle}>
+          {category}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "reason",
+    header: "Reason",
+    cell: ({ row }) => <span className="text-gray-600">{row.original.reason}</span>,
+  },
+];
+
 
