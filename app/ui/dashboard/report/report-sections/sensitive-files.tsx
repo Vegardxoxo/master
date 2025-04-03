@@ -21,7 +21,7 @@ export default function SensitiveFilesSection({
   const sensitiveFiles = metrics.length > 0 ? metrics[0] || [] : [];
   const warningFiles = metrics.length > 1 ? metrics[1] || [] : [];
 
-  if (!include || (!sensitiveFiles?.length && !warningFiles?.length)) {
+  if (!include || !metrics || (!sensitiveFiles?.length && !warningFiles?.length)) {
     return (
       <Card>
         <CardContent className="pt-6">

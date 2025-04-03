@@ -14,8 +14,8 @@ export default async function CommitSizeWrapper({
   const commitData = await fetchAllCommits(owner, repo);
   // Extract SHAs to fetch detailed information about each commit
   const { commitSummary } = parseCommitData(commitData);
-  const { commits } = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
+  const commits = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
   const image_url = await fetchGraphUrl(owner, repo, "COMMIT_SIZE");
 
-  return <CommitSize data={commits} />;
+  return <CommitSize data={commits} url={image_url} />;
 }

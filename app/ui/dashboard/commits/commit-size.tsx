@@ -36,37 +36,22 @@ import {exportChart, uploadChartToServer} from "@/app/ui/chart-utils";
 import { Download } from "lucide-react";
 import { Button } from "@/app/ui/button";
 import {useReport} from "@/app/contexts/report-context";
+import {prepareCommitsData} from "@/app/lib/utils/commits-utils";
 
-export default function CommitSize({ data }: { data: any[] }) {
+export default function CommitSize({ data, url }: { data: any[], url: string }) {
   const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const chartRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>(url);
   const {getRepositoryInfo} = useReport();
   const info = getRepositoryInfo();
-
-  const processedData = useMemo(() => {
-    return data.map((commit) => {
-      const totalChanges = commit.additions + commit.deletions;
-      return {
-        ...commit,
-        committedDate: new Date(commit.committedDate).getTime(),
-        totalChanges: totalChanges === 0 ? 1 : totalChanges,
-        size: Math.log(totalChanges + 1) * 2, // Logarithmic scale for better visualization
-      };
-    });
+    const { processedData, months, uniqueDays, maxChanges } = useMemo(() => {
+    return prepareCommitsData(data);
   }, [data]);
 
-  // Get unique months
-  const months = useMemo(() => {
-    const uniqueMonths = new Set(
-      data.map((commit) => {
-        const date = new Date(commit.committedDate);
-        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-      }),
-    );
-    return Array.from(uniqueMonths).sort();
-  }, [data]);
+
+
 
   // Filter data by month
   const filteredData = useMemo(() => {
@@ -78,6 +63,7 @@ export default function CommitSize({ data }: { data: any[] }) {
     });
   }, [processedData, selectedMonth]);
 
+
   const handleCommitClick = (commit: any) => {
     setSelectedCommit(commit);
   };
@@ -86,19 +72,7 @@ export default function CommitSize({ data }: { data: any[] }) {
     setSelectedCommit(null);
   };
 
-  // Unique days for drawing vertical reference lines
-  const uniqueDays = useMemo(() => {
-    const days = new Set(
-      filteredData.map((item) =>
-        new Date(item.committedDate).setHours(0, 0, 0, 0),
-      ),
-    );
-    return Array.from(days);
-  }, [filteredData]);
 
-  const maxChanges = Math.max(
-    ...filteredData.map((commit) => commit.totalChanges),
-  );
 
   return (
     <Card className="w-full">

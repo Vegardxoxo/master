@@ -34,13 +34,13 @@ export default function GenerateReport({
 
   // Extract metrics data
   const commitQuality = allMetrics.commitQuality?.metrics
+  const directCommits = allMetrics.directCommits?.metrics
+  const commitFrequency = allMetrics.commitFrequency?.metrics
+  const commitContributions = allMetrics.commitContributions?.metrics
+
   const testCoverage = allMetrics.TestCoverage?.metrics
   const fileCoverage = allMetrics.FileCoverage?.metrics
   const sensitiveFiles = allMetrics.sensitiveFiles?.data
-  const directCommits = allMetrics.directCommits?.metrics
-  const commitFrequency = allMetrics.commitFrequency?.metrics
-
-  const commitContributions = allMetrics.commitContributions?.metrics
 
   // State for included sections
   const [includedSections, setIncludedSections] = useState({

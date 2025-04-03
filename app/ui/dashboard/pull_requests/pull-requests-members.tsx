@@ -8,10 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -228,26 +228,38 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
               </div>
             )}
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart
+              <LineChart
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 onClick={handleChartClick}
                 style={{ cursor: "pointer" }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis allowDecimals={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={true}
+                  axisLine={true}
+                  fontSize={12}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  fontSize={12}
+                  tickLine={true}
+                  axisLine={true}
+                />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 {selectedMembers.map((member, index) => (
-                  <Bar
+                  <Line
                     key={member}
+                    type="monotone"
                     dataKey={member}
-                    stackId="a"
-                    fill={memberColors[member]}
+                    stroke={memberColors[member]}
+                    activeDot={{ r: 8, onClick: (e) => console.log(e) }}
+                    dot={{ fill: memberColors[member], r: 4 }}
+                    strokeWidth={2}
                   />
                 ))}
-              </BarChart>
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
