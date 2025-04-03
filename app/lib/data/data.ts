@@ -9,12 +9,10 @@ import {
 import {
   formatTimestamp,
   parseCommitStats,
-  parseCommitStatsGraphQL,
   parsePullRequests,
 } from "@/app/lib/utils/utils";
 import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
-import {parseCommitStatsGraphQLEnhanched} from "@/app/lib/utils/email-similarity";
 
 // const octokit = new Octokit({
 //   auth: process.env.TOKEN,
@@ -371,10 +369,9 @@ export async function fetchCommitStatsGraphQL(
 
   try {
     const response = await octokit.graphql(query, { owner, repo });
-    const commits = Object.values(response.repository);
     // const parsedCommits = parseCommitStatsGraphQL(commits);
-    const parsedCommits = parseCommitStatsGraphQLEnhanched(commits);
-    return { parsedCommits, commits };
+    // const parsedCommits = parseCommitStatsGraphQLEnhanched(commits);
+    return Object.values(response.repository);
   } catch (e) {
     console.error("GraphQL Error:", e);
     throw new Error("Failed to fetch commit details via GraphQL.");

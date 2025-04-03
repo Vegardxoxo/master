@@ -44,13 +44,21 @@ const CustomBar = (props: any) => {
   );
 };
 
+interface CommitContributionsProps {
+  data: Record<string, CommitStats>;
+  projectAverageChanges: number;
+  projectAverageFilesChanged: number;
+  url: string | undefined;
+}
+
 export default function CommitContributions({
   data,
+  projectAverageChanges,
+  projectAverageFilesChanged,
   url,
-}: {
-  data: Record<string, CommitStats>;
-  url: string | undefined;
-}) {
+}: CommitContributionsProps) {
+  console.log("projectAverageChanges", projectAverageChanges);
+  console.log("projectAverageFilesChanged", projectAverageFilesChanged);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<CommitStats | null>(null);
   const [imageUrl, setImageUrl] = useState(url);
@@ -262,6 +270,63 @@ export default function CommitContributions({
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Click on a bar to view detailed contribution information
         </div>
+
+<div className="w-full mt-6">
+            <h3 className="text-lg font-semibold mb-3">Member vs. Project Averages</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-muted/30 p-4 rounded-lg border border-border">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Average Changes per Commit</span>
+                  <span className="text-sm font-bold">Project: {projectAverageChanges.toLocaleString()}</span>
+                </div>
+
+                <div className="space-y-2">
+                  {Object.keys(data).map((email) => (
+                    <div key={`changes-${email}`} className="flex items-center justify-between">
+                      <span className="text-xs truncate max-w-[150px]" title={data[email].name}>
+                        {data[email].name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono">{data[email].average_changes.toLocaleString()}</span>
+                        <span
+                          className={`text-xs ${data[email].average_changes > projectAverageChanges ? "text-green-500" : "text-orange-500"}`}
+                        >
+                          {data[email].average_changes > projectAverageChanges ? "↑" : "↓"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-4 rounded-lg border border-border">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Average Files per Commit</span>
+                  <span className="text-sm font-bold">Project: {projectAverageFilesChanged.toFixed(2)}</span>
+                </div>
+
+                <div className="space-y-2">
+                  {Object.keys(data).map((email) => (
+                    <div key={`files-${email}`} className="flex items-center justify-between">
+                      <span className="text-xs truncate max-w-[150px]" title={data[email].name}>
+                        {data[email].name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono">{data[email].average_files_changed.toFixed(2)}</span>
+                        <span
+                          className={`text-xs ${data[email].average_files_changed > projectAverageFilesChanged ? "text-green-500" : "text-orange-500"}`}
+                        >
+                          {data[email].average_files_changed > projectAverageFilesChanged ? "↑" : "↓"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
         {/*Drill-down*/}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">

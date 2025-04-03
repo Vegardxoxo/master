@@ -66,6 +66,12 @@ export default function CommitContributionsTable({
           </TableCell>
         </TableRow>
         <TableRow>
+          <TableCell>
+             Average files changed per commit
+          </TableCell>
+          <TableCell>{data.average_files_changed.toFixed(1)}</TableCell>
+        </TableRow>
+        <TableRow>
           <TableCell>Co-authored-lines</TableCell>
           <TableCell>{data.co_authored_lines}</TableCell>
         </TableRow>

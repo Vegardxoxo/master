@@ -125,18 +125,20 @@ export type LLMResponse = {
 };
 
 export interface CommitStats {
-  name: string;
   total: number;
   additions: number;
   deletions: number;
   commits: number;
-  average_changes: number;
+  name: string;
   biggest_commit: number;
   biggest_commit_url: string;
   co_authored_lines: number;
-  additions_deletions_ratio: number;
-  group_average: number;
+  average_changes: number;
+  total_files_changed: number;
+  average_files_changed: number;
+  additions_deletions_ratio: any;
 }
+
 
 // export type VisibleSections = {
 //   [key: string]:
