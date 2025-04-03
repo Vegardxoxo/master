@@ -134,40 +134,52 @@ ${commitFrequencyRecommendations}
   }
 
   // Commit Contributions Section
-  if (includedSections.commitContributions && commitContributions) {
-    markdown += `## Commit Contributions Analysis\n\n`
+if (includedSections.commitContributions && commitContributions) {
+  markdown += `## Commit Contributions Analysis\n\n`
 
-    // Check if we should include the image
-    const shouldIncludeImage = commitContributions.includeImage !== false
+  // Check if we should include the image
+  const shouldIncludeImage = commitContributions.includeImage !== false
 
-    // If we should include the image and we have image data
-    if (shouldIncludeImage && commitContributions.url) {
-      const imageUrl = commitContributions.url
-      markdown += `![Commit Contributions Chart](${imageUrl})\n\n`
-    }
-
-    // Add contributors table if available
-    if (commitContributions.contributors && commitContributions.contributors.length > 0) {
-      markdown += `### Contributors\n\n`
-      markdown += `| Contributor | Email | Additions | Deletions | Total |\n`
-      markdown += `|-------------|-------|-----------|-----------|-------|\n`
-
-      // Add each contributor with their stats
-      commitContributions.contributors.forEach((contributor: any) => {
-        const escapedName = (contributor.name || "").replace(/\|/g, "\\|")
-        const escapedEmail = (contributor.email || "").replace(/\|/g, "\\|")
-
-        markdown += `| ${escapedName} | ${escapedEmail} | +${contributor.additions || 0} | -${contributor.deletions || 0} | ${contributor.total || 0} |\n`
-      })
-
-      markdown += `\n`
-    }
-
-    // Add recommendations
-    if (commitContributionsRecommendations) {
-      markdown += `### Recommendations\n\n${commitContributionsRecommendations}\n\n`
-    }
+  // If we should include the image and we have image data
+  if (shouldIncludeImage && commitContributions.url) {
+    const imageUrl = commitContributions.url
+    markdown += `![Commit Contributions Chart](${imageUrl})\n\n`
   }
+
+  // Add project average metrics
+  const avgChanges = commitContributions.groupAverageChanges;
+  const avgFilesChanged = commitContributions.groupAverageFilesChanged;
+
+  if (avgChanges || avgFilesChanged) {
+    markdown += `### Project Averages\n\n`
+    markdown += `- **Average Changes Per Commit**: ${avgChanges || 'N/A'}\n`
+    markdown += `- **Average Files Changed Per Commit**: ${avgFilesChanged || 'N/A'}\n\n`
+  }
+
+  // Add contributors table if available
+  if (commitContributions.contributors && commitContributions.contributors.length > 0) {
+    markdown += `### Contributors\n\n`
+    markdown += `| Name | Total Commits | Additions | Deletions | Co-authored Lines | Avg Changes | Avg Files Changed |\n`
+    markdown += `|------|--------------|-----------|-----------|------------------|------------|------------------|\n`
+
+    // Add each contributor with their stats
+    commitContributions.contributors.forEach((contributor: any) => {
+      // Extract only the first part of the name (before any spaces)
+      const firstName = contributor.name ? contributor.name.split(' ')[0] : ""
+      const escapedName = firstName.replace(/\|/g, "\\|")
+
+      markdown += `| ${escapedName} | ${contributor.commits || 0} | +${contributor.additions || 0} | -${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.average_changes.toFixed(1) || 0} | ${contributor.average_files_changed.toFixed(1) || 0} |\n`
+    })
+
+    markdown += `\n`
+  }
+
+  // Add recommendations
+  if (commitContributionsRecommendations) {
+    markdown += `### Recommendations\n\n${commitContributionsRecommendations}\n\n`
+  }
+}
+
 
   // Combined Test Coverage Section
   if (includedSections.testCoverage && (testCoverage || (fileCoverage && fileCoverage.length > 0))) {

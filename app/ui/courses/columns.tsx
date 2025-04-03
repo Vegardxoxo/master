@@ -226,6 +226,7 @@ export const commitsColumns: ColumnDef<Commit>[] = [
   },
 ]
 
+
 export const DevelopmentBranchColumns: ColumnDef<BranchConnection>[] = [
     {
       accessorKey: "branchName",
@@ -331,7 +332,12 @@ export const commitMessageClassification: ColumnDef<LLMResponse>[] = [
     accessorKey: "commit_message",
     header: "Commit Message",
     cell: ({ row }) => (
-      <Link href={row.original.url} className="font-medium text-blue-600 underline hover:cursor-pointer">{row.original.commit_message}</Link>
+      <Link
+        href={row.original.url}
+        className="font-medium text-blue-600 underline hover:cursor-pointer"
+      >
+        {row.original.commit_message}
+      </Link>
     ),
   },
   {
@@ -368,8 +374,71 @@ export const commitMessageClassification: ColumnDef<LLMResponse>[] = [
   {
     accessorKey: "reason",
     header: "Reason",
-    cell: ({ row }) => <span className="text-gray-600">{row.original.reason}</span>,
+    cell: ({ row }) => (
+      <span className="text-gray-600">{row.original.reason}</span>
+    ),
   },
 ];
 
+export const commmitContributions: ColumnDef<any>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        Name
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <span className="text-gray-800">{row.original.name.split(" ")[0]}</span>
+    ),
+  },
 
+  {
+    accessorKey: "commits",
+    header: "Total commits",
+    cell: ({ row }) => (
+      <p className="text-blue-400 font-bold">
+        {row.original.commits}
+      </p>
+    ),
+  },
+  {
+    accessorKey: "additions",
+    header: "Additions",
+    cell: ({ row }) => (
+      <p className="text-green-500">{row.original.additions}</p>
+    ),
+  },
+  {
+    accessorKey: "deletions",
+    header: "Deletions",
+    cell: ({ row }) => <p className="text-red-500">{row.original.deletions}</p>,
+  },
+
+  {
+    accessorKey: "co_authored_lines",
+    header: "Co-Authored Lines",
+    cell: ({ row }) => (
+      <p className={"text-orange-500"}>{row.original.co_authored_lines}</p>
+    ),
+  },
+  {
+    accessorKey: "average_changes",
+    header: "Avg. Changes",
+    cell: ({ row }) => <p>{row.original.average_changes.toFixed(1)}</p>,
+  },
+  {
+    accessorKey: "average_files_changed",
+    header: "Avg. Files Changed",
+    cell: ({ row }) => <p>{row.original.average_files_changed.toFixed(1)}</p>,
+  },
+];

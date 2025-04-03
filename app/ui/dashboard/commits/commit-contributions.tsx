@@ -76,6 +76,9 @@ export default function CommitContributions({
       data[key].additions + data[key].deletions + data[key].co_authored_lines,
     email: key,
     commits: data[key].commits,
+    average_changes: data[key].average_changes,
+    total_files_changed: data[key].total_files_changed,
+    average_files_changed: data[key].average_files_changed,
   }));
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -85,14 +88,19 @@ export default function CommitContributions({
         return {
           name: entry.name,
           additions: entry.additions,
-          co_authored_lines: entry.co_authored_lines,
           deletions: entry.deletions,
-          email: entry.email,
           total: entry.total,
+          co_authored_lines: entry.co_authored_lines,
+          email: entry.email,
+          commits: entry.commits,
+          average_changes: entry.average_changes,
+          average_files_changed: entry.average_files_changed,
         };
       }),
       url: imageUrl,
       includeImage: !!imageUrl,
+      groupAverageChanges: projectAverageChanges,
+      groupAverageFilesChanged: projectAverageFilesChanged,
     };
 
     addMetricData("commitContributions", data, metrics);
@@ -271,61 +279,92 @@ export default function CommitContributions({
           Click on a bar to view detailed contribution information
         </div>
 
-<div className="w-full mt-6">
-            <h3 className="text-lg font-semibold mb-3">Member vs. Project Averages</h3>
+        <div className="w-full mt-6">
+          <h3 className="text-lg font-semibold mb-3">
+            Member vs. Project Averages
+          </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-muted/30 p-4 rounded-lg border border-border">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Average Changes per Commit</span>
-                  <span className="text-sm font-bold">Project: {projectAverageChanges.toLocaleString()}</span>
-                </div>
-
-                <div className="space-y-2">
-                  {Object.keys(data).map((email) => (
-                    <div key={`changes-${email}`} className="flex items-center justify-between">
-                      <span className="text-xs truncate max-w-[150px]" title={data[email].name}>
-                        {data[email].name}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono">{data[email].average_changes.toLocaleString()}</span>
-                        <span
-                          className={`text-xs ${data[email].average_changes > projectAverageChanges ? "text-green-500" : "text-orange-500"}`}
-                        >
-                          {data[email].average_changes > projectAverageChanges ? "↑" : "↓"}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-muted/30 p-4 rounded-lg border border-border">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">
+                  Average Changes per Commit
+                </span>
+                <span className="text-sm font-bold">
+                  Project: {projectAverageChanges.toLocaleString()}
+                </span>
               </div>
 
-              <div className="bg-muted/30 p-4 rounded-lg border border-border">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Average Files per Commit</span>
-                  <span className="text-sm font-bold">Project: {projectAverageFilesChanged.toFixed(2)}</span>
-                </div>
-
-                <div className="space-y-2">
-                  {Object.keys(data).map((email) => (
-                    <div key={`files-${email}`} className="flex items-center justify-between">
-                      <span className="text-xs truncate max-w-[150px]" title={data[email].name}>
-                        {data[email].name}
+              <div className="space-y-2">
+                {Object.keys(data).map((email) => (
+                  <div
+                    key={`changes-${email}`}
+                    className="flex items-center justify-between"
+                  >
+                    <span
+                      className="text-xs truncate max-w-[150px]"
+                      title={data[email].name}
+                    >
+                      {data[email].name}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono">
+                        {data[email].average_changes.toLocaleString()}
                       </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono">{data[email].average_files_changed.toFixed(2)}</span>
-                        <span
-                          className={`text-xs ${data[email].average_files_changed > projectAverageFilesChanged ? "text-green-500" : "text-orange-500"}`}
-                        >
-                          {data[email].average_files_changed > projectAverageFilesChanged ? "↑" : "↓"}
-                        </span>
-                      </div>
+                      <span
+                        className={`text-xs ${data[email].average_changes > projectAverageChanges ? "text-green-500" : "text-orange-500"}`}
+                      >
+                        {data[email].average_changes > projectAverageChanges
+                          ? "↑"
+                          : "↓"}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-muted/30 p-4 rounded-lg border border-border">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">
+                  Average Files per Commit
+                </span>
+                <span className="text-sm font-bold">
+                  Project: {projectAverageFilesChanged.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {Object.keys(data).map((email) => (
+                  <div
+                    key={`files-${email}`}
+                    className="flex items-center justify-between"
+                  >
+                    <span
+                      className="text-xs truncate max-w-[150px]"
+                      title={data[email].name}
+                    >
+                      {data[email].name}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono">
+                        {data[email].average_files_changed.toFixed(2)}
+                      </span>
+                      <span
+                        className={`text-xs ${data[email].average_files_changed > projectAverageFilesChanged ? "text-green-500" : "text-orange-500"}`}
+                      >
+                        {data[email].average_files_changed >
+                        projectAverageFilesChanged
+                          ? "↑"
+                          : "↓"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+        </div>
 
         {/*Drill-down*/}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
