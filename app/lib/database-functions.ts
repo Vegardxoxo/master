@@ -483,7 +483,7 @@ export async function getCoverageReport(
 export async function fetchGraphUrl(
   owner: string,
   repo: string,
-  type: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "EXPORT",
+  type: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "EXPORT" | "PULL_REQUESTS",
 ): Promise<string> {
   try {
     const result = await findRepositoryByOwnerRepo(owner, repo);

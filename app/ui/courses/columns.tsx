@@ -8,8 +8,8 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronUp,
-  ExternalLink, GitBranch,
-  GitCommit,
+  ExternalLink, Eye, GitBranch,
+  GitCommit, GitPullRequest, MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +22,7 @@ import {
 } from "@/app/ui/courses/buttons";
 import Link from "next/link";
 import {Badge} from "@/components/ui/badge";
+import {UserSummary} from "@/app/lib/utils/pull-requests-utils";
 
 export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
   {
@@ -225,7 +226,6 @@ export const commitsColumns: ColumnDef<Commit>[] = [
     },
   },
 ]
-
 
 export const DevelopmentBranchColumns: ColumnDef<BranchConnection>[] = [
     {
@@ -442,3 +442,112 @@ export const commmitContributions: ColumnDef<any>[] = [
     cell: ({ row }) => <p>{row.original.average_files_changed.toFixed(1)}</p>,
   },
 ];
+
+
+
+export const pullRequestActivity: ColumnDef<UserSummary>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        Member
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-medium mr-2">
+          {row.original.name.charAt(0).toUpperCase()}
+        </div>
+        <span className="font-medium text-gray-800">{row.original.name}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "pullRequests",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        <GitPullRequest className="mr-1 h-4 w-4 text-blue-500" />
+        Pull Requests
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        <span className="font-semibold text-blue-600">{row.original.pullRequests}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "reviews",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        <Eye className="mr-1 h-4 w-4 text-purple-500" />
+        Reviews
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        <span className="font-semibold text-purple-600">{row.original.reviews}</span>
+        {row.original.reviews > 0 && (
+          <div className="ml-2 px-1.5 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
+            {row.original.reviewPercentage}% of total
+          </div>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "comments",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex items-center gap-1"
+      >
+        <MessageSquare className="mr-1 h-4 w-4 text-green-500" />
+        Comments
+        {column.getIsSorted() === "asc" ? (
+          <ChevronUp className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ChevronDown className="ml-2 h-4 w-4" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        <span className="font-semibold text-green-600">{row.original.comments}</span>
+        {row.original.comments > 0 && (
+          <div className="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+            {row.original.commentPercentage}% of total
+          </div>
+        )}
+      </div>
+    ),
+  },
+]

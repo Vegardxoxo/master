@@ -1,5 +1,3 @@
-import { getShortFilePath } from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils"
-
 export interface ReportData {
   reportTitle: string
   summary: string
@@ -9,6 +7,8 @@ export interface ReportData {
   commitFrequencyRecommendations: string
   commitContributions?: any
   commitContributionsRecommendations?: string
+  pullRequests?: any
+  pullRequestsRecommendations?: string
   testCoverage: any
   coverageRecommendations: string
   fileCoverage: any
@@ -21,6 +21,7 @@ export interface ReportData {
     commitQuality: boolean
     commitFrequency?: boolean
     commitContributions?: boolean
+    pullRequests?: boolean
     testCoverage: boolean
     sensitiveFiles: boolean
     directCommits: boolean
@@ -37,6 +38,8 @@ export function reportMarkdown(data: ReportData): string {
     commitFrequencyRecommendations,
     commitContributions,
     commitContributionsRecommendations,
+    pullRequests,
+    pullRequestsRecommendations,
     testCoverage,
     coverageRecommendations,
     fileCoverage,
@@ -88,7 +91,7 @@ ${summary}
         const escapedMessage = messageField?.replace(/\|/g, "\\|") || ""
         const escapedReason = item.reason?.replace(/\|/g, "\\|") || ""
 
-        markdown += `| ${escapedMessage} | ${item.category} | ${escapedReason} |
+        markdown += `| ${escapedMessage} | ${item.classification || item.category} | ${escapedReason} |
 `
       })
 
@@ -114,10 +117,8 @@ ${commitQualityRecommendations}
 
     // If we should include the image and we have image data
     if (shouldIncludeImage && commitFrequency.url) {
-      console.log("commitFrequency MARKDOWN", commitFrequency)
       // Create an absolute URL if baseUrl is provided
       const imageUrl = commitFrequency.url
-      console.log("imageUrl", imageUrl)
       markdown += `![Commit Frequency Chart](${imageUrl})
 
 `
@@ -134,56 +135,113 @@ ${commitFrequencyRecommendations}
   }
 
   // Commit Contributions Section
-if (includedSections.commitContributions && commitContributions) {
-  markdown += `## Commit Contributions Analysis\n\n`
+  if (includedSections.commitContributions && commitContributions) {
+    markdown += `## Commit Contributions Analysis
 
-  // Check if we should include the image
-  const shouldIncludeImage = commitContributions.includeImage !== false
+`
 
-  // If we should include the image and we have image data
-  if (shouldIncludeImage && commitContributions.url) {
-    const imageUrl = commitContributions.url
-    markdown += `![Commit Contributions Chart](${imageUrl})\n\n`
+    // Check if we should include the image
+    const shouldIncludeImage = commitContributions.includeImage !== false
+
+    // If we should include the image and we have image data
+    if (shouldIncludeImage && commitContributions.url) {
+      const imageUrl = commitContributions.url
+      markdown += `![Commit Contributions Chart](${imageUrl})
+
+`
+    }
+
+    // Add contributors table if available
+    if (commitContributions.contributors && commitContributions.contributors.length > 0) {
+      markdown += `### Contributors
+
+| Contributor | Additions | Deletions | Co-authored Lines | Total Lines |
+|-------------|-----------|-----------|------------------|-------------|
+`
+
+      // Add each contributor with their stats
+      commitContributions.contributors.forEach((contributor: any) => {
+        const escapedName = (contributor.name || "").replace(/\|/g, "\\|")
+
+        markdown += `| ${escapedName} | ${contributor.additions || 0} | ${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.total || 0} |
+`
+      })
+
+      markdown += "\n"
+    }
+
+    // Add recommendations
+    if (commitContributionsRecommendations) {
+      markdown += `### Recommendations
+
+${commitContributionsRecommendations}
+
+`
+    }
   }
 
-  // Add project average metrics
-  const avgChanges = commitContributions.groupAverageChanges;
-  const avgFilesChanged = commitContributions.groupAverageFilesChanged;
+  // Pull Requests Section
+  if (includedSections.pullRequests && pullRequests) {
+    markdown += `## Pull Requests Analysis
 
-  if (avgChanges || avgFilesChanged) {
-    markdown += `### Project Averages\n\n`
-    markdown += `- **Average Changes Per Commit**: ${avgChanges || 'N/A'}\n`
-    markdown += `- **Average Files Changed Per Commit**: ${avgFilesChanged || 'N/A'}\n\n`
+`
+
+    // Check if we should include the image
+    const shouldIncludeImage = pullRequests.includeImage !== false
+
+    // If we should include the image and we have image data
+    if (shouldIncludeImage && pullRequests.url) {
+      const imageUrl = pullRequests.url
+      markdown += `![Pull Requests Chart](${imageUrl})
+
+`
+    }
+
+    // Add pull request stats
+    markdown += `### Pull Request Statistics
+
+- **Total Pull Requests**: ${pullRequests.totalPRs || 0}
+- **PRs with Review**: ${pullRequests.prsWithReview || 0} (${pullRequests.prsWithReviewPercentage || 0}%)
+- **PRs without Review**: ${pullRequests.prsWithoutReview || 0} (${pullRequests.prsWithoutReviewPercentage || 0}%)
+- **Average Time to Merge**: ${(pullRequests.averageTimeToMerge || 0).toFixed(2)} hours
+- **Average Comments per PR**: ${(pullRequests.averageCommentsPerPR || 0).toFixed(2)}
+
+`
+
+    // Add user activity table if available
+    if (pullRequests.data && pullRequests.data.length > 0) {
+      markdown += `### Pull Request Activity by User
+
+| User | Pull Requests | Reviews | Reviews % | Comments | Comments % |
+|------|--------------|---------|-----------|----------|------------|
+`
+
+      // Add each user's PR activity
+      pullRequests.data.forEach((user: any) => {
+        const escapedName = user.name.replace(/\|/g, "\\|")
+
+        markdown += `| ${escapedName} | ${user.pullRequests} | ${user.reviews} | ${user.reviewPercentage}% | ${user.comments} | ${user.commentPercentage}% |
+`
+      })
+
+      markdown += "\n"
+    }
+
+    // Add recommendations
+    if (pullRequestsRecommendations) {
+      markdown += `### Recommendations
+
+${pullRequestsRecommendations}
+
+`
+    }
   }
-
-  // Add contributors table if available
-  if (commitContributions.contributors && commitContributions.contributors.length > 0) {
-    markdown += `### Contributors\n\n`
-    markdown += `| Name | Total Commits | Additions | Deletions | Co-authored Lines | Avg Changes | Avg Files Changed |\n`
-    markdown += `|------|--------------|-----------|-----------|------------------|------------|------------------|\n`
-
-    // Add each contributor with their stats
-    commitContributions.contributors.forEach((contributor: any) => {
-      // Extract only the first part of the name (before any spaces)
-      const firstName = contributor.name ? contributor.name.split(' ')[0] : ""
-      const escapedName = firstName.replace(/\|/g, "\\|")
-
-      markdown += `| ${escapedName} | ${contributor.commits || 0} | +${contributor.additions || 0} | -${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.average_changes.toFixed(1) || 0} | ${contributor.average_files_changed.toFixed(1) || 0} |\n`
-    })
-
-    markdown += `\n`
-  }
-
-  // Add recommendations
-  if (commitContributionsRecommendations) {
-    markdown += `### Recommendations\n\n${commitContributionsRecommendations}\n\n`
-  }
-}
-
 
   // Combined Test Coverage Section
   if (includedSections.testCoverage && (testCoverage || (fileCoverage && fileCoverage.length > 0))) {
-    markdown += `## Test Coverage Analysis\n\n`
+    markdown += `## Test Coverage Analysis
+
+`
 
     // Overall test coverage metrics in a table
     if (testCoverage) {
@@ -194,16 +252,17 @@ if (includedSections.commitContributions && commitContributions) {
       const functions = testCoverage.functions || 0
       const lines = testCoverage.lines || 0
 
-      markdown += `### Overall Coverage Metrics\n\n`
+      markdown += `### Overall Coverage Metrics
 
-      // Create a table for overall metrics
-      markdown += `| Metric | Coverage |\n`
-      markdown += `|--------|----------|\n`
-      markdown += `| Overall | ${overall.toFixed(1)}% |\n`
-      markdown += `| Statements | ${statements.toFixed(1)}% |\n`
-      markdown += `| Branches | ${branches.toFixed(1)}% |\n`
-      markdown += `| Functions | ${functions.toFixed(1)}% |\n`
-      markdown += `| Lines | ${lines.toFixed(1)}% |\n\n`
+| Metric | Coverage |
+|--------|----------|
+| Overall | ${overall.toFixed(1)}% |
+| Statements | ${statements.toFixed(1)}% |
+| Branches | ${branches.toFixed(1)}% |
+| Functions | ${functions.toFixed(1)}% |
+| Lines | ${lines.toFixed(1)}% |
+
+`
     }
 
     // File-specific coverage in a table
@@ -217,23 +276,32 @@ if (includedSections.commitContributions && commitContributions) {
       })
 
       if (lowCoverageFiles.length > 0) {
-        markdown += `### Files with Low Coverage\n\n`
+        markdown += `### Files with Low Coverage
 
-        // Create a table for files with low coverage
-        markdown += `| File | Statements | Branches | Functions |\n`
-        markdown += `|------|------------|----------|----------|\n`
+| File | Statements | Branches | Functions |
+|------|------------|----------|----------|
+`
 
         lowCoverageFiles.forEach((file: any) => {
-          markdown += `| \`${getShortFilePath(file.filePath)}\` | ${file.statements}% | ${file.branches}% | ${file.functions}% |\n`
+          markdown += `| \`${file.filePath}\` | ${file.statements}% | ${file.branches}% | ${file.functions}% |
+`
         })
 
-        markdown += `\n`
+        markdown += "\n"
       } else {
-        markdown += `### File Coverage\n\nAll files have good coverage levels.\n\n`
+        markdown += `### File Coverage
+
+All files have good coverage levels.
+
+`
       }
     }
 
-    markdown += `### Recommendations\n\n${coverageRecommendations}\n\n`
+    markdown += `### Recommendations
+
+${coverageRecommendations}
+
+`
   }
 
   // Direct Commits Section
@@ -309,12 +377,13 @@ ${sensitiveFilesRecommendations}
 
 These files may contain credentials, tokens, or other secrets and should be handled with care:
 
-| File Path |
-|-----------|
+| File Path | Reason |
+|-----------|--------|
 ${sensFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` |`
+    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
+    return `| \`${escapedPath}\` | ${escapedReason} |`
   })
   .join("\n")}
 
@@ -326,12 +395,13 @@ ${sensFiles
 
 These files may contain temporary data or system-specific configurations:
 
-| File Path |
-|-----------|
+| File Path | Reason |
+|-----------|--------|
 ${warnFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` |`
+    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
+    return `| \`${escapedPath}\` | ${escapedReason} |`
   })
   .join("\n")}
 
@@ -355,4 +425,3 @@ Generated on ${new Date().toLocaleDateString()} by Git Workflow Analysis Tool`
 
   return markdown
 }
-

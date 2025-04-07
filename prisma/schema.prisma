@@ -22,6 +22,7 @@ enum ChartType {
   COMMIT_SIZE
   CONTRIBUTIONS
   EXPORT
+  PULL_REQUESTS
 }
 
 model User {

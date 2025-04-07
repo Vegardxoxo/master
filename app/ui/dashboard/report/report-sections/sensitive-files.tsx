@@ -18,10 +18,7 @@ export default function SensitiveFilesSection({
   setRecommendations,
   include,
 }: ReportSectionProps) {
-  const sensitiveFiles = metrics.length > 0 ? metrics[0] || [] : [];
-  const warningFiles = metrics.length > 1 ? metrics[1] || [] : [];
-
-  if (!include || !metrics || (!sensitiveFiles?.length && !warningFiles?.length)) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -34,6 +31,8 @@ export default function SensitiveFilesSection({
       </Card>
     );
   }
+  const sensitiveFiles = metrics.length > 0 ? metrics[0] || [] : [];
+  const warningFiles = metrics.length > 1 ? metrics[1] || [] : [];
 
   return (
     <Card>
@@ -49,7 +48,6 @@ export default function SensitiveFilesSection({
 
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
           <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
             <CardContent className="pt-6">
               <p className="text-sm text-red-800 dark:text-red-300 font-medium flex items-center">
