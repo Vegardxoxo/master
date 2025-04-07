@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,11 @@ import {
 } from "@/components/ui/select";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 import { createChartData } from "@/app/lib/utils/utils";
+import { useReport } from "@/app/contexts/report-context";
+import { Button } from "@/app/ui/button";
+import { uploadChartToServer } from "@/app/ui/chart-utils";
+import { Download } from "lucide-react";
+import { transformPullRequestActivityData } from "@/app/lib/utils/pull-requests-utils";
 
 type DialogData = {
   title: string;
@@ -81,16 +86,25 @@ const COLORS = [
   "#b2df8a",
 ];
 
-export function PullRequestsMembers({ data }: { data: PullRequestData }) {
+export function PullRequestsMembers({
+  data,
+  url,
+}: {
+  data: PullRequestData;
+  url: string;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [dialogData, setDialogData] = useState<DialogData | null>(null);
   const members = Object.keys(data.prsByMember);
   const milestones = Array.from(data.milestones);
-
   const [selectedMembers, setSelectedMembers] = useState<string[]>(members);
   const [selectedMilestone, setSelectedMilestone] = useState<string>("all");
-
   const chartData = createChartData(data, selectedMembers, selectedMilestone);
+  const { addMetricData, getRepositoryInfo } = useReport();
+  const info = getRepositoryInfo();
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageURL, setImageURL] = useState<string | undefined>(url);
 
   const memberColors = useMemo(() => {
     return members.reduce(
@@ -166,11 +180,62 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
     return null;
   }
 
+  const metrics = useMemo(() => {
+    return {
+      totalPRs: data.totalPRs,
+      openPRs: data.openPRs,
+      closedPRs: data.closedPRs,
+      averageTimeToMerge: data.averageTimeToMerge,
+      prsByMember: data.prsByMember,
+      reviewsByMember: data.reviewsByMember,
+      commentsByMembers: data.commentsByMembers,
+      prsWithReview: data.prsWithReview,
+      prsWithReviewPercentage:
+        Math.round((data.prsWithReview / data.totalPRs) * 100) || 0,
+      prsWithoutReviewPercentage: Math.round((data.prsWithoutReview / data.totalPRs) * 100) || 0,
+      prsWithoutReview: data.prsWithoutReview,
+      averageCommentsPerPR: data.averageCommentsPerPR,
+      labelCounts: data.labelCounts,
+      totalComments: data.totalComments,
+      url: imageURL,
+      includeImage: !!imageURL,
+    };
+  }, [data]);
+
+  useEffect(() => {
+    const tableData = transformPullRequestActivityData(metrics);
+    addMetricData("pullRequests", tableData, metrics);
+  }, [data]);
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Pull Request Overview</CardTitle>
-        <CardDescription>Summary of pull request activity</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="flex items-center">
+          <div>
+            <CardTitle className="text-2xl font-bold">
+              Pull Request Overview
+            </CardTitle>
+            <CardDescription>Summary of pull request activity</CardDescription>
+          </div>
+        </div>
+        <Button
+          onClick={() => {
+            uploadChartToServer({
+              chartType: "PULL_REQUESTS",
+              chartRef: chartRef,
+              setIsUploading: setIsUploading,
+              owner: info.owner,
+              repo: info.repo,
+            }).then((r) => {
+              if (typeof r === "string") {
+                setImageURL(r);
+              }
+            });
+          }}
+          disabled={isUploading}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {imageURL ? "Replace chart" : "Upload Chart"}
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
@@ -227,7 +292,7 @@ export function PullRequestsMembers({ data }: { data: PullRequestData }) {
                 </Select>
               </div>
             )}
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={400} ref={chartRef}>
               <LineChart
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}

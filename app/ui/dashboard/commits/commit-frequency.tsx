@@ -142,7 +142,7 @@ export default function CommitFrequency({
           disabled={isUploading}
         >
           <Download className="mr-2 h-4 w-4" />
-          {isUploading ? "Uploading..." : "Upload Chart"}
+           {imageURL ? "Replace chart" : "Upload Chart"}
         </Button>
       </CardHeader>
       <CardContent>

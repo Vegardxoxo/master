@@ -22,15 +22,15 @@ export default function CommitFrequency({
   // Update the report context when the checkbox changes
   const handleIncludeImageChange = (checked: boolean) => {
     setIncludeImageInMarkdown(checked);
-      if (metrics) {
-        addMetricData("commitFrequency", null, {
-          ...metrics,
-          includeImage: checked,
-        })
-      }
+    if (metrics) {
+      addMetricData("commitFrequency", null, {
+        ...metrics,
+        includeImage: checked,
+      });
+    }
   };
 
-  if (!include) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -56,17 +56,12 @@ export default function CommitFrequency({
               <div className="relative rounded-lg border overflow-hidden bg-muted/20">
                 {/* Image container with aspect ratio */}
                 <div className="relative aspect-[16/9] w-full h-full">
-                  <Image src={metrics.url} alt={"Commit Frequency Chart"} height={1200} width={1200} />
-                </div>
-
-                {/* Image info overlay */}
-                <div className="absolute top-2 right-2">
-                  <div className="bg-background/80 backdrop-blur-sm text-xs px-2 py-1 rounded-md border shadow-sm">
-                    <div className="flex items-center gap-1">
-                      <Info className="h-3 w-3 text-muted-foreground" />
-                      <span>Chart Image</span>
-                    </div>
-                  </div>
+                  <Image
+                    src={metrics.url}
+                    alt={"Commit Frequency Chart"}
+                    height={1200}
+                    width={1200}
+                  />
                 </div>
               </div>
 
@@ -111,10 +106,6 @@ export default function CommitFrequency({
             className="min-h-[120px]"
             placeholder="Add your recommendations for improving commit frequency patterns..."
           />
-          <p className="text-xs text-muted-foreground mt-2">
-            Suggest improvements to commit frequency, such as more regular
-            commits or better distribution of work.
-          </p>
         </CardContent>
       </Card>
     </div>

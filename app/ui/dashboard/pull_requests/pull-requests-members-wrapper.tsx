@@ -1,5 +1,6 @@
 import { fetchPullRequests } from "@/app/lib/data/data";
 import { PullRequestsMembers } from "@/app/ui/dashboard/pull_requests/pull-requests-members";
+import {fetchGraphUrl} from "@/app/lib/database-functions";
 
 export default async function PullRequestsMembersWrapper({
   owner,
@@ -9,5 +10,6 @@ export default async function PullRequestsMembersWrapper({
   repo: string;
 }) {
   const data = await fetchPullRequests(owner, repo, "all");
-  return <PullRequestsMembers data={data} />;
+  const image_url = await fetchGraphUrl(owner, repo, "PULL_REQUESTS");
+  return <PullRequestsMembers data={data} url={image_url} />;
 }

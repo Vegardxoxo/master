@@ -34,7 +34,7 @@ type UploadChartProps = {
   setIsUploading: (value: boolean) => void;
   owner: string;
   repo: string;
-  chartType: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS";
+  chartType: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "PULL_REQUESTS";
 };
 
 export const uploadChartToServer = async ({

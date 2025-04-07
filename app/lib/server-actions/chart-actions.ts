@@ -29,7 +29,7 @@ export async function saveChartImage(
     console.log("chartType", chartType)
     if (
       !chartType ||
-      !["COMMIT_FREQUENCY", "COMMIT_SIZE", "CONTRIBUTIONS"].includes(chartType)
+      !["COMMIT_FREQUENCY", "COMMIT_SIZE", "CONTRIBUTIONS", "PULL_REQUESTS"].includes(chartType)
     ) {
       return {
         success: false,

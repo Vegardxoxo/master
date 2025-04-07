@@ -20,6 +20,7 @@ import DirectCommitsSection from "./report-sections/direct-commits" // Fixed imp
 import CommitFrequency from "./report-sections/commit-frequency" // Fixed import path
 import MarkdownPreview from "./markdown-preview"
 import CommitContributions from "@/app/ui/dashboard/report/report-sections/commit-contributions"
+import PullRequests from "@/app/ui/dashboard/report/report-sections/pull-requests"
 
 export default function GenerateReport({
   owner,
@@ -37,9 +38,10 @@ export default function GenerateReport({
   const directCommits = allMetrics.directCommits?.metrics
   const commitFrequency = allMetrics.commitFrequency?.metrics
   const commitContributions = allMetrics.commitContributions?.metrics
-
-  const testCoverage = allMetrics.TestCoverage?.metrics
-  const fileCoverage = allMetrics.FileCoverage?.metrics
+  const pullRequests = allMetrics.pullRequests?.metrics
+  const pullRequestTableData = allMetrics.pullRequests?.data
+  const testCoverage = allMetrics.testCoverage?.metrics // Fixed property casing
+  const fileCoverage = allMetrics.fileCoverage?.metrics // Fixed property casing
   const sensitiveFiles = allMetrics.sensitiveFiles?.data
 
   // State for included sections
@@ -50,6 +52,7 @@ export default function GenerateReport({
     sensitiveFiles: true,
     directCommits: true,
     commitContributions: true,
+    pullRequests: true,
   })
 
   // State for report content
@@ -92,10 +95,27 @@ export default function GenerateReport({
       ? "The distribution of contributions shows how work is shared across the team. Ensure that knowledge isn't siloed with a few contributors and promote collaborative practices like pair programming and code reviews to spread expertise."
       : "No commit contributions data available. Consider analyzing how work is distributed across the team to identify potential bottlenecks or knowledge silos.",
   )
+
+  const [pullRequestsRecommendations, setPullRequestsRecommendations] = useState(
+    pullRequests
+      ? "Encourage team members to review each other's pull requests to improve code quality and knowledge sharing. Consider implementing a policy where PRs require at least one review before merging."
+      : "No pull requests data available.",
+  )
+
   const [additionalNotes, setAdditionalNotes] = useState("")
+
+  // Generate markdown content based on the metrics and user  setAdditionalNotes] = useState("");
 
   // Generate markdown content based on the metrics and user input
   const getMarkdown = () => {
+    // Create a copy of pullRequests with the data included for the markdown
+    const pullRequestsWithData = pullRequests
+      ? {
+          ...pullRequests,
+          data: pullRequestTableData,
+        }
+      : undefined
+
     return reportMarkdown({
       reportTitle,
       summary,
@@ -105,6 +125,8 @@ export default function GenerateReport({
       commitFrequencyRecommendations,
       commitContributions,
       commitContributionsRecommendations: contributionsRecommendations,
+      pullRequests: pullRequestsWithData,
+      pullRequestsRecommendations,
       testCoverage,
       coverageRecommendations,
       fileCoverage,
@@ -174,6 +196,7 @@ export default function GenerateReport({
 
           <div className="space-y-2">
             <Label>Include Sections</Label>
+
             <div className="grid grid-cols-2 gap-2">
               {commitQuality && (
                 <div className="flex items-center space-x-2">
@@ -187,6 +210,7 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
               {(testCoverage || (fileCoverage && fileCoverage.length > 0)) && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -199,6 +223,7 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
               {sensitiveFiles && sensitiveFiles.length > 0 && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -250,13 +275,26 @@ export default function GenerateReport({
                   </Label>
                 </div>
               )}
+
+              {pullRequests && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-pullRequests"
+                    checked={includedSections.pullRequests}
+                    onCheckedChange={() => toggleSection("pullRequests")}
+                  />
+                  <Label htmlFor="include-pullRequests" className="cursor-pointer">
+                    Pull Requests Overview
+                  </Label>
+                </div>
+              )}
             </div>
           </div>
 
           <Separator />
 
-          <Tabs defaultValue="commits" className="w-full ">
-            <TabsList className="w-full flex flex-wrap mb-10 gap-y-2 md:gap-y-0">
+          <Tabs className="w-full ">
+            <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <TabsTrigger
                 className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
                 value="commits"
@@ -298,17 +336,22 @@ export default function GenerateReport({
               >
                 Contributions
               </TabsTrigger>
-            </TabsList>
 
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="pullRequests"
+              >
+                Pull Requests Overview
+              </TabsTrigger>
+            </TabsList>
+            <div className="h-60 md:h-20 w-full"></div>
             <TabsContent value="commits">
-              <div className={"mb-10"}>
-                <CommitQualitySection
-                  metrics={commitQuality}
-                  recommendations={commitQualityRecommendations}
-                  setRecommendations={setCommitQualityRecommendations}
-                  include={includedSections.commitQuality}
-                />
-              </div>
+              <CommitQualitySection
+                metrics={commitQuality}
+                recommendations={commitQualityRecommendations}
+                setRecommendations={setCommitQualityRecommendations}
+                include={includedSections.commitQuality}
+              />
             </TabsContent>
 
             <TabsContent value="coverage">
@@ -356,8 +399,17 @@ export default function GenerateReport({
                 include={includedSections.commitContributions}
               />
             </TabsContent>
-          </Tabs>
 
+            <TabsContent value="pullRequests">
+              <PullRequests
+                metrics={pullRequests}
+                data={pullRequestTableData}
+                recommendations={pullRequestsRecommendations}
+                setRecommendations={setPullRequestsRecommendations}
+                include={includedSections.pullRequests}
+              />
+            </TabsContent>
+          </Tabs>
           <Separator />
 
           <div className="space-y-2">

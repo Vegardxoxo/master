@@ -260,7 +260,7 @@ export interface BranchConnection {
 
 export interface ReportSectionProps {
   metrics: any;
-  additionalData?: any;
+  data?: any;
   recommendations: string;
   setRecommendations: (value: string) => void;
   include: boolean;

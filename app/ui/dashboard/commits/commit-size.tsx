@@ -43,7 +43,7 @@ export default function CommitSize({ data, url }: { data: any[], url: string }) 
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const chartRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>(url);
+  const [imageURL, setImageURL] = useState<string>(url);
   const {getRepositoryInfo} = useReport();
   const info = getRepositoryInfo();
     const { processedData, months, uniqueDays, maxChanges } = useMemo(() => {
@@ -89,12 +89,16 @@ export default function CommitSize({ data, url }: { data: any[], url: string }) 
               setIsUploading: setIsUploading,
               owner: info.owner,
               repo: info.repo,
+            }).then((r) => {
+              if (typeof r === "string") {
+                setImageURL(r);
+              }
             });
           }}
           disabled={isUploading}
         >
           <Download className="mr-2 h-4 w-4" />
-          {isUploading ? "Uploading..." : "Upload Chart"}
+         {imageURL ? "Replace chart" : "Upload Chart"}
         </Button>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-[200px]">
