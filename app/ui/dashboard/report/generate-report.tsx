@@ -1,49 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useReport } from "../../../contexts/report-context" // Fixed import path
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/hooks/use-toast"
-import { Checkbox } from "@/components/ui/checkbox"
-import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown" // Fixed import path
-import { CommitQualitySection } from "./report-sections/commit-quality" // Fixed import path
-import SensitiveFilesSection from "./report-sections/sensitive-files" // Fixed import path
-import TestCoverageSection from "./report-sections/test-coverage" // Fixed import path
-import DirectCommitsSection from "./report-sections/direct-commits" // Fixed import path
-import CommitFrequency from "./report-sections/commit-frequency" // Fixed import path
-import MarkdownPreview from "./markdown-preview"
-import CommitContributions from "@/app/ui/dashboard/report/report-sections/commit-contributions"
-import PullRequests from "@/app/ui/dashboard/report/report-sections/pull-requests"
+import { useState } from "react";
+import { useReport } from "../../../contexts/report-context"; // Fixed import path
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown"; // Fixed import path
+import { CommitQualitySection } from "./report-sections/commit-quality"; // Fixed import path
+import SensitiveFilesSection from "./report-sections/sensitive-files"; // Fixed import path
+import TestCoverageSection from "./report-sections/test-coverage"; // Fixed import path
+import DirectCommitsSection from "./report-sections/direct-commits"; // Fixed import path
+import CommitFrequency from "./report-sections/commit-frequency"; // Fixed import path
+import MarkdownPreview from "./markdown-preview";
+import CommitContributions from "@/app/ui/dashboard/report/report-sections/commit-contributions";
+import PullRequests from "@/app/ui/dashboard/report/report-sections/pull-requests";
+import DevelopmentBranches from "@/app/ui/dashboard/report/report-sections/development-branches";
 
 export default function GenerateReport({
   owner,
   repo,
 }: {
-  owner: string
-  repo: string
+  owner: string;
+  repo: string;
 }) {
-  const { getAllMetricsData, clearMetricsData } = useReport()
-  const { toast } = useToast()
-  const allMetrics = getAllMetricsData()
+  const { getAllMetricsData, clearMetricsData } = useReport();
+  const { toast } = useToast();
+  const allMetrics = getAllMetricsData();
 
   // Extract metrics data
-  const commitQuality = allMetrics.commitQuality?.metrics
-  const directCommits = allMetrics.directCommits?.metrics
-  const commitFrequency = allMetrics.commitFrequency?.metrics
-  const commitContributions = allMetrics.commitContributions?.metrics
-  const pullRequests = allMetrics.pullRequests?.metrics
-  const pullRequestTableData = allMetrics.pullRequests?.data
-  const testCoverage = allMetrics.testCoverage?.metrics // Fixed property casing
-  const fileCoverage = allMetrics.fileCoverage?.metrics // Fixed property casing
-  const sensitiveFiles = allMetrics.sensitiveFiles?.data
+  const commitQuality = allMetrics.commitQuality?.metrics;
+  const directCommits = allMetrics.directCommits?.metrics;
+  const commitFrequency = allMetrics.commitFrequency?.metrics;
+  const commitContributions = allMetrics.commitContributions?.metrics;
+  const pullRequests = allMetrics.pullRequests?.metrics;
+  const pullRequestTableData = allMetrics.pullRequests?.data;
+  const developmentBranches = allMetrics.branchConnections?.metrics;
+  const developmentBranchesData = allMetrics.branchConnections?.data;
 
+  const testCoverage = allMetrics.testCoverage?.metrics; // Fixed property casing
+  const fileCoverage = allMetrics.fileCoverage?.metrics; // Fixed property casing
+  const sensitiveFiles = allMetrics.sensitiveFiles?.data;
+
+  console.log("developmentBranches", developmentBranches)
   // State for included sections
   const [includedSections, setIncludedSections] = useState({
     commitQuality: true,
@@ -53,25 +64,30 @@ export default function GenerateReport({
     directCommits: true,
     commitContributions: true,
     pullRequests: true,
-  })
+    developmentBranches: true,
+  });
 
   // State for report content
-  const [reportTitle, setReportTitle] = useState(`Repository Analysis - ${owner}/${repo}`)
+  const [reportTitle, setReportTitle] = useState(
+    `Repository Analysis - ${owner}/${repo}`,
+  );
   const [summary, setSummary] = useState(
     `This report provides an analysis of the repository ${owner}/${repo}, focusing on commit quality, test coverage, and potential sensitive files.`,
-  )
-  const [commitQualityRecommendations, setCommitQualityRecommendations] = useState(
-    commitQuality?.qualityStatus === "good"
-      ? "Great job on your commit messages! They are clear, descriptive, and follow best practices."
-      : commitQuality?.qualityStatus === "moderate"
-        ? "Your commit messages are adequate but could be improved. Try to be more descriptive about what changes were made and why."
-        : "Your commit messages need improvement. Use the imperative mood and include both what changes were made and why they were necessary.",
-  )
-  const [commitFrequencyRecommendations, setCommitFrequencyRecommendations] = useState(
-    commitFrequency
-      ? "Maintain a consistent commit frequency to ensure steady progress and easier code reviews. Aim for smaller, more frequent commits rather than large, infrequent ones to reduce merge conflicts and improve collaboration."
-      : "No commit frequency data available. Consider analyzing commit patterns to identify potential workflow improvements.",
-  )
+  );
+  const [commitQualityRecommendations, setCommitQualityRecommendations] =
+    useState(
+      commitQuality?.qualityStatus === "good"
+        ? "Great job on your commit messages! They are clear, descriptive, and follow best practices."
+        : commitQuality?.qualityStatus === "moderate"
+          ? "Your commit messages are adequate but could be improved. Try to be more descriptive about what changes were made and why."
+          : "Your commit messages need improvement. Use the imperative mood and include both what changes were made and why they were necessary.",
+    );
+  const [commitFrequencyRecommendations, setCommitFrequencyRecommendations] =
+    useState(
+      commitFrequency
+        ? "Maintain a consistent commit frequency to ensure steady progress and easier code reviews. Aim for smaller, more frequent commits rather than large, infrequent ones to reduce merge conflicts and improve collaboration."
+        : "No commit frequency data available. Consider analyzing commit patterns to identify potential workflow improvements.",
+    );
 
   const [coverageRecommendations, setCoverageRecommendations] = useState(
     testCoverage?.status === "good"
@@ -79,30 +95,43 @@ export default function GenerateReport({
       : testCoverage?.status === "info"
         ? "Your test coverage is adequate but could be improved. Consider adding more tests to cover critical paths."
         : "Your test coverage is low. Consider adding more tests to ensure code quality and reduce the risk of regressions.",
-  )
+  );
 
-  const [sensitiveFilesRecommendations, setSensitiveFilesRecommendations] = useState(
-    "Review the identified sensitive files and ensure they are properly handled. Consider adding them to .gitignore if they contain sensitive information.",
-  )
+  const [sensitiveFilesRecommendations, setSensitiveFilesRecommendations] =
+    useState(
+      "Review the identified sensitive files and ensure they are properly handled. Consider adding them to .gitignore if they contain sensitive information.",
+    );
 
-  const [directCommitsRecommendations, setDirectCommitsRecommendations] = useState(
-    "Avoid committing directly to the main branch. Use feature branches and pull requests instead to ensure code quality and facilitate code reviews.",
-  )
+  const [directCommitsRecommendations, setDirectCommitsRecommendations] =
+    useState(
+      "Avoid committing directly to the main branch. Use feature branches and pull requests instead to ensure code quality and facilitate code reviews.",
+    );
 
   // Change the useState for contributionsRecommendations to include default text
-  const [contributionsRecommendations, setContributionsRecommendations] = useState(
-    commitContributions
-      ? "The distribution of contributions shows how work is shared across the team. Ensure that knowledge isn't siloed with a few contributors and promote collaborative practices like pair programming and code reviews to spread expertise."
-      : "No commit contributions data available. Consider analyzing how work is distributed across the team to identify potential bottlenecks or knowledge silos.",
-  )
+  const [contributionsRecommendations, setContributionsRecommendations] =
+    useState(
+      commitContributions
+        ? "The distribution of contributions shows how work is shared across the team. Ensure that knowledge isn't siloed with a few contributors and promote collaborative practices like pair programming and code reviews to spread expertise."
+        : "No commit contributions data available. Consider analyzing how work is distributed across the team to identify potential bottlenecks or knowledge silos.",
+    );
 
-  const [pullRequestsRecommendations, setPullRequestsRecommendations] = useState(
-    pullRequests
-      ? "Encourage team members to review each other's pull requests to improve code quality and knowledge sharing. Consider implementing a policy where PRs require at least one review before merging."
-      : "No pull requests data available.",
-  )
+  const [pullRequestsRecommendations, setPullRequestsRecommendations] =
+    useState(
+      pullRequests
+        ? "Encourage team members to review each other's pull requests to improve code quality and knowledge sharing. Consider implementing a policy where PRs require at least one review before merging."
+        : "No pull requests data available.",
+    );
 
-  const [additionalNotes, setAdditionalNotes] = useState("")
+  const [
+    developmentBranchesRecommendations,
+    setDevelopmentBranchesRecommendations,
+  ] = useState(
+    developmentBranches
+      ? "Improve branch naming conventions to clearly link branches to issues. Consider creating a development branch directly from the issue to ensure linkage."
+      : "No branch linkage data available. Consider analyzing how branches are connected to issues to improve traceability.",
+  );
+
+  const [additionalNotes, setAdditionalNotes] = useState("");
 
   // Generate markdown content based on the metrics and user  setAdditionalNotes] = useState("");
 
@@ -114,7 +143,7 @@ export default function GenerateReport({
           ...pullRequests,
           data: pullRequestTableData,
         }
-      : undefined
+      : undefined;
 
     return reportMarkdown({
       reportTitle,
@@ -127,6 +156,8 @@ export default function GenerateReport({
       commitContributionsRecommendations: contributionsRecommendations,
       pullRequests: pullRequestsWithData,
       pullRequestsRecommendations,
+      developmentBranches,
+      developmentBranchesRecommendations,
       testCoverage,
       coverageRecommendations,
       fileCoverage,
@@ -136,19 +167,24 @@ export default function GenerateReport({
       directCommitsRecommendations,
       additionalNotes,
       includedSections,
-    })
-  }
+    });
+  };
 
   // Toggle section inclusion
   const toggleSection = (section: keyof typeof includedSections) => {
     setIncludedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
-    }))
-  }
+    }));
+  };
 
   // Check if we have any metrics data
-  const hasAnyData = commitQuality || testCoverage || fileCoverage || sensitiveFiles || directCommits
+  const hasAnyData =
+    commitQuality ||
+    testCoverage ||
+    fileCoverage ||
+    sensitiveFiles ||
+    directCommits;
 
   if (!hasAnyData) {
     return (
@@ -158,7 +194,8 @@ export default function GenerateReport({
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            No metrics data available. Please view the various metrics charts first to collect data.
+            No metrics data available. Please view the various metrics charts
+            first to collect data.
           </p>
         </CardContent>
         <CardFooter>
@@ -167,7 +204,7 @@ export default function GenerateReport({
           </Button>
         </CardFooter>
       </Card>
-    )
+    );
   }
 
   return (
@@ -181,7 +218,11 @@ export default function GenerateReport({
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="report-title">Report Title</Label>
-            <Input id="report-title" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} />
+            <Input
+              id="report-title"
+              value={reportTitle}
+              onChange={(e) => setReportTitle(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
@@ -270,7 +311,10 @@ export default function GenerateReport({
                     checked={includedSections.commitContributions}
                     onCheckedChange={() => toggleSection("commitContributions")}
                   />
-                  <Label htmlFor="include-contributions" className="cursor-pointer">
+                  <Label
+                    htmlFor="include-contributions"
+                    className="cursor-pointer"
+                  >
                     Commit Contributions
                   </Label>
                 </div>
@@ -283,8 +327,27 @@ export default function GenerateReport({
                     checked={includedSections.pullRequests}
                     onCheckedChange={() => toggleSection("pullRequests")}
                   />
-                  <Label htmlFor="include-pullRequests" className="cursor-pointer">
+                  <Label
+                    htmlFor="include-pullRequests"
+                    className="cursor-pointer"
+                  >
                     Pull Requests Overview
+                  </Label>
+                </div>
+              )}
+
+              {developmentBranches && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-developmentBranches"
+                    checked={includedSections.developmentBranches}
+                    onCheckedChange={() => toggleSection("developmentBranches")}
+                  />
+                  <Label
+                    htmlFor="include-developmentBranches"
+                    className="cursor-pointer"
+                  >
+                    Branch-Issue Connection
                   </Label>
                 </div>
               )}
@@ -342,6 +405,13 @@ export default function GenerateReport({
                 value="pullRequests"
               >
                 Pull Requests Overview
+              </TabsTrigger>
+
+              <TabsTrigger
+                className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                value="developmentBranches"
+              >
+                Branch-issue Linkage
               </TabsTrigger>
             </TabsList>
             <div className="h-60 md:h-20 w-full"></div>
@@ -409,11 +479,23 @@ export default function GenerateReport({
                 include={includedSections.pullRequests}
               />
             </TabsContent>
+
+            <TabsContent value="developmentBranches">
+              <DevelopmentBranches
+                metrics={developmentBranches}
+                data={developmentBranchesData}
+                recommendations={developmentBranchesRecommendations}
+                setRecommendations={setDevelopmentBranchesRecommendations}
+                include={includedSections.developmentBranches}
+              />
+            </TabsContent>
           </Tabs>
           <Separator />
 
           <div className="space-y-2">
-            <Label htmlFor="additional-notes">Additional Notes (Optional)</Label>
+            <Label htmlFor="additional-notes">
+              Additional Notes (Optional)
+            </Label>
             <Textarea
               id="additional-notes"
               value={additionalNotes}
@@ -423,17 +505,15 @@ export default function GenerateReport({
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={clearMetricsData}>
-            Clear Metrics
-          </Button>
+        <CardFooter className="flex justify-end">
           <Button
             onClick={() => {
-              navigator.clipboard.writeText(getMarkdown())
+              navigator.clipboard.writeText(getMarkdown());
               toast({
                 title: "Copied to clipboard",
-                description: "The markdown report has been copied to your clipboard.",
-              })
+                description:
+                  "The markdown report has been copied to your clipboard.",
+              });
             }}
             className="flex items-center gap-1"
           >
@@ -446,6 +526,5 @@ export default function GenerateReport({
       {/* Right side - Markdown Preview */}
       <MarkdownPreview markdown={getMarkdown()} title="Report Preview" />
     </div>
-  )
+  );
 }
-

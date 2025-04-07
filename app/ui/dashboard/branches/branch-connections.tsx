@@ -1,5 +1,4 @@
-import { fetchBranches, fetchIssues } from "@/app/lib/data/data";
-import { extractIssueFromBranchName } from "@/app/ui/dashboard/branches/branches.lib";
+"use client";
 import {
   Card,
   CardContent,
@@ -7,73 +6,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { GitBranch } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { DevelopmentBranchColumns } from "@/app/ui/courses/columns";
-import Warning from "@/app/ui/dashboard/alerts/warning";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import { useReport } from "@/app/contexts/report-context";
+import { useEffect, useMemo } from "react";
 
-export default async function DevelopmentBranches({
-  owner,
-  repo,
-}: {
-  owner: string;
-  repo: string;
-}) {
-  // Fetch branches and issues
-  const branches = await fetchBranches(owner, repo);
-  const issues = await fetchIssues(owner, repo);
+interface DevelopmentBranchesProps {
+  totalBranches: number;
+  linkedBranches: number;
+  unlinkedBranches: number;
+  linkPercentage: number;
+  branchConnections: any;
+  addToReport: boolean;
+}
 
-  if (!branches) {
-    return (
-      <Warning
-        title={"No branches found"}
-        message={"No branches found for this repository."}
-      />
-    );
-  }
+export default function BranchConnections({
+  linkedBranches,
+  unlinkedBranches,
+  totalBranches,
+  linkPercentage,
+  branchConnections,
+  addToReport,
+}: DevelopmentBranchesProps) {
+  const { addMetricData } = useReport();
 
-  // Filter out main/master branches
-  const developmentBranches = branches.filter(
-    (branch) => branch.name !== "main" && branch.name !== "master",
-  );
-
-  // Extract issue numbers from branch names
-  const branchConnections = developmentBranches.map((branch) => {
-    const issueNumber = extractIssueFromBranchName(branch.name);
-    const linkedIssue = issueNumber
-      ? issues.find(
-          (issue: { number: number }) => issue.number === parseInt(issueNumber),
-        )
-      : null;
-
+  const metrics = useMemo(() => {
     return {
-      branchName: branch.name,
-      issueNumber: issueNumber,
-      url: linkedIssue?.url || "#",
-      isLinked: !!linkedIssue,
-      issueTitle: linkedIssue?.title || null,
+      linkedBranches,
+      unlinkedBranches,
+      totalBranches,
+      linkPercentage,
     };
-  });
+  }, [linkedBranches, unlinkedBranches, totalBranches, linkPercentage]);
 
-  // Calculate statistics
-  const totalBranches = branchConnections.length;
-  const linkedBranches = branchConnections.filter((b) => b.isLinked).length;
-  const unlinkedBranches = totalBranches - linkedBranches;
-  const linkPercentage =
-    totalBranches > 0 ? Math.round((linkedBranches / totalBranches) * 100) : 0;
-
-  // Get linked issues for display
-  const linkedIssues = issues.filter((issue) =>
-    branchConnections.some(
-      (branch) =>
-        branch.issueNumber && parseInt(branch.issueNumber) === issue.number,
-    ),
-  );
-
-  console.log("Linked issue", branchConnections);
+  useEffect(() => {
+    if (addToReport) {
+      addMetricData("branchConnections", branchConnections, metrics);
+    }
+  }, [metrics]);
 
   return (
     <Card className="shadow-sm">
@@ -83,9 +56,8 @@ export default async function DevelopmentBranches({
           Branch-Issue Connection Analysis
         </CardTitle>
         <CardDescription>
-          Analyzing how development branches are connected to issues in {owner}.
-          Note: main and master branches are not analyzed./
-          {repo}
+          Analyzing how development branches are connected to issues. Note: main
+          and master branches are not analyzed.
         </CardDescription>
       </CardHeader>
       <CardContent>
