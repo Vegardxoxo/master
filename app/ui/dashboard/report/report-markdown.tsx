@@ -9,6 +9,8 @@ export interface ReportData {
   commitContributionsRecommendations?: string
   pullRequests?: any
   pullRequestsRecommendations?: string
+  developmentBranches?: any
+  developmentBranchesRecommendations?: string
   testCoverage: any
   coverageRecommendations: string
   fileCoverage: any
@@ -22,6 +24,7 @@ export interface ReportData {
     commitFrequency?: boolean
     commitContributions?: boolean
     pullRequests?: boolean
+    developmentBranches?: boolean
     testCoverage: boolean
     sensitiveFiles: boolean
     directCommits: boolean
@@ -40,6 +43,8 @@ export function reportMarkdown(data: ReportData): string {
     commitContributionsRecommendations,
     pullRequests,
     pullRequestsRecommendations,
+    developmentBranches,
+    developmentBranchesRecommendations,
     testCoverage,
     coverageRecommendations,
     fileCoverage,
@@ -155,15 +160,16 @@ ${commitFrequencyRecommendations}
     if (commitContributions.contributors && commitContributions.contributors.length > 0) {
       markdown += `### Contributors
 
-| Contributor | Additions | Deletions | Co-authored Lines | Total Lines |
-|-------------|-----------|-----------|------------------|-------------|
+| Contributor | Email | Additions | Deletions | Co-authored Lines | Total Lines |
+|-------------|-------|-----------|-----------|------------------|-------------|
 `
 
       // Add each contributor with their stats
       commitContributions.contributors.forEach((contributor: any) => {
         const escapedName = (contributor.name || "").replace(/\|/g, "\\|")
+        const escapedEmail = (contributor.email || "").replace(/\|/g, "\\|")
 
-        markdown += `| ${escapedName} | ${contributor.additions || 0} | ${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.total || 0} |
+        markdown += `| ${escapedName} | ${escapedEmail} | ${contributor.additions || 0} | ${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.total || 0} |
 `
       })
 
@@ -232,6 +238,49 @@ ${commitContributionsRecommendations}
       markdown += `### Recommendations
 
 ${pullRequestsRecommendations}
+
+`
+    }
+  }
+    console.log("her", developmentBranches)
+  // Development Branches Section (Branch-Issue Connection)
+  if (includedSections.developmentBranches && developmentBranches) {
+    markdown += `## Branch-Issue Connection Analysis
+
+- **Total Branches**: ${developmentBranches.totalBranches}
+- **Branches Linked to Issues**: ${developmentBranches.linkedBranches} (${developmentBranches.linkPercentage}%)
+- **Unlinked Branches**: ${developmentBranches.unlinkedBranches} (${100 - developmentBranches.linkPercentage}%)
+
+`
+
+    // Add branch connections table if available
+    if (developmentBranches.branchConnections && developmentBranches.branchConnections.length > 0) {
+      markdown += `### Branch Connections
+
+| Branch Name | Issue | Status |
+|-------------|-------|--------|
+`
+
+      // Add each branch connection
+      developmentBranches.branchConnections.forEach((branch: any) => {
+        const escapedBranchName = branch.branchName.replace(/\|/g, "\\|")
+        const issueInfo = branch.issueNumber
+          ? `#${branch.issueNumber}${branch.issueTitle ? ` (${branch.issueTitle.replace(/\|/g, "\\|")})` : ""}`
+          : "—"
+        const status = branch.isLinked ? "Linked" : "Unlinked"
+
+        markdown += `| \`${escapedBranchName}\` | ${issueInfo} | ${status} |
+`
+      })
+
+      markdown += "\n"
+    }
+
+    // Add recommendations
+    if (developmentBranchesRecommendations) {
+      markdown += `### Recommendations
+
+${developmentBranchesRecommendations}
 
 `
     }
@@ -425,3 +474,4 @@ Generated on ${new Date().toLocaleDateString()} by Git Workflow Analysis Tool`
 
   return markdown
 }
+

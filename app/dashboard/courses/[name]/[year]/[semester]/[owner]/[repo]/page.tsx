@@ -16,13 +16,13 @@ import Files from "@/app/ui/dashboard/project_info/file-explorer/files";
 import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage";
 import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wrapper";
-import DevelopmentBranches from "@/app/ui/dashboard/branches/development-branches";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
 import { ReportProvider, useReport } from "@/app/contexts/report-context";
 import GenerateReport from "@/app/ui/dashboard/report/generate-report";
 import Link from "next/link";
 import { cn } from "@/app/lib/utils/utils";
 import { lusitana } from "@/app/ui/fonts";
+import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connections-wrapper";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -77,7 +77,7 @@ export default async function Page(props: {
             ),
             branch: <DirectCommitsWrapper owner={owner} repo={repo} />,
             branchingStrategy: (
-              <DevelopmentBranches owner={owner} repo={repo} />
+              <BranchConnectionsWrapper owner={owner} repo={repo} />
             ),
             pipeline: <PipelineActions owner={owner} repo={repo} />,
             pullRequestOverview: (
