@@ -1,4 +1,4 @@
-import {fetchPullRequests} from "@/app/lib/data/data";
+import {fetchPullRequests} from "@/app/lib/data/github-api-functions";
 import PullRequestsReviews from "@/app/ui/dashboard/pull_requests/pull-requests-reviews";
 
 export default async function PullRequestsReviewsWrapper({owner, repo}: { owner: string, repo: string }) {

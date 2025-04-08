@@ -42,7 +42,7 @@ export default function MarkdownPreview({
       </CardHeader>
       <CardContent>
         <div
-          className="bg-muted rounded-md overflow-auto p-4"
+          className=" rounded-md overflow-auto p-4"
           style={{ height }}
         >
           <MDPreview source={markdown} />

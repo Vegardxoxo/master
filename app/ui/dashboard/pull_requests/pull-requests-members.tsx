@@ -100,7 +100,7 @@ export function PullRequestsMembers({
   const [selectedMembers, setSelectedMembers] = useState<string[]>(members);
   const [selectedMilestone, setSelectedMilestone] = useState<string>("all");
   const chartData = createChartData(data, selectedMembers, selectedMilestone);
-  const { addMetricData, getRepositoryInfo } = useReport();
+  const { addMetricData, getRepositoryInfo, addImageUrls } = useReport();
   const info = getRepositoryInfo();
   const chartRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -205,6 +205,7 @@ export function PullRequestsMembers({
   useEffect(() => {
     const tableData = transformPullRequestActivityData(metrics);
     addMetricData("pullRequests", tableData, metrics);
+    addImageUrls("pullRequests", [imageURL ? imageURL : ""]);
   }, [data]);
   return (
     <Card className="w-full">

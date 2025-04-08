@@ -1,4 +1,4 @@
-import { fetchPullRequests } from "@/app/lib/data/data";
+import { fetchPullRequests } from "@/app/lib/data/github-api-functions";
 import PullRequestsOverview from "@/app/ui/dashboard/pull_requests/pull-requests-overview";
 
 export default async function PullRequestsOverviewWrapper({

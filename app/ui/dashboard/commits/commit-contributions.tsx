@@ -64,7 +64,7 @@ export default function CommitContributions({
   const [imageUrl, setImageUrl] = useState(url);
   const [isUploading, setIsUploading] = useState(false);
   // context store
-  const { getRepositoryInfo, addMetricData } = useReport();
+  const { getRepositoryInfo, addMetricData, addImageUrls } = useReport();
   const info = getRepositoryInfo();
 
   const chartData = Object.keys(data).map((key) => ({
@@ -102,7 +102,7 @@ export default function CommitContributions({
       groupAverageChanges: projectAverageChanges,
       groupAverageFilesChanged: projectAverageFilesChanged,
     };
-
+    addImageUrls("commitContributions", [imageUrl? imageUrl : ""]);
     addMetricData("commitContributions", data, metrics);
   }, [data]);
 

@@ -1,4 +1,7 @@
+"use server"
 import { Octokit } from "octokit";
+import { promises as fs } from "fs";
+import * as path from "path";
 import {
   _Branches,
   Commit,
@@ -9,19 +12,19 @@ import {
 import {
   formatTimestamp,
   parseCommitStats,
-  parsePullRequests,
+  parsePullRequests, transformLocalImagePaths,
 } from "@/app/lib/utils/utils";
 import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 
-const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
-});
-
 // const octokit = new Octokit({
-//   auth: process.env.PERSONAL,
+//   auth: process.env.TOKEN,
+//   baseUrl: "https://git.ntnu.no/api/v3",
 // });
+
+const octokit = new Octokit({
+  auth: process.env.SUPER_TOKEN,
+});
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -649,5 +652,139 @@ export default async function fetchMilestones(owner: string, repo: string) {
   } catch (e) {
     console.error("GitHub api error: Failed to fetch milestones:", e);
     return [];
+  }
+}
+
+type UploadResult =
+  | { success: true; url?: string; branch?: string }
+  | { success: false; error: string };
+
+
+
+export async function uploadReportToRepository(
+  owner: string,
+  repo: string,
+  content: string,
+  filename: string,
+  images: string[],
+  commitMessage = "Add Git Workflow Analysis Report",
+): Promise<UploadResult> {
+  try {
+    console.log("Images to upload:", images);
+
+    // 1) Get the default branch (e.g., "master" or "main")
+    const { data: repoData } = await octokit.rest.repos.get({ owner, repo });
+    const defaultBranch = repoData.default_branch;
+
+    // 2) Create a unique new branch name
+    const timestamp = new Date()
+      .toISOString()
+      .replace("T", "-")
+      .split(":")
+      .slice(0, 2)
+      .join("-");
+    const newBranchName = `report-${timestamp}`;
+    console.log("Creating new branch:", newBranchName);
+
+    // 3) Get the SHA of the default branch
+    const { data: refData } = await octokit.rest.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${defaultBranch}`,
+    });
+    const defaultBranchSha = refData.object.sha;
+
+    // 4) Create the new branch from the default branch
+    await octokit.rest.git.createRef({
+      owner,
+      repo,
+      ref: `refs/heads/${newBranchName}`,
+      sha: defaultBranchSha,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+
+    // 5) For each image, we:
+    //    - Read the file
+    //    - Upload it to "report/images/<uniqueFileName>"
+    //    - Build a map from the "old local path" => "new relative path in GitHub"
+    const replacements: Record<string, string> = {};
+
+    for (let i = 0; i < images.length; i++) {
+      const localPath = images[i]; // e.g. "/charts/foo.png"
+
+      // Remove leading slash if present
+      const normalizedLocalPath = localPath.startsWith("/")
+        ? localPath.slice(1)
+        : localPath;
+
+      // Resolve it relative to current working directory
+      const absoluteLocalPath = path.resolve(process.cwd(), normalizedLocalPath);
+      console.log(`Reading image from: ${absoluteLocalPath}`);
+
+      // Read file and convert to base64
+      const fileBuffer = await fs.readFile(absoluteLocalPath);
+      const base64Content = fileBuffer.toString("base64");
+
+      // Decide a filename in the repo
+      // We'll place them in "report/images/uniqueFileName.ext"
+      const ext = path.extname(localPath) || ".png";
+      const baseName = path.basename(localPath, ext);
+      const uniqueFileName = `${baseName}-${Date.now()}${ext}`;
+      const repoImagePath = `report/images/${uniqueFileName}`;
+
+      // Upload to GitHub
+      await octokit.rest.repos.createOrUpdateFileContents({
+        owner,
+        repo,
+        path: repoImagePath,
+        message: `${commitMessage}: ${uniqueFileName}`,
+        content: base64Content,
+        branch: newBranchName,
+      });
+
+      // Because the final Markdown is at "report/<filename>",
+      // the relative path to images is "./images/<uniqueFileName>"
+      const relativePathInMarkdown = `./images/${uniqueFileName}`;
+
+      // We'll store the mapping: localPath => new relative path
+      // so we can transform "![Alt](/charts/foo.png)" into "![Alt](./images/foo-123.png)"
+      replacements[localPath] = relativePathInMarkdown;
+    }
+
+    // 6) Use the utility to transform all local references in "content"
+    //    to the new GitHub "report/images" references
+    const updatedContent = transformLocalImagePaths(content, replacements);
+
+    // 7) Now commit the updated Markdown to "report/[filename]"
+    const markdownPath = `report/${filename}`;
+    await octokit.rest.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path: markdownPath,
+      message: commitMessage,
+      content: Buffer.from(updatedContent).toString("base64"),
+      branch: newBranchName,
+    });
+
+    // 8) Return success info
+    return {
+      success: true,
+      url: `https://github.com/${owner}/${repo}/blob/${newBranchName}/${markdownPath}`,
+      branch: newBranchName,
+    };
+  } catch (error) {
+    console.error("Error uploading report:", error);
+
+    let errorMessage = "Unknown error occurred during upload";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    return {
+      success: false,
+      error: errorMessage,
+    };
   }
 }

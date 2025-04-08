@@ -455,3 +455,22 @@ export function createChartData(
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+
+/**
+ * Utility function for replacing local urls with the ones on github
+ */
+export function transformLocalImagePaths(
+  content: string,
+  replacements: Record<string, string>
+): string {
+  let updated = content;
+
+  for (const [oldPath, newPath] of Object.entries(replacements)) {
+    const escapedOld = oldPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(`\\]\\(${escapedOld}\\)`, "g");
+    updated = updated.replace(pattern, `](${newPath})`);
+  }
+
+  return updated;
+}

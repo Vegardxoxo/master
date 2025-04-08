@@ -52,7 +52,7 @@ export default function CommitFrequency({
   const chartRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [imageURL, setImageURL] = useState<string | undefined>(image_url);
-  const { getRepositoryInfo, addMetricData } = useReport();
+  const { getRepositoryInfo, addMetricData, addImageUrls } = useReport();
   const info = getRepositoryInfo();
 
   const metrics = useMemo(() => {
@@ -66,6 +66,7 @@ export default function CommitFrequency({
 
   useEffect(() => {
     addMetricData("commitFrequency", data, metrics);
+    addImageUrls("commitFrequency", [imageURL ? imageURL : ""]);
     console.log(imageURL);
   }, [imageURL, data]);
 
@@ -142,7 +143,7 @@ export default function CommitFrequency({
           disabled={isUploading}
         >
           <Download className="mr-2 h-4 w-4" />
-           {imageURL ? "Replace chart" : "Upload Chart"}
+          {imageURL ? "Replace chart" : "Upload Chart"}
         </Button>
       </CardHeader>
       <CardContent>

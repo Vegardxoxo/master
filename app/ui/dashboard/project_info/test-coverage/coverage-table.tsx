@@ -31,7 +31,7 @@ export function FileCoverageTable({
       lines: file.lines,
       lastUpdated: new Date().toISOString(),
     }));
-    addMetricData("FileCoverage", fileData, metrics);
+    addMetricData("fileCoverage", fileData, metrics);
   }, [fileData, addMetricData]);
 
   const handleSort = (field: SortField) => {

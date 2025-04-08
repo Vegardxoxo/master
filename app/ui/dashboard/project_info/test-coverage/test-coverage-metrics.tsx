@@ -25,7 +25,7 @@ export function TestCoverageMetrics({ metrics }: { metrics: CoverageMetrics }) {
       lines: metrics.lines,
       lastUpdated: new Date().toISOString(),
     };
-    addMetricData("TestCoverage", metrics, metricsData);
+    addMetricData("testCoverage", metrics, metricsData);
   }, [metrics]);
 
   return (

@@ -1,4 +1,4 @@
-import fetchMilestones from "@/app/lib/data/data";
+import fetchMilestones from "@/app/lib/data/github-api-functions";
 import {
   Card,
   CardContent,

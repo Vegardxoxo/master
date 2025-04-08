@@ -1,4 +1,4 @@
-import { fetchPullRequests } from "@/app/lib/data/data";
+import { fetchPullRequests } from "@/app/lib/data/github-api-functions";
 import { PullRequestsMembers } from "@/app/ui/dashboard/pull_requests/pull-requests-members";
 import {fetchGraphUrl} from "@/app/lib/database-functions";
 

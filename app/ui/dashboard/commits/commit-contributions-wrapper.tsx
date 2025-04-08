@@ -1,5 +1,5 @@
 import { parseCommitData } from "@/app/lib/utils/utils";
-import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data/data";
+import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data/github-api-functions";
 import CommitContributions from "@/app/ui/dashboard/commits/commit-contributions";
 import { fetchGraphUrl } from "@/app/lib/database-functions";
 import { parseCommitStatsGraphQLEnhanched } from "@/app/lib/utils/email-similarity";

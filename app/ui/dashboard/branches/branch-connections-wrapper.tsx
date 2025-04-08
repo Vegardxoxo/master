@@ -1,4 +1,4 @@
-import { fetchBranches, fetchIssues } from "@/app/lib/data/data";
+import { fetchBranches, fetchIssues } from "@/app/lib/data/github-api-functions";
 import { extractIssueFromBranchName } from "@/app/ui/dashboard/branches/branches.lib";
 import Warning from "@/app/ui/dashboard/alerts/warning";
 import BranchConnections from "@/app/ui/dashboard/branches/branch-connections";

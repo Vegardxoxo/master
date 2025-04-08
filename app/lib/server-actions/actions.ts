@@ -13,7 +13,7 @@ import {
   SignupSchema,
   UpdateRepositorySchema,
 } from "@/app/lib/server-actions/zod-schemas";
-import { fetchRepoId } from "@/app/lib/data/data";
+import { fetchRepoId } from "@/app/lib/data/github-api-functions";
 import {CoverageMetrics, FileCoverageData, FileData, FileSetResult} from "@/app/lib/definitions";
 
 const prisma = new PrismaClient();

@@ -1,5 +1,5 @@
 import CommitFrequency from "@/app/ui/dashboard/commits/commit-frequency";
-import { fetchAllCommits } from "@/app/lib/data/data";
+import { fetchAllCommits } from "@/app/lib/data/github-api-functions";
 import { parseCommitData } from "@/app/lib/utils/utils";
 import {fetchGraphUrl} from "@/app/lib/database-functions";
 
