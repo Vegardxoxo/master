@@ -24,6 +24,7 @@ export function prepareCommitsData(data: any[]): {
   months: string[];
   uniqueDays: number[];
   maxChanges: number;
+  maxFileChanges: number;
 } {
   const processedData = data.map((commit) => {
     const totalChanges = commit.additions + commit.deletions;
@@ -53,7 +54,9 @@ export function prepareCommitsData(data: any[]): {
 
   const maxChanges = Math.max(...data.map((item) => item.totalChanges));
 
-  return { processedData, months, uniqueDays, maxChanges };
+  const maxFileChanges = Math.max(...data.map((item) => item.changedFiles));
+
+  return { processedData, months, uniqueDays, maxChanges, maxFileChanges };
 }
 
 //////////////////////////////////////////////////////

@@ -34,7 +34,7 @@ type UploadChartProps = {
   setIsUploading: (value: boolean) => void;
   owner: string;
   repo: string;
-  chartType: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "PULL_REQUESTS";
+  chartType: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "PULL_REQUESTS" | "COMMIT_CHANGED_FILES";
 };
 
 export const uploadChartToServer = async ({
@@ -63,21 +63,15 @@ export const uploadChartToServer = async ({
       logging: false,
       allowTaint: true,
       useCORS: true,
-      // This is important - it ensures the full height is captured
       height: chartContainer.scrollHeight,
-      // This ensures the full width is captured
       width: chartContainer.scrollWidth,
     });
 
-    // Get image data as base64
     const imageData = canvas.toDataURL("image/png");
 
-    // Upload to server
-    // Upload to server
     const result = await saveChartImage(imageData, chartType, owner, repo);
 
     if (result.success && result.imageUrl) {
-      // Show success message using the toast hook
       toast({
         title: "Chart uploaded successfully",
         description: "You can now use this chart in your markdown",
@@ -94,10 +88,7 @@ export const uploadChartToServer = async ({
     console.error("Failed to upload chart:", error);
     toast({
       title: "Upload failed",
-      description:
-        error instanceof Error
-          ? `Error: ${error.message}`
-          : "There was an error uploading your chart",
+      description: "There was an error uploading your chart",
       variant: "destructive",
     });
     return null;

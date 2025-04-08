@@ -1,7 +1,9 @@
 import { parseCommitData } from "@/app/lib/utils/utils";
-import { fetchAllCommits, fetchCommitStatsGraphQL } from "@/app/lib/data/github-api-functions";
+import {
+  fetchAllCommits,
+  fetchCommitStatsGraphQL,
+} from "@/app/lib/data/github-api-functions";
 import CommitSize from "@/app/ui/dashboard/commits/commit-size";
-import { fetchGraphUrl } from "@/app/lib/database-functions";
 
 export default async function CommitSizeWrapper({
   owner,
@@ -15,7 +17,6 @@ export default async function CommitSizeWrapper({
   // Extract SHAs to fetch detailed information about each commit
   const { commitSummary } = parseCommitData(commitData);
   const commits = await fetchCommitStatsGraphQL(owner, repo, commitSummary);
-  const image_url = await fetchGraphUrl(owner, repo, "COMMIT_SIZE");
 
-  return <CommitSize data={commits} url={image_url} />;
+  return <CommitSize data={commits} />;
 }
