@@ -9,8 +9,6 @@ import { ReportSectionProps } from "@/app/lib/definitions";
 
 export function CommitQualitySection({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const [qualityScore, setQualityScore] = useState<number>(0);
@@ -123,16 +121,6 @@ export function CommitQualitySection({
         columns={commitMessageClassification}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="commit-recommendations">Recommendations</Label>
-        <Textarea
-          id="commit-recommendations"
-          value={recommendations}
-          onChange={(e) => setRecommendations(e.target.value)}
-          className="min-h-[100px]"
-          placeholder="Add your recommendations for improving commit quality..."
-        />
-      </div>
     </div>
   );
 }

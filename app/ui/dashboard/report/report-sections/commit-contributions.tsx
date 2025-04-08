@@ -18,8 +18,6 @@ import {
 
 export default function CommitContributions({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
@@ -137,7 +135,7 @@ export default function CommitContributions({
           </CardHeader>
           <CardContent className="relative">
             <div className="flex items-end gap-2">
-              <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">12</p>
+              <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">{metrics.average_files_changed}</p>
               <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">files</span>
             </div>
           </CardContent>
@@ -159,24 +157,6 @@ export default function CommitContributions({
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            id="commit-contributions"
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[120px]"
-            placeholder="Add your recommendations about contributor patterns and distribution of work..."
-          />
-          <p className="text-xs text-muted-foreground mt-2">
-            Suggest improvements to contribution patterns, such as better
-            distribution of work or mentoring opportunities.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

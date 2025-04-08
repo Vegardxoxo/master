@@ -12,8 +12,6 @@ import Image from "next/image";
 
 export default function CommitFrequency({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
@@ -94,20 +92,6 @@ export default function CommitFrequency({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            id="commit-frequency"
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[120px]"
-            placeholder="Add your recommendations for improving commit frequency patterns..."
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }

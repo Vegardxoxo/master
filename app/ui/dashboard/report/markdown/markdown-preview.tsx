@@ -31,14 +31,6 @@ export default function MarkdownPreview({
     setMounted(true);
   }, []);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(markdown);
-    toast({
-      title: "Copied to clipboard",
-      description: "The markdown content has been copied to your clipboard.",
-    });
-  };
-
   if (!mounted) {
     return null;
   }
@@ -47,10 +39,6 @@ export default function MarkdownPreview({
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg">{title}</CardTitle>
-        <Button variant="outline" size="sm" onClick={handleCopy}>
-          <FileText className="h-4 w-4 mr-1" />
-          Copy Markdown
-        </Button>
       </CardHeader>
       <CardContent>
         <div
