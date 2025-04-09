@@ -1,5 +1,5 @@
 "use client";
-import { ReportSectionProps } from "@/app/lib/definitions";
+import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { useReport } from "@/app/contexts/report-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
@@ -11,7 +11,6 @@ export default function DevelopmentBranches({
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
-  console.log("metrics", metrics);
 
   if (!include || !metrics) {
     return (

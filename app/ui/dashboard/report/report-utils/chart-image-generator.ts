@@ -1,4 +1,4 @@
-import { DayEntry } from "@/app/lib/definitions";
+import { DayEntry } from "@/app/lib/definitions/definitions";
 
 export async function generateChartImage(
   data: DayEntry[],

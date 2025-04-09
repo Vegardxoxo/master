@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CommitStats } from "@/app/lib/definitions";
+import { CommitStats } from "@/app/lib/definitions/definitions";
 import Link from "next/link";
 
 export default function CommitContributionsTable({

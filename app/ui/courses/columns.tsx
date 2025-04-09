@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import {BranchConnection, Commit, LLMResponse, repositoryOverview} from "@/app/lib/definitions";
+import {BranchConnection, Commit, LLMResponse, repositoryOverview} from "@/app/lib/definitions/definitions";
 import {
   AlertCircle,
   CheckCircle2,

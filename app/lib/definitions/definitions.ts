@@ -263,3 +263,17 @@ export interface ReportSectionProps {
   data?: any;
   include: boolean;
 }
+
+export interface CommitData {
+  sha?: string
+  html_url?: string
+  commit: {
+    author: {
+      name: string
+      email: string
+      date?: string
+    }
+    message?: string
+    url?: string
+  }
+}

@@ -13,7 +13,6 @@ interface CommitSizeTableProps {
 }
 
 export default function CommitSizeTable({ data }: CommitSizeTableProps) {
-  console.log(data);
   return (
     <Table>
       <TableHeader>

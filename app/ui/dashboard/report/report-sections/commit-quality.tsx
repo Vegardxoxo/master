@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitMessageClassification } from "@/app/ui/courses/columns";
-import { ReportSectionProps } from "@/app/lib/definitions";
+import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 
 export function CommitQualitySection({
   metrics,

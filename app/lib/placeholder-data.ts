@@ -1,7 +1,7 @@
 // placeholder data
 
 import { Home, Settings } from "lucide-react";
-import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions";
+import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions/definitions";
 
 // export const getRepos = [
 //   { owner: "Vegardxoxo", repo: "bachelor_project" },

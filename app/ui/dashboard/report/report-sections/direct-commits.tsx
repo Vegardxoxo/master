@@ -1,4 +1,4 @@
-import type { ReportSectionProps } from "@/app/lib/definitions";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

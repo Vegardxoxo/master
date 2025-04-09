@@ -36,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { PullRequestData } from "@/app/lib/definitions";
+import type { PullRequestData } from "@/app/lib/definitions/definitions";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 
 const COLORS = [

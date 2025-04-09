@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import type { CommitByDate } from "@/app/lib/definitions";
+import type { CommitByDate } from "@/app/lib/definitions/definitions";
 
 export default function CommitFrequencyTable({
   data,

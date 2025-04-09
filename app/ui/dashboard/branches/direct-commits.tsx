@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitsColumns } from "@/app/ui/courses/columns";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
-import { Commit } from "@/app/lib/definitions";
+import { Commit } from "@/app/lib/definitions/definitions";
 import { useReport } from "@/app/contexts/report-context";
 import { useEffect } from "react";
 

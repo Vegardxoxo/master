@@ -1,4 +1,4 @@
-import { CommitStats } from "@/app/lib/definitions";
+import { CommitStats } from "@/app/lib/definitions/definitions";
 
 function parseCoAuthorLine(line: string): { name: string; email: string } {
   const clean = line.replace("Co-authored-by:", "").trim();

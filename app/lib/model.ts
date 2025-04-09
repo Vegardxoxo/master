@@ -1,4 +1,4 @@
-import { CommitMessageShort } from "@/app/lib/definitions";
+import { CommitMessageShort } from "@/app/lib/definitions/definitions";
 import { parseModelResponse } from "@/app/lib/utils/utils";
 
 const API_KEY = process.env.API_KEY;

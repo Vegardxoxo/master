@@ -18,8 +18,6 @@ export default async function Milestones({
   repo: string;
 }) {
   const milestones = await fetchMilestones(owner, repo);
-  console.log("milestones", milestones);
-
   return (
     <Card className="w-full h-full">
       <CardHeader>

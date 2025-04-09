@@ -7,7 +7,7 @@ import {
   getCoverageTextColor,
   getShortFilePath,
 } from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
-import { FileCoverageData } from "@/app/lib/definitions";
+import { FileCoverageData } from "@/app/lib/definitions/definitions";
 import { useReport } from "@/app/contexts/report-context";
 
 type SortField = "filePath" | "statements" | "branches" | "functions" | "lines";

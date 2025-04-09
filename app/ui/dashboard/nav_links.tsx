@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { AddCourseInstance } from "@/app/ui/courses/add/add-course-instance";
-import { UserCourse } from "@/app/lib/definitions";
+import { UserCourse } from "@/app/lib/definitions/definitions";
 
 // Define the navigation links
 export const links = [
@@ -186,7 +186,6 @@ function CourseItem({
  */
 export function Courses({ courses }: { courses: UserCourse[] }) {
   const pathName = usePathname();
-  console.log("courses", courses);
   return (
     <div className="w-full">
       {courses?.map((userCourse) => (

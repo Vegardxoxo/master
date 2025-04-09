@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ReportSectionProps } from "@/app/lib/definitions";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

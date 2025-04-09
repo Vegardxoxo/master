@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { ReportSectionProps } from "@/app/lib/definitions";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Clock, GitPullRequest, ImageOff } from "lucide-react";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { pullRequestActivity } from "@/app/ui/courses/columns";

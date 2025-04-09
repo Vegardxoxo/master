@@ -9,7 +9,7 @@ import {
   FileSetResult,
   Repository,
   UserCourse,
-} from "@/app/lib/definitions";
+} from "@/app/lib/definitions/definitions";
 
 const prisma = new PrismaClient();
 
@@ -283,7 +283,6 @@ export async function findRepositoryByOwnerRepo(
         repoName: repo,
       },
     });
-    console.log("repository", repository);
 
     if (!repository) {
       return {
@@ -416,11 +415,6 @@ export async function getCoverageReport(
         error: "Repository not found or you don't have access to it",
       };
     }
-
-    console.log("Looking for coverage report with:", {
-      repositoryId: repository.id,
-      branch,
-    });
 
     const coverageReport = await prisma.coverageReport.findFirst({
       where: {

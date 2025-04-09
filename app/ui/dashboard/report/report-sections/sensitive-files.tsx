@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { AlertTriangle, Lock, Shield } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileData, ReportSectionProps } from "@/app/lib/definitions";
+import { FileData, ReportSectionProps } from "@/app/lib/definitions/definitions";
 
 export default function SensitiveFilesSection({
   metrics,

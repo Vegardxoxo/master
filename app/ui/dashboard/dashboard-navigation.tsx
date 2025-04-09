@@ -9,7 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
-import type { VisibleSections } from "@/app/lib/definitions"
+import type { VisibleSections } from "@/app/lib/definitions/definitions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 type SidebarProps = {

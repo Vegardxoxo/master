@@ -31,7 +31,7 @@ import {
 import UserProfile from "@/app/ui/user-profile";
 import { usePathname } from "next/navigation";
 import {handleSignOut} from "@/app/lib/server-actions/actions";
-import {UserCourse} from "@/app/lib/definitions";
+import {UserCourse} from "@/app/lib/definitions/definitions";
 
 function AddCourseButton() {
   return (

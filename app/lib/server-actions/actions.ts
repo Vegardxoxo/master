@@ -14,7 +14,7 @@ import {
   UpdateRepositorySchema,
 } from "@/app/lib/server-actions/zod-schemas";
 import { fetchRepoId } from "@/app/lib/data/github-api-functions";
-import {CoverageMetrics, FileCoverageData, FileData, FileSetResult} from "@/app/lib/definitions";
+import {CoverageMetrics, FileCoverageData, FileData, FileSetResult} from "@/app/lib/definitions/definitions";
 
 const prisma = new PrismaClient();
 
@@ -121,7 +121,6 @@ export async function createRepository(prevState: any, formData: FormData) {
     const semester = courseInstance.semester.toLowerCase();
 
     revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);
-    console.log("repository", repository);
     return {
       success: true,
       repository,
