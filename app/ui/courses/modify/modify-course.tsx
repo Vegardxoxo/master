@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Course, UserCourse } from "@/app/lib/definitions"
+import type { Course, UserCourse } from "@/app/lib/definitions/definitions"
 import { AddCourse } from "./add-course"
 import { RemoveCourse } from "./remove-course"
 

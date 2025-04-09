@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ReportSectionProps } from "@/app/lib/definitions";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,6 @@ import Image from "next/image";
 
 export default function CommitFrequency({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
@@ -94,20 +92,6 @@ export default function CommitFrequency({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            id="commit-frequency"
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[120px]"
-            placeholder="Add your recommendations for improving commit frequency patterns..."
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }

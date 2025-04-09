@@ -5,12 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitMessageClassification } from "@/app/ui/courses/columns";
-import { ReportSectionProps } from "@/app/lib/definitions";
+import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 
 export function CommitQualitySection({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const [qualityScore, setQualityScore] = useState<number>(0);
@@ -123,16 +121,6 @@ export function CommitQualitySection({
         columns={commitMessageClassification}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="commit-recommendations">Recommendations</Label>
-        <Textarea
-          id="commit-recommendations"
-          value={recommendations}
-          onChange={(e) => setRecommendations(e.target.value)}
-          className="min-h-[100px]"
-          placeholder="Add your recommendations for improving commit quality..."
-        />
-      </div>
     </div>
   );
 }

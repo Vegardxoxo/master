@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useActionState } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { enrollInCourse } from "@/app/lib/server-actions/actions";
-import type { Course, UserCourse } from "@/app/lib/definitions";
+import type { Course, UserCourse } from "@/app/lib/definitions/definitions";
 import { Search, CheckCircle2, AlertCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

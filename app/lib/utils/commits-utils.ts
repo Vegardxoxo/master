@@ -1,4 +1,4 @@
-import { CommitStats } from "@/app/lib/definitions";
+import {CommitData, CommitStats} from "@/app/lib/definitions/definitions";
 
 export interface PreparedCommit {
   oid: string;
@@ -24,6 +24,7 @@ export function prepareCommitsData(data: any[]): {
   months: string[];
   uniqueDays: number[];
   maxChanges: number;
+  maxFileChanges: number;
 } {
   const processedData = data.map((commit) => {
     const totalChanges = commit.additions + commit.deletions;
@@ -53,7 +54,9 @@ export function prepareCommitsData(data: any[]): {
 
   const maxChanges = Math.max(...data.map((item) => item.totalChanges));
 
-  return { processedData, months, uniqueDays, maxChanges };
+  const maxFileChanges = Math.max(...data.map((item) => item.changedFiles));
+
+  return { processedData, months, uniqueDays, maxChanges, maxFileChanges };
 }
 
 //////////////////////////////////////////////////////
@@ -143,18 +146,156 @@ export function parseCommitStatsGraphQL(data: any[]) {
   return { statMap, projectAverageChanges, projectAverageFilesChanged };
 }
 
-function parseCoAuthorLine(line: string): { name: string; email: string } {
-  const clean = line.replace("Co-authored-by:", "").trim();
+// function parseCoAuthorLine(line: string): { name: string; email: string } {
+//   const clean = line.replace("Co-authored-by:", "").trim();
+//
+//   // Match the pattern "Name <email>"
+//   const match = clean.match(/^(.*?)\s*<([^>]+)>/);
+//
+//   if (!match) {
+//     return { name: clean, email: "unknown@invalid.com" };
+//   }
+//
+//   const name = match[1].trim();
+//   const email = match[2].trim().toLowerCase();
+//
+//   return { name, email };
+// }
 
-  // Match the pattern "Name <email>"
-  const match = clean.match(/^(.*?)\s*<([^>]+)>/);
 
-  if (!match) {
-    return { name: clean, email: "unknown@invalid.com" };
+export function parseCommitData(commitData: any[]): ParseCommitDataResult {
+  const dayMap: Record<string, AuthorFrequency> = {}
+  const dayTotals: Record<string, number> = {}
+  const emailToDisplayName: Record<string, string> = {}
+  const commitSummary = []
+  const commitByDate = []
+
+  // Process each commit
+  for (const item of commitData) {
+    const authorName = item.commit.author.name ?? "unknown"
+    const authorEmail = item.commit.author.email ?? "unknown"
+    const commitDate = item.commit.author.date
+    const message = item.commit.message
+    const url = item.commit.url
+    const htmlUrl = item.html_url
+    const sha = item.sha
+
+    emailToDisplayName[authorEmail] = authorName
+    commitSummary.push({ sha, url, commit_message: message })
+    commitByDate.push({
+      authorEmail,
+      authorName,
+      commitDate,
+      message,
+      htmlUrl,
+    })
+
+    const day = new Date(commitDate).toISOString().split("T")[0]
+    if (!dayMap[day]) dayMap[day] = {}
+    if (!dayTotals[day]) dayTotals[day] = 0
+    // Increment commit count for this author on this day
+    if (!dayMap[day][authorEmail]) {
+      dayMap[day][authorEmail] = 0
+    }
+    dayMap[day][authorEmail]++
+    dayTotals[day]++
   }
 
-  const name = match[1].trim();
-  const email = match[2].trim().toLowerCase();
+  // Add total commits for each day
+  emailToDisplayName["TOTAL@commits"] = "Total"
+  for (const day of Object.keys(dayMap)) {
+    dayMap[day]["TOTAL@commits"] = dayTotals[day]
+  }
 
-  return { name, email };
+  // Create the final data structure for the chart
+  const dayEntries: DayEntry[] = Object.entries(dayMap)
+    .map(([day, authorsMap]) => ({
+      day,
+      ...authorsMap,
+    }))
+    .sort((a, b) => a.day.localeCompare(b.day))
+
+  let total = 0
+  for (const day of dayEntries) {
+    total += day["TOTAL@commits"] as number
+  }
+
+  return {
+    dayEntries,
+    total,
+    emailToDisplayName,
+    commitSummary,
+    commitByDate,
+  }
+}
+
+
+
+interface ParseCommitDataResult {
+  dayEntries: DayEntry[]
+  total: number
+  emailToDisplayName: Record<string, string>
+  commitSummary: any[]
+  commitByDate: any[]
+}
+
+// Helper function to parse co-author lines
+function parseCoAuthorLine(line: string): { email: string; name: string } {
+  // Default values in case parsing fails
+  let email = "unknown"
+  let name = "Unknown Co-author"
+
+  try {
+    // Extract the part after "Co-authored-by: "
+    const authorPart = line.trim().substring("Co-authored-by:".length).trim()
+
+    // Parse name and email - format is typically "Name <email@example.com>"
+    const match = authorPart.match(/([^<]+)<([^>]+)>/)
+
+    if (match && match.length >= 3) {
+      name = match[1].trim()
+      email = match[2].trim()
+    }
+  } catch (error) {
+    console.error("Error parsing co-author line:", error)
+  }
+
+  return { email, name }
+}
+
+// Type definitions
+interface AuthorFrequency {
+  [email: string]: number
+}
+
+interface DayEntry {
+  day: string
+  [email: string]: string | number
+}
+
+interface ParseCommitDataResult {
+  dayEntries: DayEntry[]
+  total: number
+  emailToDisplayName: Record<string, string>
+  commitSummary: any[]
+  commitByDate: any[]
+}
+
+
+export function convertToCommitStats(commitData: CommitData[]): CommitStats[] {
+  return commitData.map((data) => {
+    const original = data._original || {}
+
+    return {
+      committedDate: data.commit.author.date || new Date().toISOString(),
+      author: {
+        email: data.commit.author.email,
+        name: data.commit.author.name,
+      },
+      additions: original.additions || 0,
+      deletions: original.deletions || 0,
+      changedFiles: original.changedFiles || 0,
+      url: data.commit.url || data.html_url || "",
+    }
+  })
 }

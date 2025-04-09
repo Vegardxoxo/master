@@ -14,8 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { fetchBranchesWithStatus } from "@/app/lib/data/data";
-import { _Branches } from "@/app/lib/definitions";
+import { fetchBranchesWithStatus } from "@/app/lib/data/github-api-functions";
+import { _Branches } from "@/app/lib/definitions/definitions";
 
 interface BranchesProps {
   owner: string;

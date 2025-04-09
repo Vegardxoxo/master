@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { removeEnrollment } from "@/app/lib/server-actions/actions"
-import type { UserCourse } from "@/app/lib/definitions"
+import type { UserCourse } from "@/app/lib/definitions/definitions"
 import { CheckCircle2, Trash2, AlertCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {

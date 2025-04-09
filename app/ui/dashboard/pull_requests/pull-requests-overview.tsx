@@ -1,6 +1,6 @@
 "use client";
 
-import { PullRequestData } from "@/app/lib/definitions";
+import { PullRequestData } from "@/app/lib/definitions/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import {

@@ -1,20 +1,16 @@
 "use client";
-import { ReportSectionProps } from "@/app/lib/definitions";
+import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { useReport } from "@/app/contexts/report-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { DevelopmentBranchColumns } from "@/app/ui/courses/columns";
 
 export default function DevelopmentBranches({
   metrics,
-  recommendations,
-  setRecommendations,
   data,
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
-  console.log("metrics", metrics)
 
   if (!include || !metrics) {
     return (
@@ -74,26 +70,6 @@ export default function DevelopmentBranches({
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[150px]"
-            placeholder="Add your recommendations for improving branch-issue connections..."
-          />
-          <p className="text-xs text-muted-foreground mt-2">
-            Suggest ways to improve branch naming conventions and issue tracking
-            integration.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
-
-
-

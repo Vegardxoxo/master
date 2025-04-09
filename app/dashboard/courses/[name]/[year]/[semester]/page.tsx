@@ -5,7 +5,7 @@ import {
 } from "@/app/lib/database-functions";
 import { DataTable } from "@/app/ui/courses/tables/overview-table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
-import { fetchRepoOverview } from "@/app/lib/data/data";
+import { fetchRepoOverview } from "@/app/lib/data/github-api-functions";
 import { ReportProvider } from "@/app/contexts/report-context";
 
 interface pageProps {

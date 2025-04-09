@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ReferenceLine,
@@ -32,28 +32,21 @@ import {
 } from "@/components/ui/select";
 import CommitSizeTable from "@/app/ui/dashboard/commits/commit-size-table";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
-import {exportChart, uploadChartToServer} from "@/app/ui/chart-utils";
-import { Download } from "lucide-react";
-import { Button } from "@/app/ui/button";
-import {useReport} from "@/app/contexts/report-context";
-import {prepareCommitsData} from "@/app/lib/utils/commits-utils";
+import { prepareCommitsData } from "@/app/lib/utils/commits-utils";
+import { Separator } from "@/components/ui/separator";
+import { GitCommit } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-export default function CommitSize({ data, url }: { data: any[], url: string }) {
+export default function CommitSize({ data }: { data: any[] }) {
   const [selectedCommit, setSelectedCommit] = useState<any | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
-  const chartRef = useRef<HTMLDivElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [imageURL, setImageURL] = useState<string>(url);
-  const {getRepositoryInfo} = useReport();
-  const info = getRepositoryInfo();
-    const { processedData, months, uniqueDays, maxChanges } = useMemo(() => {
-    return prepareCommitsData(data);
-  }, [data]);
+  const [selectedFilesMonth, setSelectedFilesMonth] = useState<string>("all");
+  const { processedData, months, uniqueDays, maxChanges, maxFileChanges } =
+    useMemo(() => {
+      return prepareCommitsData(data);
+    }, [data]);
 
-
-
-
-  // Filter data by month
+  // Filter data by month for the first chart
   const filteredData = useMemo(() => {
     if (selectedMonth === "all") return processedData;
     return processedData.filter((commit) => {
@@ -63,6 +56,15 @@ export default function CommitSize({ data, url }: { data: any[], url: string }) 
     });
   }, [processedData, selectedMonth]);
 
+  // Filter data by month for the second chart
+  const filteredFilesData = useMemo(() => {
+    if (selectedFilesMonth === "all") return processedData;
+    return processedData.filter((commit) => {
+      const date = new Date(commit.committedDate);
+      const commitMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+      return commitMonth === selectedFilesMonth;
+    });
+  }, [processedData, selectedFilesMonth]);
 
   const handleCommitClick = (commit: any) => {
     setSelectedCommit(commit);
@@ -72,139 +74,265 @@ export default function CommitSize({ data, url }: { data: any[], url: string }) 
     setSelectedCommit(null);
   };
 
-
+  const totalChangesCommitCount = filteredData.length;
+  const changedFilesCommitCount = filteredFilesData.length;
 
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl font-bold">
-          Commit Size Scatter Plot
+          Commit Size Analysis
         </CardTitle>
-        <div className={"flex items-center space-x-2"}>
-                 <Button
-          onClick={() => {
-            uploadChartToServer({
-              chartType: "COMMIT_SIZE",
-              chartRef: chartRef,
-              setIsUploading: setIsUploading,
-              owner: info.owner,
-              repo: info.repo,
-            }).then((r) => {
-              if (typeof r === "string") {
-                setImageURL(r);
-              }
-            });
-          }}
-          disabled={isUploading}
-        >
-          <Download className="mr-2 h-4 w-4" />
-         {imageURL ? "Replace chart" : "Upload Chart"}
-        </Button>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                {months.map((month) => (
-                  <SelectItem key={month} value={month}>
-                    {new Date(month).toLocaleString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
       </CardHeader>
       <CardContent>
-        {/*Chart*/}
-        <ChartContainer
-          ref={chartRef}
-          config={{
-            totalChanges: {
-              label: "Total Changes",
-              color: "hsl(var(--chart-2))",
-            },
-          }}
-          className="h-[500px] w-full"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              {uniqueDays.map((day) => (
-                <ReferenceLine
-                  key={day}
-                  x={day}
-                  stroke="hsl(var(--border))"
-                  strokeOpacity={1}
-                  strokeDasharray="1 1"
-                  ifOverflow="extendDomain"
-                />
-              ))}
-              <XAxis
-                dataKey="committedDate"
-                name="Date"
-                type="number"
-                scale="time"
-                domain={["dataMin - 86400000", "dataMax + 86400000"]}
-                tickFormatter={(timestamp) =>
-                  new Date(timestamp).toLocaleDateString()
-                }
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-                tickMargin={10}
-                allowDataOverflow
-                padding={{ left: 20, right: 20 }}
-              />
-              <YAxis
-                dataKey="totalChanges"
-                name="Total Changes"
-                type="number"
-                domain={[1, maxChanges]}
-                allowDataOverflow
-                tickLine={false}
-                axisLine={false}
-                tickMargin={10}
-                label={{
-                  value: "Total Changes",
-                  angle: -90,
-                  position: "insideLeft",
-                  style: { textAnchor: "middle" },
-                }}
-                scale="log"
-                padding={{ top: 20, bottom: 10 }}
-              />
-              <ZAxis dataKey="size" range={[20, 50]} />
-              <ChartTooltip
-                cursor={{ strokeDasharray: "1 1" }}
-                content={
-                  <ChartTooltipContent
-                    indicator="dot"
-                    formatter={(value, name) => {
-                      if (name === "Date") {
-                        return [new Date(value).toLocaleString("en-US"), null];
-                      }
-                      return [`${value} `, name];
-                    }}
+        {/* Total Changes Chart */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+             <div className="flex items-center gap-2">
+            <h3 className="text-lg font-medium">
+              Total Changes
+            </h3>
+
+            <Badge variant="outline" className="flex items-center gap-1">
+              <GitCommit className="h-3.5 w-3.5" />
+              <span>{totalChangesCommitCount} commits</span>
+            </Badge>
+             </div>
+            <div className="flex items-center space-x-2">
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all">All</SelectItem>
+                    {months.map((month) => (
+                      <SelectItem key={month} value={month}>
+                        {new Date(month).toLocaleString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <ChartContainer
+            config={{
+              totalChanges: {
+                label: "Total Changes",
+                color: "hsl(var(--chart-2))",
+              },
+            }}
+            className="h-[500px] w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
+                {uniqueDays.map((day) => (
+                  <ReferenceLine
+                    key={day}
+                    x={day}
+                    stroke="hsl(var(--border))"
+                    strokeOpacity={1}
+                    strokeDasharray="1 1"
+                    ifOverflow="extendDomain"
                   />
-                }
-              />
-              <Scatter
-                name="Commits"
-                data={filteredData}
-                fill="var(--color-totalChanges)"
-                fillOpacity={1}
-                onClick={handleCommitClick}
-                x="committedDate"
-                y="totalChanges"
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+                ))}
+                <XAxis
+                  dataKey="committedDate"
+                  name="Date"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin - 86400000", "dataMax + 86400000"]}
+                  tickFormatter={(timestamp) =>
+                    new Date(timestamp).toLocaleDateString()
+                  }
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  allowDataOverflow
+                  padding={{ left: 20, right: 20 }}
+                />
+                <YAxis
+                  dataKey="totalChanges"
+                  name="Total Changes"
+                  type="number"
+                  domain={[1, maxChanges]}
+                  allowDataOverflow
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  label={{
+                    value: "Total Changes",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: { textAnchor: "middle" },
+                  }}
+                  scale="log"
+                  padding={{ top: 20, bottom: 10 }}
+                />
+                <ZAxis dataKey="size" range={[20, 50]} />
+                <ChartTooltip
+                  cursor={{ strokeDasharray: "1 1" }}
+                  content={
+                    <ChartTooltipContent
+                      indicator="dot"
+                      formatter={(value, name) => {
+                        if (name === "Date") {
+                          return [
+                            new Date(value).toLocaleString("en-US"),
+                            null,
+                          ];
+                        }
+                        return [`${value} `, name];
+                      }}
+                    />
+                  }
+                />
+                <Scatter
+                  name="Commits"
+                  data={filteredData}
+                  fill="var(--color-totalChanges)"
+                  fillOpacity={1}
+                  onClick={handleCommitClick}
+                  x="committedDate"
+                  y="totalChanges"
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </div>
+
+        {/* Separator between charts */}
+        <Separator className="my-10" />
+
+        {/* Changed Files Chart */}
+        <div className="mt-10">
+          <div className="flex justify-between items-center mb-4">
+             <div className="flex items-center gap-2">
+            <h3 className="text-lg font-medium">Changed Files</h3>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <GitCommit className="h-3.5 w-3.5" />
+              <span>{changedFilesCommitCount} commits</span>
+            </Badge>
+             </div>
+            <div className="flex items-center space-x-2">
+              <Select
+                value={selectedFilesMonth}
+                onValueChange={setSelectedFilesMonth}
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all">All</SelectItem>
+                    {months.map((month) => (
+                      <SelectItem key={month} value={month}>
+                        {new Date(month).toLocaleString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <ChartContainer
+            config={{
+              changedFiles: {
+                label: "Changed Files",
+                color: "hsl(var(--chart-1))",
+              },
+            }}
+            className="h-[500px] w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
+                {uniqueDays.map((day) => (
+                  <ReferenceLine
+                    key={day}
+                    x={day}
+                    stroke="hsl(var(--border))"
+                    strokeOpacity={1}
+                    strokeDasharray="1 1"
+                    ifOverflow="extendDomain"
+                  />
+                ))}
+                <XAxis
+                  dataKey="committedDate"
+                  name="Date"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin - 86400000", "dataMax + 86400000"]}
+                  tickFormatter={(timestamp) =>
+                    new Date(timestamp).toLocaleDateString()
+                  }
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  allowDataOverflow
+                  padding={{ left: 20, right: 20 }}
+                />
+                <YAxis
+                  dataKey="changedFiles"
+                  name="Changed Files"
+                  type="number"
+                  domain={[1, maxFileChanges]}
+                  allowDataOverflow
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  label={{
+                    value: "Changed Files",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: { textAnchor: "middle" },
+                  }}
+                  scale="log"
+                  padding={{ top: 20, bottom: 10 }}
+                />
+                <ZAxis dataKey="size" range={[20, 50]} />
+                <ChartTooltip
+                  cursor={{ strokeDasharray: "1 1" }}
+                  content={
+                    <ChartTooltipContent
+                      indicator="dot"
+                      formatter={(value, name) => {
+                        if (name === "Date") {
+                          return [
+                            new Date(value).toLocaleString("en-US"),
+                            null,
+                          ];
+                        }
+                        return [`${value} `, name];
+                      }}
+                    />
+                  }
+                />
+                <Scatter
+                  name="Commits"
+                  data={filteredFilesData}
+                  fill="var(--color-changedFiles)"
+                  fillOpacity={1}
+                  onClick={handleCommitClick}
+                  x="committedDate"
+                  y="changedFiles"
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </div>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Click on a point to view detailed commit information
@@ -247,7 +375,7 @@ export default function CommitSize({ data, url }: { data: any[], url: string }) 
           </BestPractices>
         </div>
       </CardContent>
-      {/*Drill-down*/}
+      {/* Drill-down */}
       <Dialog open={Boolean(selectedCommit)} onOpenChange={closeDialog}>
         <DialogContent className="sm:max-w-4xl h-auto max-h-[80vh] overflow-auto w-full">
           <DialogHeader className={"h-fit"}>

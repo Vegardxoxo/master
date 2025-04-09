@@ -23,6 +23,7 @@ enum ChartType {
   CONTRIBUTIONS
   EXPORT
   PULL_REQUESTS
+  COMMIT_CHANGED_FILES
 }
 
 model User {

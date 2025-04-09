@@ -1,10 +1,7 @@
-import { ReportSectionProps } from "@/app/lib/definitions";
+import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { CoverageProgressBar } from "@/app/ui/dashboard/project_info/test-coverage/coverage-progress-bar";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {FileCoverageTable} from "@/app/ui/dashboard/project_info/test-coverage/coverage-table";
-import {CoverageTableReport} from "@/app/ui/dashboard/project_info/test-coverage/coverage-table-report";
+import { CoverageTableReport } from "@/app/ui/dashboard/project_info/test-coverage/coverage-table-report";
 
 interface TestCoverageProps extends ReportSectionProps {
   fileCoverage: any;
@@ -13,13 +10,11 @@ interface TestCoverageProps extends ReportSectionProps {
 export default function TestCoverageSection({
   metrics,
   fileCoverage,
-  recommendations,
-  setRecommendations,
   include,
 }: TestCoverageProps) {
   // Check if fileData exists and if section should be included
 
-  console.log("filecoverage", fileCoverage)
+  console.log("filecoverage", fileCoverage);
   if (!metrics || !include || !fileCoverage) {
     return (
       <Card>
@@ -62,17 +57,6 @@ export default function TestCoverageSection({
           <CoverageTableReport fileData={fileCoverage} />
         </CardContent>
       </Card>
-
-      <div className="space-y-2">
-        <Label htmlFor="coverage-recommendations">Recommendations</Label>
-        <Textarea
-          id="coverage-recommendations"
-          value={recommendations}
-          onChange={(e) => setRecommendations(e.target.value)}
-          className="min-h-[100px]"
-          placeholder="Add your recommendations for improving commit quality..."
-        />
-      </div>
     </div>
   );
 }

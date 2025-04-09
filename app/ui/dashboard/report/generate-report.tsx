@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useReport } from "../../../contexts/report-context"; // Fixed import path
+import { useReport } from "@/app/contexts/report-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,20 +14,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown"; // Fixed import path
-import { CommitQualitySection } from "./report-sections/commit-quality"; // Fixed import path
-import SensitiveFilesSection from "./report-sections/sensitive-files"; // Fixed import path
-import TestCoverageSection from "./report-sections/test-coverage"; // Fixed import path
-import DirectCommitsSection from "./report-sections/direct-commits"; // Fixed import path
-import CommitFrequency from "./report-sections/commit-frequency"; // Fixed import path
-import MarkdownPreview from "./markdown-preview";
+import { reportMarkdown } from "@/app/ui/dashboard/report/report-markdown";
+import { CommitQualitySection } from "./report-sections/commit-quality";
+import SensitiveFilesSection from "./report-sections/sensitive-files";
+import TestCoverageSection from "./report-sections/test-coverage";
+import DirectCommitsSection from "./report-sections/direct-commits";
+import CommitFrequency from "./report-sections/commit-frequency";
+import MarkdownPreview from "./markdown/markdown-preview";
 import CommitContributions from "@/app/ui/dashboard/report/report-sections/commit-contributions";
 import PullRequests from "@/app/ui/dashboard/report/report-sections/pull-requests";
 import DevelopmentBranches from "@/app/ui/dashboard/report/report-sections/development-branches";
+import RecommendationEditor from "@/app/ui/dashboard/report/recommendation-editor";
+import FinalReport from "@/app/ui/dashboard/report/final-report";
+import { useReportHelper } from "@/app/contexts/report-context-helper";
+
+import { usePathname, useRouter } from "next/navigation";
 
 export default function GenerateReport({
   owner,
@@ -39,6 +44,9 @@ export default function GenerateReport({
   const { getAllMetricsData, clearMetricsData } = useReport();
   const { toast } = useToast();
   const allMetrics = getAllMetricsData();
+  const { setReport } = useReportHelper();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Extract metrics data
   const commitQuality = allMetrics.commitQuality?.metrics;
@@ -50,12 +58,19 @@ export default function GenerateReport({
   const developmentBranches = allMetrics.branchConnections?.metrics;
   const developmentBranchesData = allMetrics.branchConnections?.data;
 
-  const testCoverage = allMetrics.testCoverage?.metrics; // Fixed property casing
-  const fileCoverage = allMetrics.fileCoverage?.metrics; // Fixed property casing
+  const testCoverage = allMetrics.testCoverage?.metrics;
+  const fileCoverage = allMetrics.fileCoverage?.metrics;
   const sensitiveFiles = allMetrics.sensitiveFiles?.data;
 
-  console.log("developmentBranches", developmentBranches)
-  // State for included sections
+
+  const handlePreviewClick = () => {
+    setReport({
+      title: reportTitle,
+      content: getMarkdown(),
+    });
+    router.push(`${pathname}/report`);
+  };
+
   const [includedSections, setIncludedSections] = useState({
     commitQuality: true,
     commitFrequency: true,
@@ -132,8 +147,6 @@ export default function GenerateReport({
   );
 
   const [additionalNotes, setAdditionalNotes] = useState("");
-
-  // Generate markdown content based on the metrics and user  setAdditionalNotes] = useState("");
 
   // Generate markdown content based on the metrics and user input
   const getMarkdown = () => {
@@ -356,7 +369,7 @@ export default function GenerateReport({
 
           <Separator />
 
-          <Tabs className="w-full ">
+          <Tabs defaultValue={"commits"} className="w-full ">
             <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <TabsTrigger
                 className="flex-1 data-[state=active]:bg-sky-500 data-[state=active]:text-white"
@@ -416,78 +429,126 @@ export default function GenerateReport({
             </TabsList>
             <div className="h-60 md:h-20 w-full"></div>
             <TabsContent value="commits">
-              <CommitQualitySection
-                metrics={commitQuality}
-                recommendations={commitQualityRecommendations}
-                setRecommendations={setCommitQualityRecommendations}
-                include={includedSections.commitQuality}
-              />
+              <div className={"space-y-6"}>
+                <CommitQualitySection
+                  metrics={commitQuality}
+                  include={includedSections.commitQuality}
+                />
+                <RecommendationEditor
+                  value={commitQualityRecommendations}
+                  onChange={setCommitQualityRecommendations}
+                  title="Commit Quality Recommendations"
+                  sectionId="commit-quality-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="coverage">
-              <TestCoverageSection
-                metrics={testCoverage}
-                fileCoverage={fileCoverage}
-                recommendations={coverageRecommendations}
-                setRecommendations={setCoverageRecommendations}
-                include={includedSections.testCoverage}
-              />
+              <div className={"space-y-6"}>
+                <TestCoverageSection
+                  metrics={testCoverage}
+                  fileCoverage={fileCoverage}
+                  include={includedSections.testCoverage}
+                />
+                <RecommendationEditor
+                  value={coverageRecommendations}
+                  onChange={setCoverageRecommendations}
+                  title="Test Coverage Recommendations"
+                  sectionId="test-coverage-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="sensitive">
-              <SensitiveFilesSection
-                metrics={sensitiveFiles}
-                recommendations={sensitiveFilesRecommendations}
-                setRecommendations={setSensitiveFilesRecommendations}
-                include={includedSections.sensitiveFiles}
-              />
+              <div className={"space-y-6"}>
+                <SensitiveFilesSection
+                  metrics={sensitiveFiles}
+                  include={includedSections.sensitiveFiles}
+                />
+                <RecommendationEditor
+                  value={sensitiveFilesRecommendations}
+                  onChange={setSensitiveFilesRecommendations}
+                  title="Sensitive Files Recommendations"
+                  sectionId="sensitive-files-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="directCommits">
-              <DirectCommitsSection
-                metrics={directCommits}
-                recommendations={directCommitsRecommendations}
-                setRecommendations={setDirectCommitsRecommendations}
-                include={includedSections.directCommits}
-              />
+              <div className={"space-y-6"}>
+                <DirectCommitsSection
+                  metrics={directCommits}
+                  include={includedSections.directCommits}
+                />
+                <RecommendationEditor
+                  value={directCommitsRecommendations}
+                  onChange={setDirectCommitsRecommendations}
+                  title="Direct Commits Recommendations"
+                  sectionId="direct-commits-to-the-main-branch"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="frequency">
-              <CommitFrequency
-                metrics={commitFrequency}
-                recommendations={commitFrequencyRecommendations}
-                setRecommendations={setCommitFrequencyRecommendations}
-                include={includedSections.commitFrequency}
-              />
+              <div className={"space-y-6"}>
+                <CommitFrequency
+                  metrics={commitFrequency}
+                  include={includedSections.commitFrequency}
+                />
+                <RecommendationEditor
+                  value={commitFrequencyRecommendations}
+                  onChange={setCommitFrequencyRecommendations}
+                  title="Commit Frequency Recommendations"
+                  sectionId="commit-frequency-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="contributions">
-              <CommitContributions
-                metrics={commitContributions}
-                recommendations={contributionsRecommendations}
-                setRecommendations={setContributionsRecommendations}
-                include={includedSections.commitContributions}
-              />
+              <div className={"space-y-6"}>
+                <CommitContributions
+                  metrics={commitContributions}
+                  include={includedSections.commitContributions}
+                />
+                <RecommendationEditor
+                  value={contributionsRecommendations}
+                  onChange={setContributionsRecommendations}
+                  title="Contributions Recommendations"
+                  sectionId="commit-contributions-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="pullRequests">
-              <PullRequests
-                metrics={pullRequests}
-                data={pullRequestTableData}
-                recommendations={pullRequestsRecommendations}
-                setRecommendations={setPullRequestsRecommendations}
-                include={includedSections.pullRequests}
-              />
+              <div className={"space-y-6"}>
+                <PullRequests
+                  metrics={pullRequests}
+                  data={pullRequestTableData}
+                  include={includedSections.pullRequests}
+                />
+                <RecommendationEditor
+                  value={pullRequestsRecommendations}
+                  onChange={setPullRequestsRecommendations}
+                  title="Pull Requests Recommendations"
+                  sectionId="pull-requests-analysis"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="developmentBranches">
-              <DevelopmentBranches
-                metrics={developmentBranches}
-                data={developmentBranchesData}
-                recommendations={developmentBranchesRecommendations}
-                setRecommendations={setDevelopmentBranchesRecommendations}
-                include={includedSections.developmentBranches}
-              />
+              <div className={"space-y-6"}>
+                <DevelopmentBranches
+                  metrics={developmentBranches}
+                  data={developmentBranchesData}
+                  include={includedSections.developmentBranches}
+                />
+                <RecommendationEditor
+                  value={developmentBranchesRecommendations}
+                  onChange={setDevelopmentBranchesRecommendations}
+                  title="Development Branches Recommendations"
+                  sectionId="branch-issue-connection-analysis"
+                />
+              </div>
             </TabsContent>
           </Tabs>
           <Separator />
@@ -506,20 +567,31 @@ export default function GenerateReport({
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button
-            onClick={() => {
-              navigator.clipboard.writeText(getMarkdown());
-              toast({
-                title: "Copied to clipboard",
-                description:
-                  "The markdown report has been copied to your clipboard.",
-              });
-            }}
-            className="flex items-center gap-1"
-          >
-            <FileText className="h-4 w-4" />
-            Copy Report
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(getMarkdown());
+                toast({
+                  title: "Copied to clipboard",
+                  description:
+                    "The markdown report has been copied to your clipboard.",
+                });
+              }}
+              variant="outline"
+              className="flex items-center gap-1"
+            >
+              <FileText className="h-4 w-4" />
+              Copy Report
+            </Button>
+
+            <Button
+              onClick={handlePreviewClick}
+              className="flex items-center gap-1 bg-sky-500 hover:bg-sky-700"
+            >
+              <Eye className="h-4 w-4" />
+              Preview & Upload
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 

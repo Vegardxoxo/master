@@ -4,7 +4,7 @@ import {
   getCoverageColor,
   getCoverageTextColor,
 } from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
-import { CoverageMetrics } from "@/app/lib/definitions";
+import { CoverageMetrics } from "@/app/lib/definitions/definitions";
 import { useEffect } from "react";
 import { useReport } from "@/app/contexts/report-context";
 
@@ -25,7 +25,7 @@ export function TestCoverageMetrics({ metrics }: { metrics: CoverageMetrics }) {
       lines: metrics.lines,
       lastUpdated: new Date().toISOString(),
     };
-    addMetricData("TestCoverage", metrics, metricsData);
+    addMetricData("testCoverage", metrics, metricsData);
   }, [metrics]);
 
   return (

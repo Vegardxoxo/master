@@ -1,17 +1,14 @@
 "use client"
-
-import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-
-// Dynamically import the markdown editor to avoid SSR issues
-const MDEditor = dynamic(() => import("@uiw/react-md-editor").then((mod) => mod.default), { ssr: false })
+import { Textarea } from "@/components/ui/textarea"
 
 interface RecommendationEditorProps {
   value: string
-  onChange: (value: string | undefined) => void
+  onChange: (value: string) => void
   title: string
   description?: string
+  sectionId: string
+  onFocus?: (sectionId: string) => void
   height?: number
 }
 
@@ -20,17 +17,13 @@ export default function RecommendationEditor({
   onChange,
   title,
   description,
-  height = 200,
+  sectionId,
+  onFocus,
 }: RecommendationEditorProps) {
-  const [mounted, setMounted] = useState(false)
-
-  // Handle SSR
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
+  const handleFocus = () => {
+    if (onFocus) {
+      onFocus(sectionId)
+    }
   }
 
   return (
@@ -40,9 +33,13 @@ export default function RecommendationEditor({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div data-color-mode="light">
-          <MDEditor value={value} onChange={onChange} preview="edit" height={height} className="border rounded-md" />
-        </div>
+        <Textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={handleFocus}
+          className="min-h-[150px]"
+          placeholder={`Add your recommendations for ${title.toLowerCase()}...`}
+        />
       </CardContent>
     </Card>
   )

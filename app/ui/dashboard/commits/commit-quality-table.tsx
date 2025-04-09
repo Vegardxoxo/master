@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type {CommitEval, LLMResponse} from "@/app/lib/definitions";
+import type {CommitEval, LLMResponse} from "@/app/lib/definitions/definitions";
 import Link from "next/link";
 
 export default function CommitQualityTable({ data }: { data: LLMResponse[] }) {

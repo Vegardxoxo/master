@@ -261,7 +261,19 @@ export interface BranchConnection {
 export interface ReportSectionProps {
   metrics: any;
   data?: any;
-  recommendations: string;
-  setRecommendations: (value: string) => void;
   include: boolean;
+}
+
+export interface CommitData {
+  sha?: string
+  html_url?: string
+  commit: {
+    author: {
+      name: string
+      email: string
+      date?: string
+    }
+    message?: string
+    url?: string
+  }
 }

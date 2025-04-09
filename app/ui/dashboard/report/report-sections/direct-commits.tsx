@@ -1,13 +1,9 @@
-import type { ReportSectionProps } from "@/app/lib/definitions";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {Label} from "@/components/ui/label";
 
 export default function DirectCommitsSection({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   if (!include || !metrics) {
@@ -60,18 +56,6 @@ export default function DirectCommitsSection({
           )}
         </CardContent>
       </Card>
-
-       <div className="space-y-2">
-        <Label htmlFor="direct-recommendations">Recommendations</Label>
-          <Textarea
-            id="direct-recommendations"
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[100px]"
-            placeholder="Add your recommendations for reducing direct commits to main branch."
-          />
-       </div>
-
     </div>
   );
 }

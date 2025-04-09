@@ -3,38 +3,23 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import type { ReportSectionProps } from "@/app/lib/definitions";
-import {
-  AlertTriangle,
-  GitPullRequest,
-  Award,
-  MessageSquare,
-  Clock,
-  ImageOff,
-} from "lucide-react";
+import type { ReportSectionProps } from "@/app/lib/definitions/definitions";
+import { Clock, GitPullRequest, ImageOff } from "lucide-react";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
-import {
-  commmitContributions,
-  pullRequestActivity,
-} from "@/app/ui/courses/columns";
-import { transformPullRequestActivityData } from "@/app/lib/utils/pull-requests-utils";
+import { pullRequestActivity } from "@/app/ui/courses/columns";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useReport } from "@/app/contexts/report-context";
-import { Separator } from "@/components/ui/separator";
 
 export default function PullRequestsSection({
   metrics,
   data,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState<boolean>(
@@ -178,24 +163,6 @@ export default function PullRequestsSection({
         </CardContent>
 
         <GenericDataTable data={data} columns={pullRequestActivity} />
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[150px]"
-            placeholder="Add your recommendations for improving pull request workflow..."
-          />
-          <p className="text-xs text-muted-foreground mt-2">
-            Suggest ways to increase review participation and improve the
-            feedback culture.
-          </p>
-        </CardContent>
       </Card>
     </div>
   );

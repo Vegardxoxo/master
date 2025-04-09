@@ -1,21 +1,17 @@
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
-import { Lock, AlertTriangle, FileWarning, Shield } from "lucide-react";
+import { AlertTriangle, Lock, Shield } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileData, ReportSectionProps } from "@/app/lib/definitions";
+import { FileData, ReportSectionProps } from "@/app/lib/definitions/definitions";
 
 export default function SensitiveFilesSection({
   metrics,
-  recommendations,
-  setRecommendations,
   include,
 }: ReportSectionProps) {
   if (!include || !metrics) {
@@ -141,19 +137,6 @@ export default function SensitiveFilesSection({
             )}
           </CardContent>
         </Card>
-
-        <div className="space-y-2">
-          <label htmlFor="sensitive-files-recommendations">
-            Recommendations
-          </label>
-          <Textarea
-            id="sensitive-files-recommendations"
-            value={recommendations}
-            onChange={(e) => setRecommendations(e.target.value)}
-            className="min-h-[100px]"
-            placeholder="Add your recommendations for handling sensitive files..."
-          />
-        </div>
       </CardContent>
     </Card>
   );

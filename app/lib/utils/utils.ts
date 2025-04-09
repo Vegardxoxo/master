@@ -13,7 +13,7 @@ import {
   ParseCommitDataResult,
   PullRequestData,
   Review,
-} from "@/app/lib/definitions";
+} from "@/app/lib/definitions/definitions";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -65,95 +65,95 @@ function parseCoAuthorLine(line: string): { name: string; email: string } {
   return { name, email };
 }
 
-export function parseCommitData(commitData: any[]): ParseCommitDataResult {
-  const dayMap: Record<string, AuthorFrequency> = {};
-  const dayTotals: Record<string, number> = {};
-  const emailToDisplayName: Record<string, string> = {};
-  const allEmails = new Set<string>();
-  const commitSummary = [];
-  const commitByDate = [];
-
-  for (const item of commitData) {
-    const authorName = item.commit.author.name ?? "unknown";
-    const authorEmail = item.commit.author.email ?? "unknown";
-    const commitDate = item.commit.author.date;
-    const message = item.commit.message;
-    const url = item.commit.url;
-    const htmlUrl = item.html_url;
-    const sha = item.sha;
-    commitSummary.push({ sha, url, commit_message: message });
-    commitByDate.push({
-      authorEmail,
-      authorName,
-      commitDate,
-      message,
-      htmlUrl,
-    });
-
-    emailToDisplayName[authorEmail] = authorName;
-    const day = new Date(commitDate).toISOString().split("T")[0];
-
-    // --- MAIN-AUTHOR ---
-    // if the datastructures have not been initialized
-    if (!dayMap[day]) dayMap[day] = {};
-    if (!dayTotals[day]) dayTotals[day] = 0;
-
-    if (!dayMap[day][authorEmail]) {
-      dayMap[day][authorEmail] = 0;
-    }
-    dayMap[day][authorEmail]++;
-    dayTotals[day]++;
-
-    // --- CO-AUTHORS ---
-    const lines = message.split("\n");
-    const coAuthorLines = lines.filter((line: string) =>
-      line.trim().startsWith("Co-authored-by:"),
-    );
-
-    for (const line of coAuthorLines) {
-      const { email, name } = parseCoAuthorLine(line);
-      emailToDisplayName[email] = name;
-      if (!dayMap[day][email]) {
-        dayMap[day][email] = 0;
-      }
-      dayMap[day][email]++;
-    }
-
-    allEmails.add(authorEmail);
-    for (const line of coAuthorLines) {
-      const { email } = parseCoAuthorLine(line);
-      allEmails.add(email);
-    }
-  }
-
-  // Sum the total number of commits for the given day
-  allEmails.add("TOTAL@commits");
-  for (const day of Object.keys(dayMap)) {
-    dayMap[day]["TOTAL@commits"] = dayTotals[day] ?? 0;
-    emailToDisplayName["TOTAL@commits"] = "Total";
-  }
-
-  const dayEntries: DayEntry[] = Object.entries(dayMap)
-    .map(([day, authorsMap]) => ({
-      day,
-      ...authorsMap,
-    }))
-    .sort((a, b) => a.day.localeCompare(b.day));
-
-  // total count for all days
-  let total = 0;
-  for (const day of dayEntries) {
-    total += day["TOTAL@commits"] as number;
-  }
-
-  return {
-    dayEntries,
-    total,
-    emailToDisplayName,
-    commitSummary,
-    commitByDate,
-  };
-}
+// export function parseCommitData(commitData: any[]): ParseCommitDataResult {
+//   const dayMap: Record<string, AuthorFrequency> = {};
+//   const dayTotals: Record<string, number> = {};
+//   const emailToDisplayName: Record<string, string> = {};
+//   const allEmails = new Set<string>();
+//   const commitSummary = [];
+//   const commitByDate = [];
+//
+//   for (const item of commitData) {
+//     const authorName = item.commit.author.name ?? "unknown";
+//     const authorEmail = item.commit.author.email ?? "unknown";
+//     const commitDate = item.commit.author.date;
+//     const message = item.commit.message;
+//     const url = item.commit.url;
+//     const htmlUrl = item.html_url;
+//     const sha = item.sha;
+//     commitSummary.push({ sha, url, commit_message: message });
+//     commitByDate.push({
+//       authorEmail,
+//       authorName,
+//       commitDate,
+//       message,
+//       htmlUrl,
+//     });
+//
+//     emailToDisplayName[authorEmail] = authorName;
+//     const day = new Date(commitDate).toISOString().split("T")[0];
+//
+//     // --- MAIN-AUTHOR ---
+//     // if the datastructures have not been initialized
+//     if (!dayMap[day]) dayMap[day] = {};
+//     if (!dayTotals[day]) dayTotals[day] = 0;
+//
+//     if (!dayMap[day][authorEmail]) {
+//       dayMap[day][authorEmail] = 0;
+//     }
+//     dayMap[day][authorEmail]++;
+//     dayTotals[day]++;
+//
+//     // --- CO-AUTHORS ---
+//     const lines = message.split("\n");
+//     const coAuthorLines = lines.filter((line: string) =>
+//       line.trim().startsWith("Co-authored-by:"),
+//     );
+//
+//     for (const line of coAuthorLines) {
+//       const { email, name } = parseCoAuthorLine(line);
+//       emailToDisplayName[email] = name;
+//       if (!dayMap[day][email]) {
+//         dayMap[day][email] = 0;
+//       }
+//       dayMap[day][email]++;
+//     }
+//
+//     allEmails.add(authorEmail);
+//     for (const line of coAuthorLines) {
+//       const { email } = parseCoAuthorLine(line);
+//       allEmails.add(email);
+//     }
+//   }
+//
+//   // Sum the total number of commits for the given day
+//   allEmails.add("TOTAL@commits");
+//   for (const day of Object.keys(dayMap)) {
+//     dayMap[day]["TOTAL@commits"] = dayTotals[day] ?? 0;
+//     emailToDisplayName["TOTAL@commits"] = "Total";
+//   }
+//
+//   const dayEntries: DayEntry[] = Object.entries(dayMap)
+//     .map(([day, authorsMap]) => ({
+//       day,
+//       ...authorsMap,
+//     }))
+//     .sort((a, b) => a.day.localeCompare(b.day));
+//
+//   // total count for all days
+//   let total = 0;
+//   for (const day of dayEntries) {
+//     total += day["TOTAL@commits"] as number;
+//   }
+//
+//   return {
+//     dayEntries,
+//     total,
+//     emailToDisplayName,
+//     commitSummary,
+//     commitByDate,
+//   };
+// }
 
 function fixBracketedWords(jsonText: string): string {
   return jsonText.replace(
@@ -454,4 +454,23 @@ export function createChartData(
       ...counts,
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+
+/**
+ * Utility function for replacing local urls with the ones on github
+ */
+export function transformLocalImagePaths(
+  content: string,
+  replacements: Record<string, string>
+): string {
+  let updated = content;
+
+  for (const [oldPath, newPath] of Object.entries(replacements)) {
+    const escapedOld = oldPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(`\\]\\(${escapedOld}\\)`, "g");
+    updated = updated.replace(pattern, `](${newPath})`);
+  }
+
+  return updated;
 }

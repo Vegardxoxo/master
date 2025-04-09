@@ -1,5 +1,5 @@
 "use client";
-import { PullRequestData } from "@/app/lib/definitions";
+import { PullRequestData } from "@/app/lib/definitions/definitions";
 import {
   Card,
   CardContent,

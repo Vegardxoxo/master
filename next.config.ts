@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+      SUPER_TOKEN: process.env.SUPER_TOKEN,
+  }
 };
 
 export default nextConfig;

@@ -1,4 +1,4 @@
-import {getMainCommits} from "@/app/lib/data/data";
+import {getMainCommits} from "@/app/lib/data/github-api-functions";
 import Good from "@/app/ui/dashboard/alerts/good";
 import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
 
