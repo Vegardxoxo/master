@@ -88,6 +88,7 @@ interface Repo {
   repoName: string;
   url: string;
   platform: "github" | "gitlab";
+  hasReport: boolean;
 }
 
 export async function getRepository(
@@ -159,6 +160,7 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         repoName: true,
         url: true,
         platform: true,
+        hasReport: true,
       },
     });
 
@@ -472,12 +474,15 @@ export async function getCoverageReport(
   }
 }
 
-
-
 export async function fetchGraphUrl(
   owner: string,
   repo: string,
-  type: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "EXPORT" | "PULL_REQUESTS",
+  type:
+    | "COMMIT_FREQUENCY"
+    | "COMMIT_SIZE"
+    | "CONTRIBUTIONS"
+    | "EXPORT"
+    | "PULL_REQUESTS",
 ): Promise<string> {
   try {
     const result = await findRepositoryByOwnerRepo(owner, repo);
@@ -498,5 +503,53 @@ export async function fetchGraphUrl(
   } catch (e) {
     console.error("Database error: Error fetching graph URL:", e);
     return "";
+  }
+}
+
+export async function setReportGenerated(
+  owner: string,
+  repo: string,
+): Promise<{
+  success: boolean;
+  error?: string;
+  message?: string;
+}> {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user.email) {
+      return {
+        success: false,
+        error: "Not authenticated",
+      };
+    }
+
+    const result = await findRepositoryByOwnerRepo(owner, repo);
+    if (!result.repository) {
+      return {
+        success: false,
+        error: "Repository not found",
+      };
+    }
+
+    // Update the repository record
+    await prisma.repository.update({
+      where: {
+        id: result.repository.id,
+      },
+      data: {
+        hasReport: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Report has been generated for the repository.",
+    };
+  } catch (e) {
+    console.error("Database error: Error updating report status:", e);
+    return {
+      success: false,
+      error: "Failed to update report status",
+    };
   }
 }

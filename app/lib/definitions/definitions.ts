@@ -6,6 +6,7 @@ export type repositoryOverview = {
   name: string;
   contributors: string[];
   openIssues: number;
+  hasReport: boolean;
   url: string;
 };
 
@@ -213,6 +214,7 @@ export type Repository = {
   updatedAt: Date;
   courseInstanceId: string;
   githubId: string;
+  hasReport: boolean;
 };
 
 export type FileData = {

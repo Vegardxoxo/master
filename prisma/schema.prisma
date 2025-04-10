@@ -99,6 +99,7 @@ model Repository {
   coverageReport   CoverageReport[]
   fileSets         FileSet[]
   charts           RepositoryImage[]
+  hasReport Boolean @default(false)
 }
 
 model CoverageReport {
@@ -159,6 +160,7 @@ model RepositoryImage {
   description  String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
   @@unique([repositoryId, chartType])
   @@index([repositoryId])
 }

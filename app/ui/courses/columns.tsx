@@ -1,15 +1,24 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import {BranchConnection, Commit, LLMResponse, repositoryOverview} from "@/app/lib/definitions/definitions";
+import {
+  BranchConnection,
+  Commit,
+  LLMResponse,
+  repositoryOverview,
+} from "@/app/lib/definitions/definitions";
 import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   ChevronUp,
-  ExternalLink, Eye, GitBranch,
-  GitCommit, GitPullRequest, MessageSquare,
+  ExternalLink,
+  Eye, FileText,
+  GitBranch,
+  GitCommit,
+  GitPullRequest,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,53 +30,24 @@ import {
   ViewProject,
 } from "@/app/ui/courses/buttons";
 import Link from "next/link";
-import {Badge} from "@/components/ui/badge";
-import {UserSummary} from "@/app/lib/utils/pull-requests-utils";
+import { Badge } from "@/components/ui/badge";
+import { UserSummary } from "@/app/lib/utils/pull-requests-utils";
 
 export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "owner",
     header: "Repository owner",
   },
   {
-    accessorKey: "url",
-    header: "Url",
-    cell: ({ row }) => {
-      return (
-        <Link
-          className={"hover:cursor-pointer hover:underline text-blue-600"}
-          href={row.getValue("url")}
-        >
-          {row.getValue("url")}
-        </Link>
-      );
-    },
-  },
-  {
     accessorKey: "name",
     header: "Repository Name",
+    cell: ({ row }) => {
+      return (
+        <Link className={"hover:cursor-pointer hover:underline text-blue-600"} href={row.original.url}>
+          {row.getValue("name")}
+        </Link>
+      )
+    },
   },
 
   {
@@ -87,24 +67,43 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
           >
             Open Issues
             <ChevronRight
-              className={clsx(
-                "ml-auto transition-transform duration-200 -rotate-90",
-                {
-                  "-rotate-90": column.getIsSorted() === "asc",
-                  "rotate-90": column.getIsSorted() !== "asc",
-                },
-              )}
+              className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
+                "-rotate-90": column.getIsSorted() === "asc",
+                "rotate-90": column.getIsSorted() !== "asc",
+              })}
             />
           </Button>
         </div>
-      );
+      )
     },
     cell: ({ row }) => {
+      return <div className="text-right pr-20 font-medium">{row.getValue("openIssues")}</div>
+    },
+  },
+
+  {
+    accessorKey: "hasReport",
+    header: "Report Status",
+    cell: ({ row }) => {
+      const hasReport = row.getValue("hasReport") as boolean
+
       return (
-        <div className="text-right pr-20 font-medium">
-          {row.getValue("openIssues")}
+        <div className="flex items-center">
+          {hasReport ? (
+            <div className="flex items-center">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <FileText className="w-3.5 h-3.5 mr-1" />
+                Generated
+              </span>
+            </div>
+          ) : (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <AlertCircle className="w-3.5 h-3.5 mr-1" />
+              Not Generated
+            </span>
+          )}
         </div>
-      );
+      )
     },
   },
 
@@ -112,7 +111,8 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     accessorKey: "buttons",
     header: "",
     cell: ({ row }) => {
-      const details = row.original;
+      const details = row.original
+      console.log("details", details)
       return (
         <div className="flex justify-end gap-2">
           <ViewProject owner={details.owner} repo={details.name} databaseId={details.databaseId} />
@@ -120,10 +120,10 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
           <DeleteRepoButton id={details.databaseId} />
           <UpdateRepository id={details.databaseId} />
         </div>
-      );
+      )
     },
   },
-];
+]
 
 export const commitsColumns: ColumnDef<Commit>[] = [
   {
@@ -143,16 +143,16 @@ export const commitsColumns: ColumnDef<Commit>[] = [
             <ChevronDown className="ml-2 h-4 w-4" />
           ) : null}
         </Button>
-      )
+      );
     },
     cell: ({ row }) => {
-      const author = row.getValue("author") as string
+      const author = row.getValue("author") as string;
       return (
         <div className="flex items-center">
           <GitCommit className="h-4 w-4 text-amber-500 mr-2" />
           <div className="font-medium">{author}</div>
         </div>
-      )
+      );
     },
   },
   {
@@ -171,13 +171,13 @@ export const commitsColumns: ColumnDef<Commit>[] = [
             <ChevronDown className="ml-2 h-4 w-4" />
           ) : null}
         </Button>
-      )
+      );
     },
     cell: ({ row }) => {
-      const message = row.getValue("message") as string
+      const message = row.getValue("message") as string;
       // Split message at first newline to show just the first line
-      const firstLine = message.split("\n")[0]
-      return <div className="font-medium">{firstLine}</div>
+      const firstLine = message.split("\n")[0];
+      return <div className="font-medium">{firstLine}</div>;
     },
   },
   {
@@ -198,134 +198,147 @@ export const commitsColumns: ColumnDef<Commit>[] = [
             ) : null}
           </Button>
         </div>
-      )
+      );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue("date"))
+      const date = new Date(row.getValue("date"));
       // Format date as YYYY-MM-DD HH:MM
-      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`
-      return <div className="text-right font-medium">{formattedDate}</div>
+      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString(
+        [],
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      )}`;
+      return <div className="text-right font-medium">{formattedDate}</div>;
     },
   },
   {
     accessorKey: "url",
     header: "",
     cell: ({ row }) => {
-      const url = row.getValue("url") as string
+      const url = row.getValue("url") as string;
       return (
         <div className="flex justify-end">
-          <Link href={url} target="_blank" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <Link
+            href={url}
+            target="_blank"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800"
+          >
             <ExternalLink className="h-4 w-4 mr-1" />
             View
           </Link>
         </div>
-      )
+      );
     },
   },
-]
+];
 
 export const DevelopmentBranchColumns: ColumnDef<BranchConnection>[] = [
-    {
-      accessorKey: "branchName",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1"
-          >
-            Branch Name
-            {column.getIsSorted() === "asc" ? (
-              <ChevronUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ChevronDown className="ml-2 h-4 w-4" />
-            ) : null}
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const branchName = row.getValue("branchName") as string;
-        return (
-          <div className="flex items-center gap-2">
-            <GitBranch className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{branchName}</span>
-          </div>
-        );
-      },
+  {
+    accessorKey: "branchName",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex items-center gap-1"
+        >
+          Branch Name
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="ml-2 h-4 w-4" />
+          ) : null}
+        </Button>
+      );
     },
-    {
-      accessorKey: "isLinked",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1"
-          >
-            Status
-            {column.getIsSorted() === "asc" ? (
-              <ChevronUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ChevronDown className="ml-2 h-4 w-4" />
-            ) : null}
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const isLinked = row.getValue("isLinked") as boolean;
-        return isLinked ? (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            Linked
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            Not Linked
-          </Badge>
-        );
-      },
+    cell: ({ row }) => {
+      const branchName = row.getValue("branchName") as string;
+      return (
+        <div className="flex items-center gap-2">
+          <GitBranch className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{branchName}</span>
+        </div>
+      );
     },
-    {
-      accessorKey: "issueNumber",
-      header: "Issue",
-      cell: ({ row }) => {
-        const isLinked = row.getValue("isLinked") as boolean;
-        const issueNumber = row.getValue("issueNumber") as string | null;
-        const issueTitle = row.original.issueTitle;
-        const url = row.original.url;
+  },
+  {
+    accessorKey: "isLinked",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex items-center gap-1"
+        >
+          Status
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="ml-2 h-4 w-4" />
+          ) : null}
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const isLinked = row.getValue("isLinked") as boolean;
+      return isLinked ? (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          Linked
+        </Badge>
+      ) : (
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        >
+          Not Linked
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "issueNumber",
+    header: "Issue",
+    cell: ({ row }) => {
+      const isLinked = row.getValue("isLinked") as boolean;
+      const issueNumber = row.getValue("issueNumber") as string | null;
+      const issueTitle = row.original.issueTitle;
+      const url = row.original.url;
 
-        return isLinked && issueNumber ? (
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-            <span>
-              <Link
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                #{issueNumber}
-              </Link>
-              {issueTitle && (
-                <span className="text-muted-foreground ml-1 text-xs">
-                  {issueTitle.length > 40
-                    ? issueTitle.substring(0, 40) + '...'
-                    : issueTitle}
-                </span>
-              )}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-amber-600">
-            <AlertCircle className="h-4 w-4" />
-            <span>Not linked</span>
-          </div>
-        );
-      },
+      return isLinked && issueNumber ? (
+        <div className="flex items-center gap-1">
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <span>
+            <Link
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              #{issueNumber}
+            </Link>
+            {issueTitle && (
+              <span className="text-muted-foreground ml-1 text-xs">
+                {issueTitle.length > 40
+                  ? issueTitle.substring(0, 40) + "..."
+                  : issueTitle}
+              </span>
+            )}
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1 text-amber-600">
+          <AlertCircle className="h-4 w-4" />
+          <span>Not linked</span>
+        </div>
+      );
     },
-  ];
+  },
+];
 
 export const commitMessageClassification: ColumnDef<LLMResponse>[] = [
   {
@@ -406,9 +419,7 @@ export const commmitContributions: ColumnDef<any>[] = [
     accessorKey: "commits",
     header: "Total commits",
     cell: ({ row }) => (
-      <p className="text-blue-400 font-bold">
-        {row.original.commits}
-      </p>
+      <p className="text-blue-400 font-bold">{row.original.commits}</p>
     ),
   },
   {
@@ -442,8 +453,6 @@ export const commmitContributions: ColumnDef<any>[] = [
     cell: ({ row }) => <p>{row.original.average_files_changed.toFixed(1)}</p>,
   },
 ];
-
-
 
 export const pullRequestActivity: ColumnDef<UserSummary>[] = [
   {
@@ -490,7 +499,9 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center">
-        <span className="font-semibold text-blue-600">{row.original.pullRequests}</span>
+        <span className="font-semibold text-blue-600">
+          {row.original.pullRequests}
+        </span>
       </div>
     ),
   },
@@ -513,7 +524,9 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center">
-        <span className="font-semibold text-purple-600">{row.original.reviews}</span>
+        <span className="font-semibold text-purple-600">
+          {row.original.reviews}
+        </span>
         {row.original.reviews > 0 && (
           <div className="ml-2 px-1.5 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
             {row.original.reviewPercentage}% of total
@@ -541,7 +554,9 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center">
-        <span className="font-semibold text-green-600">{row.original.comments}</span>
+        <span className="font-semibold text-green-600">
+          {row.original.comments}
+        </span>
         {row.original.comments > 0 && (
           <div className="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
             {row.original.commentPercentage}% of total
@@ -550,4 +565,4 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
       </div>
     ),
   },
-]
+];

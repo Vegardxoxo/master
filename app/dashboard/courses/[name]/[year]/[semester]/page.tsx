@@ -53,11 +53,12 @@ export default async function CoursePage(props: {
 
   // Fetch data from the github api
   const repoData = await Promise.all(
-    repositories.map(({ id, username, repoName, url }) =>
+    repositories.map(({ id, username, repoName, url, hasReport }) =>
       fetchRepoOverview(username, repoName).then((result) => ({
         ...result,
         databaseId: id,
         url: url,
+        hasReport: hasReport,
       })),
     ),
   );
@@ -69,6 +70,7 @@ export default async function CoursePage(props: {
       ...result.data,
       databaseId: result.databaseId,
       url: result.url,
+      hasReport: result.hasReport,
     }));
 
   const errors = repoData
