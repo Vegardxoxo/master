@@ -21,7 +21,6 @@ export default function Page() {
   const handleBackClick = () => {
     const parentPath = pathname.replace(/\/report$/, "");
     router.push(parentPath);
-    console.log("Navigating to:", parentPath);
   };
 
   const report = getReport();

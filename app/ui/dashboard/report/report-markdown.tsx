@@ -426,13 +426,12 @@ ${sensitiveFilesRecommendations}
 
 These files may contain credentials, tokens, or other secrets and should be handled with care:
 
-| File Path | Reason |
-|-----------|--------|
+| File Path |
+|-----------|
 ${sensFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` | ${escapedReason} |`
+    return `| \`${escapedPath}\` |`
   })
   .join("\n")}
 
@@ -444,13 +443,12 @@ ${sensFiles
 
 These files may contain temporary data or system-specific configurations:
 
-| File Path | Reason |
-|-----------|--------|
+| File Path |
+|-----------|
 ${warnFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` | ${escapedReason} |`
+    return `| \`${escapedPath}\` |`
   })
   .join("\n")}
 

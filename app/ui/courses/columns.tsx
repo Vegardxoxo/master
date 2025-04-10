@@ -14,7 +14,8 @@ import {
   ChevronRight,
   ChevronUp,
   ExternalLink,
-  Eye, FileText,
+  Eye,
+  FileText,
   GitBranch,
   GitCommit,
   GitPullRequest,
@@ -43,10 +44,13 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     header: "Repository Name",
     cell: ({ row }) => {
       return (
-        <Link className={"hover:cursor-pointer hover:underline text-blue-600"} href={row.original.url}>
+        <Link
+          className={"hover:cursor-pointer hover:underline text-blue-600"}
+          href={row.original.url}
+        >
           {row.getValue("name")}
         </Link>
-      )
+      );
     },
   },
 
@@ -67,17 +71,24 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
           >
             Open Issues
             <ChevronRight
-              className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
-                "-rotate-90": column.getIsSorted() === "asc",
-                "rotate-90": column.getIsSorted() !== "asc",
-              })}
+              className={clsx(
+                "ml-auto transition-transform duration-200 -rotate-90",
+                {
+                  "-rotate-90": column.getIsSorted() === "asc",
+                  "rotate-90": column.getIsSorted() !== "asc",
+                },
+              )}
             />
           </Button>
         </div>
-      )
+      );
     },
     cell: ({ row }) => {
-      return <div className="text-right pr-20 font-medium">{row.getValue("openIssues")}</div>
+      return (
+        <div className="text-right pr-20 font-medium">
+          {row.getValue("openIssues")}
+        </div>
+      );
     },
   },
 
@@ -85,7 +96,7 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     accessorKey: "hasReport",
     header: "Report Status",
     cell: ({ row }) => {
-      const hasReport = row.getValue("hasReport") as boolean
+      const hasReport = row.getValue("hasReport") as boolean;
 
       return (
         <div className="flex items-center">
@@ -103,7 +114,7 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
             </span>
           )}
         </div>
-      )
+      );
     },
   },
 
@@ -111,19 +122,23 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     accessorKey: "buttons",
     header: "",
     cell: ({ row }) => {
-      const details = row.original
-      console.log("details", details)
+      const details = row.original;
+      console.log("details", details);
       return (
         <div className="flex justify-end gap-2">
-          <ViewProject owner={details.owner} repo={details.name} databaseId={details.databaseId} />
+          <ViewProject
+            owner={details.owner}
+            repo={details.name}
+            databaseId={details.databaseId}
+          />
           <AddToClipboard url={details.url} />
           <DeleteRepoButton id={details.databaseId} />
           <UpdateRepository id={details.databaseId} />
         </div>
-      )
+      );
     },
   },
-]
+];
 
 export const commitsColumns: ColumnDef<Commit>[] = [
   {
@@ -435,13 +450,6 @@ export const commmitContributions: ColumnDef<any>[] = [
     cell: ({ row }) => <p className="text-red-500">{row.original.deletions}</p>,
   },
 
-  {
-    accessorKey: "co_authored_lines",
-    header: "Co-Authored Lines",
-    cell: ({ row }) => (
-      <p className={"text-orange-500"}>{row.original.co_authored_lines}</p>
-    ),
-  },
   {
     accessorKey: "average_changes",
     header: "Avg. Changes",

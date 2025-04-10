@@ -71,12 +71,14 @@ export default function FinalReport({
     }
     setIsUploading(true);
 
+    const filename = `${title.replace(/[^a-zA-Z0-9]/g, "-")}.md`;
+
     try {
       const result = await uploadReportToRepository(
         owner,
         repo,
         content,
-        title,
+        filename,
         images,
         "KEKW",
       );
