@@ -3,8 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import {
   BranchConnection,
-  Commit, FileCoverageData,
-  LLMResponse, Repository,
+  Commit,
+  FileCoverageData,
+  LLMResponse,
+  Repository,
   repositoryOverview,
 } from "@/app/lib/definitions/definitions";
 import {
@@ -87,6 +89,35 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
       return <div className="text-right pr-20 font-medium">{row.getValue("openIssues")}</div>
     },
   },
+  {
+    accessorKey: "updatedAt",
+    header: ({ column }) => {
+      return (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Updated at
+          <ChevronRight
+            className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
+              "-rotate-90": column.getIsSorted() === "asc",
+              "rotate-90": column.getIsSorted() !== "asc",
+            })}
+          />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      // Get the date value
+      const dateValue = row.getValue("updatedAt")
+
+      // Format the date to remove the GMT part
+      const formattedDate = dateValue
+        ? new Date(dateValue as string).toDateString() +
+          " " +
+          new Date(dateValue as string).toTimeString().split(" ")[0]
+        : ""
+
+      return <div>{formattedDate}</div>
+    },
+  },
 
   {
     accessorKey: "hasReport",
@@ -130,7 +161,6 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
     },
   },
 ]
-
 
 export const commitsColumns: ColumnDef<Commit>[] = [
   {
@@ -566,8 +596,6 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
     ),
   },
 ];
-
-
 
 export const coverageTableColumns: ColumnDef<FileCoverageData>[] = [
   {

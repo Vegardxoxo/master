@@ -292,6 +292,7 @@ export function convertToCommitStats(commitData: CommitData[]): CommitStats[] {
         email: data.commit.author.email,
         name: data.commit.author.name,
       },
+      message: original.message || "",
       additions: original.additions || 0,
       deletions: original.deletions || 0,
       changedFiles: original.changedFiles || 0,
