@@ -3,18 +3,20 @@
 import { ColumnDef } from "@tanstack/react-table";
 import {
   BranchConnection,
-  Commit,
-  LLMResponse,
+  Commit, FileCoverageData,
+  LLMResponse, Repository,
   repositoryOverview,
 } from "@/app/lib/definitions/definitions";
 import {
   AlertCircle,
+  ArrowUpDown,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   ChevronUp,
   ExternalLink,
   Eye,
+  FileCode,
   FileText,
   GitBranch,
   GitCommit,
@@ -22,7 +24,6 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import clsx from "clsx";
 import {
   AddToClipboard,
@@ -33,30 +34,32 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { UserSummary } from "@/app/lib/utils/pull-requests-utils";
+import {
+  getCoverageTextColor,
+  getShortFilePath,
+} from "@/app/ui/dashboard/project_info/test-coverage/coverage-utils";
+import { CoverageProgressBar } from "@/app/ui/dashboard/project_info/test-coverage/coverage-progress-bar";
 
-export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
+export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
   {
-    accessorKey: "owner",
+    accessorKey: "username",
     header: "Repository owner",
   },
   {
-    accessorKey: "name",
+    accessorKey: "repoName",
     header: "Repository Name",
     cell: ({ row }) => {
       return (
         <Link
           className={"hover:cursor-pointer hover:underline text-blue-600"}
           href={row.original.url}
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          {row.getValue("name")}
+          {row.getValue("repoName")}
         </Link>
-      );
+      )
     },
-  },
-
-  {
-    accessorKey: "contributors",
-    header: "Contributors",
   },
 
   {
@@ -71,24 +74,17 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
           >
             Open Issues
             <ChevronRight
-              className={clsx(
-                "ml-auto transition-transform duration-200 -rotate-90",
-                {
-                  "-rotate-90": column.getIsSorted() === "asc",
-                  "rotate-90": column.getIsSorted() !== "asc",
-                },
-              )}
+              className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
+                "-rotate-90": column.getIsSorted() === "asc",
+                "rotate-90": column.getIsSorted() !== "asc",
+              })}
             />
           </Button>
         </div>
-      );
+      )
     },
     cell: ({ row }) => {
-      return (
-        <div className="text-right pr-20 font-medium">
-          {row.getValue("openIssues")}
-        </div>
-      );
+      return <div className="text-right pr-20 font-medium">{row.getValue("openIssues")}</div>
     },
   },
 
@@ -96,7 +92,7 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
     accessorKey: "hasReport",
     header: "Report Status",
     cell: ({ row }) => {
-      const hasReport = row.getValue("hasReport") as boolean;
+      const hasReport = row.getValue("hasReport") as boolean
 
       return (
         <div className="flex items-center">
@@ -114,31 +110,27 @@ export const repositoryOverviewColumns: ColumnDef<repositoryOverview>[] = [
             </span>
           )}
         </div>
-      );
+      )
     },
   },
 
   {
-    accessorKey: "buttons",
+    accessorKey: "actions",
     header: "",
     cell: ({ row }) => {
-      const details = row.original;
-      console.log("details", details);
+      const details = row.original
       return (
         <div className="flex justify-end gap-2">
-          <ViewProject
-            owner={details.owner}
-            repo={details.name}
-            databaseId={details.databaseId}
-          />
+          <ViewProject owner={details.username} repo={details.repoName} databaseId={details.id} />
           <AddToClipboard url={details.url} />
-          <DeleteRepoButton id={details.databaseId} />
-          <UpdateRepository id={details.databaseId} />
+          <DeleteRepoButton id={details.id} />
+          <UpdateRepository id={details.id} />
         </div>
-      );
+      )
     },
   },
-];
+]
+
 
 export const commitsColumns: ColumnDef<Commit>[] = [
   {
@@ -572,5 +564,128 @@ export const pullRequestActivity: ColumnDef<UserSummary>[] = [
         )}
       </div>
     ),
+  },
+];
+
+
+
+export const coverageTableColumns: ColumnDef<FileCoverageData>[] = [
+  {
+    accessorKey: "filePath",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          File Path
+          <ArrowUpDown className="ml-1 h-4 w-4" />
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const filePath = row.getValue("filePath") as string;
+      return (
+        <div className="flex items-center">
+          <FileCode className="h-5 w-5 text-gray-400 mr-2" />
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            {getShortFilePath(filePath)}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "statements",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Statements
+          <ArrowUpDown className="ml-1 h-4 w-4" />
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue("statements") as number;
+      return (
+        <span className={`text-sm font-medium ${getCoverageTextColor(value)}`}>
+          {value.toFixed(1)}%
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "branches",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Branches
+          <ArrowUpDown className="ml-1 h-4 w-4" />
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue("branches") as number;
+      return (
+        <span className={`text-sm font-medium ${getCoverageTextColor(value)}`}>
+          {value.toFixed(1)}%
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "functions",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Functions
+          <ArrowUpDown className="ml-1 h-4 w-4" />
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue("functions") as number;
+      return (
+        <span className={`text-sm font-medium ${getCoverageTextColor(value)}`}>
+          {value.toFixed(1)}%
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "lines",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Lines
+          <ArrowUpDown className="ml-1 h-4 w-4" />
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue("lines") as number;
+      return (
+        <div className="w-32">
+          <CoverageProgressBar
+            percentage={value}
+            label=""
+            showPercentage={false}
+            height="h-2"
+          />
+        </div>
+      );
+    },
   },
 ];

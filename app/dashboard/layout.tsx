@@ -9,9 +9,9 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+
   const user = session?.user ?? { name: "Guest" };
   const { success, error, enrolledCourses } = await getUserCourses();
-  console.log("user", user);
 
   return (
     <SidebarProvider>

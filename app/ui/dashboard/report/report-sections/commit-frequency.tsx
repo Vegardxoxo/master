@@ -15,7 +15,9 @@ export default function CommitFrequency({
   include,
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
-  const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState(metrics?.includeImage || false);
+  const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState(
+    metrics?.includeImage || false,
+  );
 
   // Update the report context when the checkbox changes
   const handleIncludeImageChange = (checked: boolean) => {
@@ -33,7 +35,9 @@ export default function CommitFrequency({
       <Card>
         <CardContent className="pt-6">
           <p className="text-muted-foreground">
-            Commit frequency section is not included in the report.
+            {!include
+              ? "Commit Frequency section is not included in the report."
+              : "Commit Frequency section is not available. Did you generate a chart from the Commit Frequency page?"}
           </p>
         </CardContent>
       </Card>
@@ -91,7 +95,6 @@ export default function CommitFrequency({
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 }

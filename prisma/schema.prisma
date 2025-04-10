@@ -12,10 +12,6 @@ enum Semester {
   AUTUMN
 }
 
-enum UserType {
-  EDUCATOR
-  STUDENT
-}
 
 enum ChartType {
   COMMIT_FREQUENCY
@@ -30,13 +26,9 @@ model User {
   id              String       @id @default(uuid())
   email           String       @unique
   password        String       @db.VarChar(255)
-  avatarUrl       String?
-  githubUrl       String?
-  userType        UserType
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   repositories    Repository[] @relation("RepositoryMembers")
-  accessToken     String?
   enrolledCourses UserCourse[]
 }
 
@@ -72,34 +64,29 @@ model CourseInstance {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relationship to UserCourse
   userCourseId String
   userCourse   UserCourse @relation(fields: [userCourseId], references: [id], onDelete: Cascade)
-
-  // Repositories associated with this course instance
   repositories Repository[]
-
-  // Prevent duplicate instances for the same user-course combination
   @@unique([userCourseId, year, semester])
 }
 
 model Repository {
   id               String            @id @default(uuid())
-  githubId         String            @unique
+  githubId         String
   username         String
   repoName         String
   url              String
-  platform         String
+  organization     String            @default("none")
   createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  updatedAt        DateTime
+  openIssues       String            @default("0")
   members          User[]            @relation("RepositoryMembers")
-  courseInstanceId String?
-  courseInstance   CourseInstance?   @relation(fields: [courseInstanceId], references: [id])
+  courseInstanceId String
+  courseInstance   CourseInstance?   @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
   coverageReport   CoverageReport[]
   fileSets         FileSet[]
   charts           RepositoryImage[]
-  hasReport Boolean @default(false)
+  hasReport        Boolean           @default(false)
 }
 
 model CoverageReport {

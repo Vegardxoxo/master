@@ -36,25 +36,14 @@ export default function CommitContributions({
     }
   };
 
-  if (!include) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
           <p className="text-muted-foreground">
-            Commit contribution section is not included in the report.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!metrics) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-muted-foreground">
-            Did you forget to generate a chart from the Commit Contributions
-            page?
+            {!include
+              ? "Commit Contributions section is not included in the report."
+              : "Commit Contributions section is not available. Did you generate a chart from the Commit Contributions page?"}
           </p>
         </CardContent>
       </Card>
@@ -130,7 +119,9 @@ export default function CommitContributions({
             <CardContent className="relative">
               <div className="flex items-end gap-2">
                 <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
-                  {metrics.groupAverageChanges ? metrics.groupAverageChanges.toFixed(1) : "NaN"}
+                  {metrics.groupAverageChanges
+                    ? metrics.groupAverageChanges.toFixed(1)
+                    : "NaN"}
                 </p>
                 <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">
                   changes
@@ -152,7 +143,9 @@ export default function CommitContributions({
             <CardContent className="relative">
               <div className="flex items-end gap-2">
                 <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
-                  {metrics.groupAverageFilesChanged ? metrics.groupAverageFilesChanged.toFixed(1) : "NaN"}
+                  {metrics.groupAverageFilesChanged
+                    ? metrics.groupAverageFilesChanged.toFixed(1)
+                    : "NaN"}
                 </p>
                 <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">
                   files

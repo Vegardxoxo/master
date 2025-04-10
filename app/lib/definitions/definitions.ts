@@ -209,12 +209,10 @@ export type Repository = {
   username: string;
   repoName: string;
   url: string;
-  platform: string;
-  createdAt: Date;
+  organization: string;
   updatedAt: Date;
-  courseInstanceId: string;
-  githubId: string;
   hasReport: boolean;
+  openIssues: string
 };
 
 export type FileData = {

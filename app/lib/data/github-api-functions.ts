@@ -18,14 +18,14 @@ import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 import {CommitStats} from "@/app/lib/definitions/commit-definitions";
 
-// const octokit = new Octokit({
-//   auth: process.env.TOKEN,
-//   baseUrl: "https://git.ntnu.no/api/v3",
-// });
-
 const octokit = new Octokit({
-  auth: process.env.SUPER_TOKEN,
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
+
+// const octokit = new Octokit({
+//   auth: process.env.SUPER_TOKEN,
+// });
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -110,75 +110,7 @@ export async function fetchBranches(owner: string, repo: string) {
   }
 }
 
-/**
- * Fetches details for a single branch (including its latest commit info).
- * @param owner - GitHub owner/organization
- * @param repo  - Repository name
- * @param branch - DirectCommitsWrapper name
- */
-export async function fetchBranchDetails(
-  owner: string,
-  repo: string,
-  branch: string,
-) {
-  try {
-    const { data: branchData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/branches/{branch}",
-      {
-        owner,
-        repo,
-        branch,
-      },
-    );
-    return branchData;
-  } catch (e) {
-    console.error("Error fetching details for branch:", e);
-    throw new Error("Failed to fetch details for branch.");
-  }
-}
 
-/**
- * Fetches all branches, determines their "staleness" based on last commit date,
- * and returns them with an added `status` and `lastUpdate`.
- * @param owner - GitHub owner/organization
- * @param repo  - Repository name
- * @param branches
- */
-export async function fetchBranchesWithStatus(
-  owner: string,
-  repo: string,
-  branches: _Branches[],
-) {
-  const now = new Date();
-  const staleThresholdDays = 14;
-
-  return await Promise.all(
-    branches.map(async (branch) => {
-      const commitData = await fetchBranchDetails(owner, repo, branch.name);
-
-      // Default to a far-past date if commit info is missing
-      let lastCommitDate = new Date(0);
-      if (commitData.commit?.commit?.author?.date) {
-        lastCommitDate = new Date(commitData.commit.commit.author.date);
-      }
-
-      // Calculate difference in days from now
-      const diffInMs = now.getTime() - lastCommitDate.getTime();
-      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-      let status = "active";
-      if (diffInDays > staleThresholdDays) {
-        status = "stale";
-      }
-
-      return {
-        ...branch,
-        lastUpdate: formatTimestamp(lastCommitDate.toISOString()),
-        status,
-      };
-    }),
-  );
-}
 
 /**
  * Fetches contributors for the contributor card in the dashboard.
@@ -231,30 +163,7 @@ export async function fetchProjectInfo(owner: string, repo: string) {
   }
 }
 
-/**
- * Fetches commits from a repository
- * @param owner
- * @param repo
- */
-export async function fetchCommits(owner: string, repo: string) {
-  try {
-    const { data: commitData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/commits",
-      {
-        owner,
-        repo,
-        per_page: 5,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    );
-    return commitData;
-  } catch (e) {
-    console.log(e);
-    throw new Error("Failed to fetch commits");
-  }
-}
+
 
 /**
  * Fetches all commits for a repository. Uses octokit's built in pagination.
@@ -291,7 +200,20 @@ export async function fetchAllCommits(owner: string, repo: string): Promise<Comm
   }
 }
 
-export async function fetchRepoId(owner: string, repo: string) {
+interface GithubRepoOverview {
+  id?: string;
+  name?: string;
+  url?: string;
+  openIssues?: string;
+  updatedAt?: string;
+  success: boolean;
+  error?: string;
+}
+
+export async function fetchRepository(
+  owner: string,
+  repo: string,
+): Promise<GithubRepoOverview> {
   try {
     const { data: repoData } = await octokit.request(
       "GET /repos/{owner}/{repo}",
@@ -301,19 +223,16 @@ export async function fetchRepoId(owner: string, repo: string) {
       },
     );
     return {
-      id: repoData.id.toString(),
+      id: repoData.id?.toString(),
       name: repoData.name,
-      fullName: repoData.full_name,
       url: repoData.html_url,
+      openIssues: repoData.open_issues_count.toString(),
+      updatedAt: repoData.updated_at,
       success: true,
     };
   } catch (e) {
     console.error("Error fetching repository info:", e);
     return {
-      id: null,
-      name: null,
-      fullName: null,
-      url: null,
       success: false,
       error:
         e instanceof Error

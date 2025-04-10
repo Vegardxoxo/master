@@ -1,5 +1,6 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/app/lib/prisma';
+
 import { auth } from "@/auth";
 import {
   Course,
@@ -11,7 +12,6 @@ import {
   UserCourse,
 } from "@/app/lib/definitions/definitions";
 
-const prisma = new PrismaClient();
 
 /**
  * Fetches all courses the user is enrolled in with their instances
@@ -87,8 +87,8 @@ interface Repo {
   username: string;
   repoName: string;
   url: string;
-  platform: "github" | "gitlab";
   hasReport: boolean;
+  organization: string;
 }
 
 export async function getRepository(
@@ -136,7 +136,7 @@ export async function getRepositories(courseInstanceId: string): Promise<{
   error?: string;
   success?: boolean;
   message?: string;
-  repositories: Repo[];
+  repositories: Repository[];
 }> {
   try {
     const session = await auth();
@@ -159,14 +159,16 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         username: true,
         repoName: true,
         url: true,
-        platform: true,
         hasReport: true,
+        organization: true,
+        openIssues: true,
+        updatedAt: true,
       },
     });
 
     return {
       success: true,
-      repositories: repositories as Repo[],
+      repositories: repositories as Repository[],
     };
   } catch (e) {
     console.error("Error fetching repositories:", e);

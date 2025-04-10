@@ -1,101 +1,137 @@
-"use client"
-import { Button } from "@/app/ui/button"
-import {Button as Button2} from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState, useEffect } from "react"
-import { Checkbox } from "@/components/ui/checkbox"
-import type { CheckedState } from "@radix-ui/react-checkbox"
-import { createRepository } from "@/app/lib/server-actions/actions"
-import { useActionState } from "react"
-import { CheckCircle2, AlertCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+"use client";
+import { Button } from "@/app/ui/button";
+import { CardFooter } from "@/components/ui/card";
 
-export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: string }) {
-  const router = useRouter()
-  const [formState, formAction, isPending] = useActionState(createRepository, undefined)
+import { Button as Button2 } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { CheckedState } from "@radix-ui/react-checkbox";
+import { createRepository } from "@/app/lib/server-actions/actions";
+import { useActionState } from "react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {useToast} from "@/hooks/use-toast";
 
-  const [platform, setPlatform] = useState<string>("")
-  const [username, setUsername] = useState<string>("")
-  const [repoName, setRepoName] = useState<string>("")
-  const [url, setUrl] = useState<string>("")
-  const [isEditable, setIsEditable] = useState(false)
 
-  const isFormValid = platform && username && repoName
+export function AddRepositoryForm({
+  courseInstanceId,
+}: {
+  courseInstanceId: string;
+}) {
+  const router = useRouter();
+  const [formState, formAction, isPending] = useActionState(
+    createRepository,
+    undefined,
+  );
+  const [organization, setOrganization] = useState<"ntnu" | "none">("none");
+  const [username, setUsername] = useState<string>("");
+  const [repoName, setRepoName] = useState<string>("");
+  const [url, setUrl] = useState<string>("");
+  const [isEditable, setIsEditable] = useState(false);
+  const { toast } = useToast();
+
+  const isFormValid = username && repoName;
+
+  const clear = () => {
+    setOrganization("none");
+    setUsername("");
+    setRepoName("");
+    setUrl("");
+    setIsEditable(false);
+  };
 
   // Reset URL when inputs change
   useEffect(() => {
-    if (platform && username && repoName) {
-      setUrl(`https://${platform}.com/${username}/${repoName}`)
+    if (username && repoName) {
+      if (organization === "ntnu") {
+        setUrl(`https://git.ntnu.no/${username}/${repoName}`);
+      } else {
+        setUrl(`https://github.com/${username}/${repoName}`);
+      }
     } else {
-      setUrl("")
+      setUrl("");
     }
-  }, [platform, username, repoName])
+  }, [organization, username, repoName]);
 
   // Reset form after successful submission
   useEffect(() => {
     if (formState?.success) {
-      setPlatform("")
-      setUsername("")
-      setRepoName("")
-      setUrl("")
-      setIsEditable(false)
+     clear();
 
-      // Refresh the page after a short delay
+
       setTimeout(() => {
-        router.refresh()
-      }, 1500)
+        router.refresh();
+      }, 1500);
     }
-  }, [formState, router])
+  }, [formState, router]);
 
   function handleCheck(value: CheckedState) {
-    setIsEditable(!!value)
+    setIsEditable(!!value);
   }
 
   // Custom form submission handler to ensure all data is properly sent
   const handleSubmit = async (formData: FormData) => {
-    // Add the courseInstanceId
-    formData.append("courseInstanceId", courseInstanceId)
-
-    // Make sure platform, username, and repoName are included
-    if (platform) formData.set("platform", platform)
-    if (username) formData.set("username", username)
-    if (repoName) formData.set("repoName", repoName)
-
-    // Set the URL (either from the input or constructed)
+    formData.append("courseInstanceId", courseInstanceId);
+    formData.set("organization", organization);
+    if (username) formData.set("username", username);
+    if (repoName) formData.set("repoName", repoName);
     if (isEditable) {
-      formData.set("url", url)
+      formData.set("url", url);
     } else {
-      formData.set("url", `https://${platform}.com/${username}/${repoName}`)
+      if (organization === "ntnu") {
+        formData.set("url", `https://git.ntnu.no/${username}/${repoName}`);
+      } else {
+        formData.set("url", `https://github.com/${username}/${repoName}`);
+      }
     }
 
-    // Call the server action
-    return formAction(formData)
-  }
+    return formAction(formData);
+  };
 
   return (
-    <Card className="w-[350px]">
+    <Card className="w-[450px]">
       <form action={handleSubmit}>
         <CardHeader>
           <CardTitle>Manually Add Repository</CardTitle>
-          <CardDescription>Add a GitHub or GitLab repository URL.</CardDescription>
+          <CardDescription>
+            Add a GitHub or NTNU Git repository URL.
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="grid w-full items-center gap-4">
-            {/* We'll add the courseInstanceId in the handleSubmit function */}
-
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="platform">Platform</Label>
-              <Select name="platform" value={platform} onValueChange={setPlatform} disabled={isPending}>
-                <SelectTrigger id="platform">
-                  <SelectValue placeholder="Select platform" />
+              <Label htmlFor="organization">Organization</Label>
+              <Select
+                name="organization"
+                value={organization}
+                onValueChange={(value: "ntnu" | "none") =>
+                  setOrganization(value)
+                }
+                disabled={isPending}
+              >
+                <SelectTrigger id="organization">
+                  <SelectValue placeholder="Select organization" />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  <SelectItem value="github">GitHub</SelectItem>
-                  <SelectItem value="gitlab">GitLab</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="ntnu">NTNU</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -109,6 +145,7 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isPending}
+                required
               />
             </div>
 
@@ -121,10 +158,11 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
                 value={repoName}
                 onChange={(e) => setRepoName(e.target.value)}
                 disabled={isPending}
+                required
               />
             </div>
 
-            {platform && username && repoName && (
+            {username && repoName && (
               <div className="text-sm text-muted-foreground">
                 <Label htmlFor="preview">Preview</Label>
                 <div className="flex justify-end gap-x-4">
@@ -143,6 +181,7 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
                   name="url"
                   placeholder="Preview"
                   value={url}
+                  className="font-mono text-sm"
                   disabled={!isEditable || isPending}
                   onChange={(e) => setUrl(e.target.value)}
                 />
@@ -171,13 +210,7 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
           <Button2
             type="reset"
             variant="outline"
-            onClick={() => {
-              setPlatform("")
-              setUsername("")
-              setRepoName("")
-              setUrl("")
-              setIsEditable(false)
-            }}
+            onClick={clear}
             disabled={isPending}
           >
             Clear
@@ -189,6 +222,5 @@ export function AddRepositoryForm({ courseInstanceId }: { courseInstanceId: stri
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }
-
