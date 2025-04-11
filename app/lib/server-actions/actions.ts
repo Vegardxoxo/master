@@ -7,6 +7,7 @@ import {
   CourseInstanceSchema,
   CourseSchema,
   EnrollCourseSchema,
+  preferencesSchema,
   RemoveEnrollmentSchema,
   RepositorySchema,
   SignupSchema,
@@ -21,6 +22,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 
 import { prisma } from "@/app/lib/prisma";
+import {defaultVisibleSections} from "@/app/ui/dashboard/dashboard";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -441,42 +443,71 @@ export async function createCourse(prevState: any, formData: FormData) {
 }
 
 export async function createUser(prevState: any, formData: FormData) {
-  console.log("formData", formData);
-  const parsedFormData = SignupSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!parsedFormData.success) {
-    return { error: "Validation failed. Please check your input." };
-  }
-
-  const { email, password } = parsedFormData.data;
-
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-
-  // Check if user already exists
-  if (existingUser) {
-    return { error: "User already exists." };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   try {
-    await prisma.user.create({
+    // Create the user first
+    const newUser = await prisma.user.create({
       data: {
         id: crypto.randomUUID(),
         email,
         password: hashedPassword,
       },
-    });
+    })
 
-    return { success: true };
+    // Create default dashboard preferences with hardcoded values
+    await prisma.dashboardPreference.create({
+      data: {
+        userId: newUser.id,
+        preferences: {
+          overview: {
+            visible: true,
+            text: "Repository Overview",
+            contributors: { visible: true, text: "Contributors & Teams" },
+            milestones: { visible: true, text: "Project Milestones" },
+            info: { visible: true, text: "Repository Information" },
+            files: { visible: true, text: "File Structure" },
+            coverage: { visible: true, text: "Code Coverage" },
+          },
+          commits: {
+            visible: true,
+            text: "Commit Analysis",
+            quality: { visible: true, text: "Commit Message Quality" },
+            frequency: { visible: true, text: "Commit Frequency" },
+            size: { visible: true, text: "Commit Size" },
+            contributions: { visible: true, text: "Contribution Distribution" },
+          },
+          branches: {
+            visible: true,
+            text: "Branching Strategy",
+            to_main: { visible: true, text: "Merges to Main" },
+            strategy: { visible: true, text: "Branch Usage Patterns" },
+          },
+          pipelines: {
+            visible: true,
+            text: "CI/CD Pipelines",
+          },
+          pullRequests: {
+            visible: true,
+            text: "Pull Request Analysis",
+            overview: { visible: true, text: "PR Overview" },
+            members: { visible: true, text: "PR by Team Member" },
+            comments: { visible: true, text: "PR Comments" },
+            reviews: { visible: true, text: "PR Review Process" },
+          },
+        },
+      },
+    })
+
+    return { success: true }
   } catch (error) {
-    console.error("Error creating user:", error);
-    return { error: "Failed to create user. Please try again." };
+    console.error("Error creating user:", error)
+    return { error: "Failed to create user. Please try again." }
   }
 }
+
 
 export async function handleSignOut() {
   await signOut({ redirectTo: "/" });
@@ -822,7 +853,7 @@ export async function deleteCourseInstance(id: string) {
 
     await prisma.courseInstance.delete({
       where: { id },
-      include: {repositories: true}
+      include: { repositories: true },
     });
 
     return { success: true, message: "Course instance deleted successfully." };
@@ -831,3 +862,4 @@ export async function deleteCourseInstance(id: string) {
     return { success: false, error: "Failed to delete course instance." };
   }
 }
+

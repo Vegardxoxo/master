@@ -45,3 +45,8 @@ export const UpdateRepositorySchema = z.object({
   username: z.string().min(1, "Username is required"), // Change to userName with capital N
   repoName: z.string().min(1, "Repository name is required"),
 });
+
+
+export const preferencesSchema = z.object({
+  preferences: z.any(),
+})

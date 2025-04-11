@@ -140,46 +140,47 @@ export interface CommitStats {
   additions_deletions_ratio: any;
 }
 
-
-// export type VisibleSections = {
-//   [key: string]:
-//     | boolean
-//     | {
-//         visible: boolean;
-//         [subKey: string]: boolean;
-//       };
-// };
+export type MenuItem = {
+  visible: boolean
+  text: string
+}
 
 export type VisibleSections = {
   overview: {
-    visible: boolean;
-    contributors: boolean;
-    milestones: boolean;
-    info: boolean;
-    files: boolean;
-    coverage: boolean;
-  };
+    visible: boolean
+    text: string
+    contributors: MenuItem
+    milestones: MenuItem
+    info: MenuItem
+    files: MenuItem
+    coverage: MenuItem
+  }
   commits: {
-    visible: boolean;
-    quality: boolean;
-    frequency: boolean;
-    size: boolean;
-    contributions: boolean;
-  };
+    visible: boolean
+    text: string
+    quality: MenuItem
+    frequency: MenuItem
+    size: MenuItem
+    contributions: MenuItem
+  }
   branches: {
-    visible: boolean;
-    to_main: boolean;
-    strategy: boolean;
-  };
-  pipelines: boolean;
+    visible: boolean
+    text: string
+    to_main: MenuItem
+    strategy: MenuItem
+  }
+  pipelines: boolean | MenuItem
   pullRequests: {
-    visible: boolean;
-    overview: boolean;
-    members: boolean;
-    comments: boolean;
-    reviews: boolean;
-  };
-};
+    visible: boolean
+    text: string
+    overview: MenuItem
+    members: MenuItem
+    comments: MenuItem
+    reviews: MenuItem
+  }
+}
+
+
 
 export type Review = {
   count: number;
