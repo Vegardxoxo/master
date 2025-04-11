@@ -162,6 +162,14 @@ export function parseCommitStatsGraphQL(data: any[]) {
 //   return { name, email };
 // }
 
+interface ParseCommitDataResult {
+  dayEntries: DayEntry[]
+  total: number
+  emailToDisplayName: Record<string, string>
+  commitSummary: any[]
+  commitByDate: any[]
+  authorTotals: Record<string, number>
+}
 
 export function parseCommitData(commitData: any[]): ParseCommitDataResult {
   const dayMap: Record<string, AuthorFrequency> = {}
@@ -169,6 +177,9 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
   const emailToDisplayName: Record<string, string> = {}
   const commitSummary = []
   const commitByDate = []
+
+  // Add authorTotals to track commits per author
+  const authorTotals: Record<string, number> = {}
 
   // Process each commit
   for (const item of commitData) {
@@ -199,6 +210,12 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
     }
     dayMap[day][authorEmail]++
     dayTotals[day]++
+
+    // Track total commits per author
+    if (!authorTotals[authorEmail]) {
+      authorTotals[authorEmail] = 0
+    }
+    authorTotals[authorEmail]++
   }
 
   // Add total commits for each day
@@ -226,42 +243,14 @@ export function parseCommitData(commitData: any[]): ParseCommitDataResult {
     emailToDisplayName,
     commitSummary,
     commitByDate,
+    authorTotals
   }
 }
 
 
 
-interface ParseCommitDataResult {
-  dayEntries: DayEntry[]
-  total: number
-  emailToDisplayName: Record<string, string>
-  commitSummary: any[]
-  commitByDate: any[]
-}
 
-// Helper function to parse co-author lines
-function parseCoAuthorLine(line: string): { email: string; name: string } {
-  // Default values in case parsing fails
-  let email = "unknown"
-  let name = "Unknown Co-author"
 
-  try {
-    // Extract the part after "Co-authored-by: "
-    const authorPart = line.trim().substring("Co-authored-by:".length).trim()
-
-    // Parse name and email - format is typically "Name <email@example.com>"
-    const match = authorPart.match(/([^<]+)<([^>]+)>/)
-
-    if (match && match.length >= 3) {
-      name = match[1].trim()
-      email = match[2].trim()
-    }
-  } catch (error) {
-    console.error("Error parsing co-author line:", error)
-  }
-
-  return { email, name }
-}
 
 // Type definitions
 interface AuthorFrequency {
@@ -273,13 +262,6 @@ interface DayEntry {
   [email: string]: string | number
 }
 
-interface ParseCommitDataResult {
-  dayEntries: DayEntry[]
-  total: number
-  emailToDisplayName: Record<string, string>
-  commitSummary: any[]
-  commitByDate: any[]
-}
 
 
 export function convertToCommitStats(commitData: CommitData[]): CommitStats[] {

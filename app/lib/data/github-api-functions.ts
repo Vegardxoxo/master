@@ -20,14 +20,14 @@ import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 import { CommitStats } from "@/app/lib/definitions/commit-definitions";
 
-// const octokit = new Octokit({
-//   auth: process.env.TOKEN,
-//   baseUrl: "https://git.ntnu.no/api/v3",
-// });
-
 const octokit = new Octokit({
-  auth: process.env.SUPER_TOKEN,
+  auth: process.env.TOKEN,
+  baseUrl: "https://git.ntnu.no/api/v3",
 });
+
+// const octokit = new Octokit({
+//   auth: process.env.SUPER_TOKEN,
+// });
 
 /**
  * Checks if there is a connection to the repo before displaying the rest of the dashboard.

@@ -192,7 +192,8 @@ export function PullRequestsMembers({
       prsWithReview: data.prsWithReview,
       prsWithReviewPercentage:
         Math.round((data.prsWithReview / data.totalPRs) * 100) || 0,
-      prsWithoutReviewPercentage: Math.round((data.prsWithoutReview / data.totalPRs) * 100) || 0,
+      prsWithoutReviewPercentage:
+        Math.round((data.prsWithoutReview / data.totalPRs) * 100) || 0,
       prsWithoutReview: data.prsWithoutReview,
       averageCommentsPerPR: data.averageCommentsPerPR,
       labelCounts: data.labelCounts,
@@ -274,7 +275,7 @@ export function PullRequestsMembers({
             </div>
 
             {milestones.length > 1 && (
-              <div className="mb-4">
+              <div className="mb-4 flex justify-end">
                 <Select
                   value={selectedMilestone}
                   onValueChange={setSelectedMilestone}
