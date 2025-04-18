@@ -12,11 +12,6 @@ enum Semester {
   AUTUMN
 }
 
-enum UserType {
-  EDUCATOR
-  STUDENT
-}
-
 enum ChartType {
   COMMIT_FREQUENCY
   COMMIT_SIZE
@@ -27,17 +22,25 @@ enum ChartType {
 }
 
 model User {
-  id              String       @id @default(uuid())
-  email           String       @unique
-  password        String       @db.VarChar(255)
-  avatarUrl       String?
-  githubUrl       String?
-  userType        UserType
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  repositories    Repository[] @relation("RepositoryMembers")
-  accessToken     String?
-  enrolledCourses UserCourse[]
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  password             String                @db.VarChar(255)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  repositories         Repository[]          @relation("RepositoryMembers")
+  enrolledCourses      UserCourse[]
+  dashboardPreferences DashboardPreference[]
+}
+
+model DashboardPreference {
+  id           String    @id @default(uuid())
+  userId       String
+  preferences  Json
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId])
+  @@index([userId])
 }
 
 model Course {
@@ -66,39 +69,36 @@ model UserCourse {
 
 // Course instance represents a specific year/semester offering
 model CourseInstance {
-  id        String   @id @default(uuid())
-  year      Int
-  semester  Semester
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relationship to UserCourse
+  id           String       @id @default(uuid())
+  year         Int
+  semester     Semester
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   userCourseId String
-  userCourse   UserCourse @relation(fields: [userCourseId], references: [id], onDelete: Cascade)
-
-  // Repositories associated with this course instance
+  userCourse   UserCourse   @relation(fields: [userCourseId], references: [id], onDelete: Cascade)
   repositories Repository[]
 
-  // Prevent duplicate instances for the same user-course combination
   @@unique([userCourseId, year, semester])
 }
 
 model Repository {
   id               String            @id @default(uuid())
-  githubId         String            @unique
+  githubId         String
   username         String
   repoName         String
   url              String
-  platform         String
+  organization     String            @default("none")
   createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  updatedAt        DateTime
+  openIssues       String            @default("0")
   members          User[]            @relation("RepositoryMembers")
-  courseInstanceId String?
-  courseInstance   CourseInstance?   @relation(fields: [courseInstanceId], references: [id])
+  courseInstanceId String
+  courseInstance   CourseInstance?   @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
   coverageReport   CoverageReport[]
   fileSets         FileSet[]
   charts           RepositoryImage[]
+  hasReport        Boolean           @default(false)
 }
 
 model CoverageReport {
@@ -159,6 +159,7 @@ model RepositoryImage {
   description  String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
   @@unique([repositoryId, chartType])
   @@index([repositoryId])
 }

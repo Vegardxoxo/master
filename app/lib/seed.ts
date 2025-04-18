@@ -256,7 +256,7 @@ const codes = [
   { code: "TDMA5002", name: "Marketing Management and Business Models" },
   { code: "TDMA5004", name: "Research Project Planning" },
   { code: "TDMA5005", name: "Master Thesis" },
-  {code: "TDT4110", name: "Informasjonsteknologi, grunnkurs"}
+  { code: "TDT4110", name: "Informasjonsteknologi, grunnkurs" },
 ];
 
 // drop duplicates
@@ -264,11 +264,7 @@ const courses = Array.from(
     new Map(codes.map(course => [course.code, course])).values()
 );
 
-import {PrismaClient} from "@prisma/client"
-
-const prisma = new PrismaClient()
-
-
+import {prisma} from '@/app/lib/prisma';
 
 
 async function main() {

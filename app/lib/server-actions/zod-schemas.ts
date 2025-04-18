@@ -3,9 +3,6 @@ import { z } from "zod";
 export const SignupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  name: z.string().min(1),
-  userType: z.enum(["STUDENT", "EDUCATOR"]),
-  githubUrl: z.string().url().optional().or(z.literal("")),
 });
 
 export const CourseSchema = z.object({
@@ -36,17 +33,20 @@ export const CourseInstanceSchema = z.object({
 
 export const RepositorySchema = z.object({
   courseInstanceId: z.string().min(1, "Course instance ID is required"),
-  platform: z.enum(["github", "gitlab"]),
+  organization: z.enum(["ntnu", "none"]).default("none"),
   username: z.string().min(1, "Username is required"), // Change to userName with capital N
   repoName: z.string().min(1, "Repository name is required"),
-  url: z.string().optional(),
 });
 
 export const UpdateRepositorySchema = z.object({
   id: z.string().min(1, "ID is required"),
   courseInstanceId: z.string().min(1, "Course instance ID is required"),
-  platform: z.enum(["github", "gitlab"]),
+  organization: z.enum(["ntnu", "none"]).default("none"),
   username: z.string().min(1, "Username is required"), // Change to userName with capital N
   repoName: z.string().min(1, "Repository name is required"),
-  url: z.string().optional(),
 });
+
+
+export const preferencesSchema = z.object({
+  preferences: z.any(),
+})

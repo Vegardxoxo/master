@@ -2,10 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
 import { z } from "zod";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/app/lib/prisma";
 
 export async function getUser(email: string) {
   try {

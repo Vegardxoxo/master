@@ -5,7 +5,7 @@ import { useReport } from "@/app/contexts/report-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
+  CardContent, CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, FileText } from "lucide-react";
+import {CheckCircle2, Eye, FileText} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,7 +29,6 @@ import CommitContributions from "@/app/ui/dashboard/report/report-sections/commi
 import PullRequests from "@/app/ui/dashboard/report/report-sections/pull-requests";
 import DevelopmentBranches from "@/app/ui/dashboard/report/report-sections/development-branches";
 import RecommendationEditor from "@/app/ui/dashboard/report/recommendation-editor";
-import FinalReport from "@/app/ui/dashboard/report/final-report";
 import { useReportHelper } from "@/app/contexts/report-context-helper";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -221,31 +220,39 @@ export default function GenerateReport({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
       {/* Left side - Report Editor */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Repository Analysis Report</CardTitle>
+       <Card className="shadow-lg border-slate-200 h-full flex flex-col">
+        <CardHeader className="bg-slate-50 rounded-t-lg border-b">
+          <CardTitle className="text-2xl font-bold text-slate-800">Repository Analysis Report</CardTitle>
+          <CardDescription>Customize your report content and sections</CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="report-title">Report Title</Label>
-            <Input
-              id="report-title"
-              value={reportTitle}
-              onChange={(e) => setReportTitle(e.target.value)}
-            />
-          </div>
+        <CardContent className="p-6 space-y-8 overflow-auto flex-grow">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="report-title" className="text-sm font-medium">
+                Report Title
+              </Label>
+              <Input
+                id="report-title"
+                value={reportTitle}
+                onChange={(e) => setReportTitle(e.target.value)}
+                className="border-slate-300 focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="summary">Summary</Label>
-            <Textarea
-              id="summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              className="min-h-[80px]"
-            />
+            <div className="space-y-3">
+              <Label htmlFor="summary" className="text-sm font-medium">
+                Executive Summary
+              </Label>
+              <Textarea
+                id="summary"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                className="min-h-[100px] border-slate-300 focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -595,8 +602,27 @@ export default function GenerateReport({
         </CardFooter>
       </Card>
 
-      {/* Right side - Markdown Preview */}
-      <MarkdownPreview markdown={getMarkdown()} title="Report Preview" />
+     {/* Right side - Markdown Preview */}
+       <div className="hidden lg:block h-full">
+        <Card className="shadow-lg border-slate-200 h-full flex flex-col">
+          <CardHeader className="bg-slate-50 rounded-t-lg border-b flex-shrink-0">
+            <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <Eye className="h-5 w-5 text-sky-500" />
+              Report Preview
+            </CardTitle>
+            <CardDescription>Live preview of your generated report</CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 overflow-auto flex-grow">
+            <MarkdownPreview markdown={getMarkdown()} title="" />
+          </CardContent>
+         <CardFooter className="bg-slate-50 border-t p-4 flex justify-center flex-shrink-0">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              Preview updates automatically as you edit
+            </div>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }

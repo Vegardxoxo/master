@@ -29,7 +29,7 @@ export default function CommitSizeTable({ data }: CommitSizeTableProps) {
               href={data?.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
+              className="text-blue-500 hover:underline block truncate"
             >
               {data?.message}
             </Link>

@@ -1,22 +1,28 @@
 "use server";
 import { AuthError } from "next-auth";
 import { auth, signIn, signOut } from "@/auth";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import {
   CourseInstanceSchema,
   CourseSchema,
   EnrollCourseSchema,
+  preferencesSchema,
   RemoveEnrollmentSchema,
   RepositorySchema,
   SignupSchema,
   UpdateRepositorySchema,
 } from "@/app/lib/server-actions/zod-schemas";
-import { fetchRepoId } from "@/app/lib/data/github-api-functions";
-import {CoverageMetrics, FileCoverageData, FileData, FileSetResult} from "@/app/lib/definitions/definitions";
+import { fetchRepository } from "@/app/lib/data/github-api-functions";
+import {
+  CoverageMetrics,
+  FileCoverageData,
+  FileData,
+  FileSetResult,
+} from "@/app/lib/definitions/definitions";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/app/lib/prisma";
+import {defaultVisibleSections} from "@/app/ui/dashboard/dashboard";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -51,8 +57,7 @@ export async function createRepository(prevState: any, formData: FormData) {
       courseInstanceId: formData.get("courseInstanceId"),
       username: formData.get("username"),
       repoName: formData.get("repoName"),
-      platform: formData.get("platform"),
-      url: formData.get("url"),
+      organization: formData.get("organization"),
     });
 
     if (!parsedFormData.success) {
@@ -63,7 +68,7 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    const { courseInstanceId, url, platform, username, repoName } =
+    const { courseInstanceId, organization, username, repoName } =
       parsedFormData.data;
 
     const courseInstance = await prisma.courseInstance.findFirst({
@@ -88,24 +93,23 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    let githubId = null;
-    const repoInfo = await fetchRepoId(username, repoName);
+    const repoInfo = await fetchRepository(username, repoName);
 
     if (!repoInfo.success) {
       return {
         error: `Failed to fetch repository information: ${repoInfo.error}`,
       };
     }
-    githubId = repoInfo.id;
-    console.log("githubId", githubId);
 
     const repository = await prisma.repository.create({
       data: {
         username: username,
         repoName: repoName,
-        url: url,
-        githubId,
-        platform: platform,
+        url: repoInfo.url!,
+        githubId: repoInfo.id!,
+        organization: organization,
+        openIssues: repoInfo.openIssues!,
+        updatedAt: repoInfo.updatedAt!,
         courseInstanceId: courseInstanceId,
         members: {
           connect: {
@@ -124,7 +128,7 @@ export async function createRepository(prevState: any, formData: FormData) {
     return {
       success: true,
       repository,
-      message: `Repository ${url} added successfully`,
+      message: `Repository ${repoInfo.url} added successfully`,
     };
   } catch (e) {
     console.error("Error adding repository:", e);
@@ -439,47 +443,71 @@ export async function createCourse(prevState: any, formData: FormData) {
 }
 
 export async function createUser(prevState: any, formData: FormData) {
-  console.log("formData", formData);
-  const parsedFormData = SignupSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    name: formData.get("name"),
-    userType: formData.get("userType"),
-    githubUrl: formData.get("githubUrl") || "",
-  });
-
-  if (!parsedFormData.success) {
-    return { error: "Validation failed. Please check your input." };
-  }
-
-  const { email, password, name, userType, githubUrl } = parsedFormData.data;
-
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-
-  // Check if user already exists
-  if (existingUser) {
-    return { error: "User already exists." };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   try {
-    await prisma.user.create({
+    // Create the user first
+    const newUser = await prisma.user.create({
       data: {
-        id: crypto.randomUUID(), // Generate a UUID for the id
+        id: crypto.randomUUID(),
         email,
         password: hashedPassword,
-        userType,
-        githubUrl: githubUrl || null,
       },
-    });
+    })
 
-    return { success: true };
+    // Create default dashboard preferences with hardcoded values
+    await prisma.dashboardPreference.create({
+      data: {
+        userId: newUser.id,
+        preferences: {
+          overview: {
+            visible: true,
+            text: "Repository Overview",
+            contributors: { visible: true, text: "Contributors & Teams" },
+            milestones: { visible: true, text: "Project Milestones" },
+            info: { visible: true, text: "Repository Information" },
+            files: { visible: true, text: "File Structure" },
+            coverage: { visible: true, text: "Code Coverage" },
+          },
+          commits: {
+            visible: true,
+            text: "Commit Analysis",
+            quality: { visible: true, text: "Commit Message Quality" },
+            frequency: { visible: true, text: "Commit Frequency" },
+            size: { visible: true, text: "Commit Size" },
+            contributions: { visible: true, text: "Contribution Distribution" },
+          },
+          branches: {
+            visible: true,
+            text: "Branching Strategy",
+            to_main: { visible: true, text: "Merges to Main" },
+            strategy: { visible: true, text: "Branch Usage Patterns" },
+          },
+          pipelines: {
+            visible: true,
+            text: "CI/CD Pipelines",
+          },
+          pullRequests: {
+            visible: true,
+            text: "Pull Request Analysis",
+            overview: { visible: true, text: "PR Overview" },
+            members: { visible: true, text: "PR by Team Member" },
+            comments: { visible: true, text: "PR Comments" },
+            reviews: { visible: true, text: "PR Review Process" },
+          },
+        },
+      },
+    })
+
+    return { success: true }
   } catch (error) {
-    console.error("Error creating user:", error);
-    return { error: "Failed to create user. Please try again." };
+    console.error("Error creating user:", error)
+    return { error: "Failed to create user. Please try again." }
   }
 }
+
 
 export async function handleSignOut() {
   await signOut({ redirectTo: "/" });
@@ -568,8 +596,7 @@ export async function updateRepository(
       courseInstanceId: formData.get("courseInstanceId"),
       username: formData.get("username"),
       repoName: formData.get("repoName"),
-      platform: formData.get("platform"),
-      url: formData.get("url"),
+      organization: formData.get("organization"),
     });
 
     if (!parsedFormData.success) {
@@ -579,7 +606,7 @@ export async function updateRepository(
       };
     }
 
-    const { courseInstanceId, url, platform, username, repoName, id } =
+    const { courseInstanceId, username, repoName, organization, id } =
       parsedFormData.data;
 
     const courseInstance = await prisma.courseInstance.findFirst({
@@ -611,13 +638,12 @@ export async function updateRepository(
       data: {
         username: username,
         repoName: repoName,
-        url: url,
-        platform: platform,
+        organization: organization,
       },
     });
     return {
       success: true,
-      message: `Repository ${url} updated successfully`,
+      message: `Repository updated successfully`,
     };
   } catch (e) {
     console.error("Error updating repository:", e);
@@ -628,8 +654,6 @@ export async function updateRepository(
     };
   }
 }
-
-
 
 export async function saveCoverageReport(
   githubRepoId: string,
@@ -739,16 +763,12 @@ export async function saveCoverageReport(
   }
 }
 
-
-
-
 export async function updateRepositoryFiles(
   repositoryId: string,
   branch: string,
   commit: string,
-  fileData: FileData[]
+  fileData: FileData[],
 ): Promise<FileSetResult> {
-
   // The transaction already knows the repository exists since we're passing its ID
   return await prisma.$transaction(async (prisma) => {
     // Try to find an existing file set for this repository and branch
@@ -800,5 +820,46 @@ export async function updateRepositoryFiles(
       });
     }
   });
+}
+
+export async function deleteCourseInstance(id: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        error: "You must be logged in to delete a course instance.",
+        success: false,
+      };
+    }
+
+    const userId = session.user.id;
+
+    const courseInstance = await prisma.courseInstance.findFirst({
+      where: {
+        id,
+        userCourse: {
+          userId: userId,
+        },
+      },
+    });
+
+    if (!courseInstance) {
+      return {
+        error:
+          "Course instance not found or you do not have permission to delete it.",
+        success: false,
+      };
+    }
+
+    await prisma.courseInstance.delete({
+      where: { id },
+      include: { repositories: true },
+    });
+
+    return { success: true, message: "Course instance deleted successfully." };
+  } catch (error) {
+    console.error("Error deleting course instance:", error);
+    return { success: false, error: "Failed to delete course instance." };
+  }
 }
 

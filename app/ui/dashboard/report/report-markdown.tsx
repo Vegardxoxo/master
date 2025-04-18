@@ -129,6 +129,43 @@ ${commitQualityRecommendations}
 `
     }
 
+    // Add author statistics if available
+    if (commitFrequency && commitFrequency.authorTotals) {
+      markdown += `### Author Contribution Statistics
+
+| Author | Email | Commits | Percentage |
+|--------|-------|---------|------------|
+`
+
+      // Process author statistics
+      const authorStats = Object.entries(commitFrequency.authorTotals)
+        .filter(([email]) => email !== "TOTAL@commits")
+        .map(([email, commits]) => ({
+          email,
+          name: commitFrequency.authors?.[email] || email,
+          commits,
+          percentage:
+            commitFrequency.total > 0
+              ? (((commits as number) / commitFrequency.total) * 100).toFixed(1)
+              : "0",
+        }))
+        .sort((a, b) => (b.commits as number) - (a.commits as number))
+
+      // Add each author with their stats
+      authorStats.forEach((author) => {
+        const escapedName = author.name.replace(/\|/g, "\\|")
+        const escapedEmail = author.email.replace(/\|/g, "\\|")
+
+        markdown += `| ${escapedName} | ${escapedEmail} | ${author.commits} | ${author.percentage}% |
+`
+      })
+
+      markdown += `
+**Total Commits**: ${commitFrequency.total}
+
+`
+    }
+
     // Add recommendations
     if (commitFrequencyRecommendations) {
       markdown += `### Recommendations
@@ -160,8 +197,8 @@ ${commitFrequencyRecommendations}
     if (commitContributions.contributors && commitContributions.contributors.length > 0) {
       markdown += `### Contributors
 
-| Contributor | Email | Additions | Deletions | Co-authored Lines | Total Lines |
-|-------------|-------|-----------|-----------|------------------|-------------|
+| Contributor | Email | Additions | Deletions | Total Lines |
+|-------------|-------|-----------|-----------|-------------|
 `
 
       // Add each contributor with their stats
@@ -169,7 +206,7 @@ ${commitFrequencyRecommendations}
         const escapedName = (contributor.name || "").replace(/\|/g, "\\|")
         const escapedEmail = (contributor.email || "").replace(/\|/g, "\\|")
 
-        markdown += `| ${escapedName} | ${escapedEmail} | ${contributor.additions || 0} | ${contributor.deletions || 0} | ${contributor.co_authored_lines || 0} | ${contributor.total || 0} |
+        markdown += `| ${escapedName} | ${escapedEmail} | ${contributor.additions || 0} | ${contributor.deletions || 0} | ${contributor.total || 0} |
 `
       })
 
@@ -242,7 +279,7 @@ ${pullRequestsRecommendations}
 `
     }
   }
-    console.log("her", developmentBranches)
+  console.log("her", developmentBranches)
   // Development Branches Section (Branch-Issue Connection)
   if (includedSections.developmentBranches && developmentBranches) {
     markdown += `## Branch-Issue Connection Analysis
@@ -426,13 +463,12 @@ ${sensitiveFilesRecommendations}
 
 These files may contain credentials, tokens, or other secrets and should be handled with care:
 
-| File Path | Reason |
-|-----------|--------|
+| File Path |
+|-----------|
 ${sensFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` | ${escapedReason} |`
+    return `| \`${escapedPath}\` |`
   })
   .join("\n")}
 
@@ -444,13 +480,12 @@ ${sensFiles
 
 These files may contain temporary data or system-specific configurations:
 
-| File Path | Reason |
-|-----------|--------|
+| File Path |
+|-----------|
 ${warnFiles
   .map((file: any) => {
     const escapedPath = file.path.replace(/\|/g, "\\|")
-    const escapedReason = (file.reason || "Not specified").replace(/\|/g, "\\|")
-    return `| \`${escapedPath}\` | ${escapedReason} |`
+    return `| \`${escapedPath}\` |`
   })
   .join("\n")}
 
@@ -474,4 +509,3 @@ Generated on ${new Date().toLocaleDateString()} by Git Workflow Analysis Tool`
 
   return markdown
 }
-

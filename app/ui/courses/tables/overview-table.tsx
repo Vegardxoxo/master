@@ -73,9 +73,9 @@ export function DataTable<TData, TValue>({
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             placeholder="Filter repository name"
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("repoName")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("repoName")?.setFilterValue(event.target.value)
             }
             className="pl-8 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
           />

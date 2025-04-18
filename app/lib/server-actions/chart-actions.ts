@@ -1,11 +1,10 @@
 "use server";
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions";
 
-const prisma = new PrismaClient();
+import { prisma } from '@/app/lib/prisma';
 
 export async function saveChartImage(
   imageData: string,

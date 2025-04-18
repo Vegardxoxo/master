@@ -2,6 +2,9 @@ import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { CoverageProgressBar } from "@/app/ui/dashboard/project_info/test-coverage/coverage-progress-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CoverageTableReport } from "@/app/ui/dashboard/project_info/test-coverage/coverage-table-report";
+import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
+import { coverageTableColumns } from "@/app/ui/courses/columns";
+import {Separator} from "@/components/ui/separator";
 
 interface TestCoverageProps extends ReportSectionProps {
   fileCoverage: any;
@@ -52,11 +55,8 @@ export default function TestCoverageSection({
           <CoverageProgressBar percentage={lines} label="Lines" />
         </CardContent>
       </Card>
-      <Card>
-        <CardContent>
-          <CoverageTableReport fileData={fileCoverage} />
-        </CardContent>
-      </Card>
+      <Separator/>
+      <GenericDataTable data={fileCoverage} columns={coverageTableColumns} />
     </div>
   );
 }

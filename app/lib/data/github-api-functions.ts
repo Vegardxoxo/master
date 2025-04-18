@@ -1,31 +1,82 @@
-"use server"
-import { Octokit } from "octokit";
-import { promises as fs } from "fs";
+"use server";
+import {Octokit} from "octokit";
+import {promises as fs} from "fs";
 import * as path from "path";
 import {
-  _Branches,
-  Commit, CommitData,
+  Commit,
+  CommitData,
   CommitMessageLong,
   PullRequestData,
   repositoryOverview,
 } from "@/app/lib/definitions/definitions";
-import {
-  formatTimestamp,
-  parseCommitStats,
-  parsePullRequests, transformLocalImagePaths,
-} from "@/app/lib/utils/utils";
-import { cache } from "react";
-import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
-import {CommitStats} from "@/app/lib/definitions/commit-definitions";
+import {parseCommitStats, parsePullRequests, transformLocalImagePaths,} from "@/app/lib/utils/utils";
+import {cache} from "react";
+import {getCommitsOnMain} from "@/app/lib/data/graphql-queries";
+import {CommitStats} from "@/app/lib/definitions/commits";
+import {GitHubIssue} from "@/app/lib/definitions/pull-requests";
 
-const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
-});
+/**
+ * Fetches the languages used in a repository and their byte counts
+ * @param owner - The owner of the repository
+ * @param repo - The name of the repository
+ * @returns An object mapping language names to byte counts
+ */
+export async function getRepoLanguages(
+  owner: string,
+  repo: string
+): Promise<{ [key: string]: number } | null> {
+  try {
+    const response = await octokit.rest.repos.listLanguages({
+      owner,
+      repo,
+    });
 
-// const octokit = new Octokit({
-//   auth: process.env.SUPER_TOKEN,
-// });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching repository languages:", error);
+    return null;
+  }
+}
+
+//const octokit = new Octokit({
+ // auth: process.env.TOKEN,
+  //baseUrl: "https://git.ntnu.no/api/v3",
+//});
+
+ const octokit = new Octokit({
+   auth: process.env.SUPER_TOKEN,
+ });
+
+/**
+ * Checks if there is a connection to the repo before displaying the rest of the dashboard.
+ * @param owner
+ * @param repo
+ */
+export async function checkConnection(
+  owner: string,
+  repo: string,
+): Promise<boolean> {
+  try {
+    await octokit.rest.repos.get({
+      owner,
+      repo,
+    });
+    return true;
+  } catch (e: any) {
+    if (e.status === 401 || e.status === 403 || e.status === 404) {
+      console.error(
+        `Authentication error: No permission to access ${owner}/${repo}. Please check your GitHub token.`,
+      );
+    } else if (e.status === 429) {
+      console.error(`Rate limit exceeded. Please try again later.`);
+    } else {
+      console.error("GitHub API Error:", e);
+    }
+
+    // Return false instead of throwing an error
+    return false;
+  }
+}
 
 /**
  * Fetches an overview about the projects. Data is used to render data tables.
@@ -110,98 +161,27 @@ export async function fetchBranches(owner: string, repo: string) {
   }
 }
 
-/**
- * Fetches details for a single branch (including its latest commit info).
- * @param owner - GitHub owner/organization
- * @param repo  - Repository name
- * @param branch - DirectCommitsWrapper name
- */
-export async function fetchBranchDetails(
-  owner: string,
-  repo: string,
-  branch: string,
-) {
-  try {
-    const { data: branchData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/branches/{branch}",
-      {
-        owner,
-        repo,
-        branch,
-      },
-    );
-    return branchData;
-  } catch (e) {
-    console.error("Error fetching details for branch:", e);
-    throw new Error("Failed to fetch details for branch.");
-  }
-}
-
-/**
- * Fetches all branches, determines their "staleness" based on last commit date,
- * and returns them with an added `status` and `lastUpdate`.
- * @param owner - GitHub owner/organization
- * @param repo  - Repository name
- * @param branches
- */
-export async function fetchBranchesWithStatus(
-  owner: string,
-  repo: string,
-  branches: _Branches[],
-) {
-  const now = new Date();
-  const staleThresholdDays = 14;
-
-  return await Promise.all(
-    branches.map(async (branch) => {
-      const commitData = await fetchBranchDetails(owner, repo, branch.name);
-
-      // Default to a far-past date if commit info is missing
-      let lastCommitDate = new Date(0);
-      if (commitData.commit?.commit?.author?.date) {
-        lastCommitDate = new Date(commitData.commit.commit.author.date);
-      }
-
-      // Calculate difference in days from now
-      const diffInMs = now.getTime() - lastCommitDate.getTime();
-      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-      let status = "active";
-      if (diffInDays > staleThresholdDays) {
-        status = "stale";
-      }
-
-      return {
-        ...branch,
-        lastUpdate: formatTimestamp(lastCommitDate.toISOString()),
-        status,
-      };
-    }),
-  );
-}
-
-/**
- * Fetches contributors for the contributor card in the dashboard.
- * @param owner
- * @param repo
- */
 export async function fetchContributors(owner: string, repo: string) {
   try {
     const { data: contributorData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/contributors",
-      {
-        owner,
-        repo,
-      },
+        "GET /repos/{owner}/{repo}/contributors",
+        {
+          owner,
+          repo,
+        },
     );
     return {
-      contributors: contributorData.map((c: any) => c.login),
+      contributors: contributorData.map((c: any) => ({
+        login: c.login,
+        url: c.html_url
+      })),
     };
   } catch (e) {
     console.error("Error fetching contributors:", e);
     throw new Error("Failed to fetch contributors.");
   }
 }
+
 
 /**
  * Fetches general information about the repository.
@@ -232,36 +212,14 @@ export async function fetchProjectInfo(owner: string, repo: string) {
 }
 
 /**
- * Fetches commits from a repository
- * @param owner
- * @param repo
- */
-export async function fetchCommits(owner: string, repo: string) {
-  try {
-    const { data: commitData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/commits",
-      {
-        owner,
-        repo,
-        per_page: 5,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    );
-    return commitData;
-  } catch (e) {
-    console.log(e);
-    throw new Error("Failed to fetch commits");
-  }
-}
-
-/**
  * Fetches all commits for a repository. Uses octokit's built in pagination.
  * @param owner
  * @param repo
  */
-export async function fetchAllCommits(owner: string, repo: string): Promise<CommitData[]> {
+export async function fetchAllCommits(
+  owner: string,
+  repo: string,
+): Promise<CommitData[]> {
   try {
     const commits = await octokit.paginate(octokit.rest.repos.listCommits, {
       owner,
@@ -272,18 +230,18 @@ export async function fetchAllCommits(owner: string, repo: string): Promise<Comm
       },
     });
 
-    return commits.map(item => ({
+    return commits.map((item) => ({
       sha: item.sha,
       html_url: item.html_url,
       commit: {
         author: {
-          name: item.commit.author?.name  || "Unknown",
+          name: item.commit.author?.name || "Unknown",
           email: item.commit.author?.email || "Unknown",
           date: item.commit.author?.date || "Unknown",
         },
         message: item.commit.message,
-        url: item.commit.url
-      }
+        url: item.commit.url,
+      },
     }));
   } catch (e) {
     console.log(e);
@@ -291,7 +249,20 @@ export async function fetchAllCommits(owner: string, repo: string): Promise<Comm
   }
 }
 
-export async function fetchRepoId(owner: string, repo: string) {
+interface GithubRepoOverview {
+  id?: string;
+  name?: string;
+  url?: string;
+  openIssues?: string;
+  updatedAt?: string;
+  success: boolean;
+  error?: string;
+}
+
+export async function fetchRepository(
+  owner: string,
+  repo: string,
+): Promise<GithubRepoOverview> {
   try {
     const { data: repoData } = await octokit.request(
       "GET /repos/{owner}/{repo}",
@@ -301,19 +272,16 @@ export async function fetchRepoId(owner: string, repo: string) {
       },
     );
     return {
-      id: repoData.id.toString(),
+      id: repoData.id?.toString(),
       name: repoData.name,
-      fullName: repoData.full_name,
       url: repoData.html_url,
+      openIssues: repoData.open_issues_count.toString(),
+      updatedAt: repoData.updated_at,
       success: true,
     };
   } catch (e) {
     console.error("Error fetching repository info:", e);
     return {
-      id: null,
-      name: null,
-      fullName: null,
-      url: null,
       success: false,
       error:
         e instanceof Error
@@ -353,7 +321,7 @@ export async function fetchCommitStatsGraphQL(
   repo: string,
   data: CommitMessageLong[],
 ): Promise<CommitData[]> {
-  const shas = data.map((obj) => obj.sha)
+  const shas = data.map((obj) => obj.sha);
   const query = `
     query($owner: String!, $repo: String!) {
       repository(owner: $owner, name: $repo) {
@@ -363,6 +331,7 @@ export async function fetchCommitStatsGraphQL(
             commit${index}: object(oid: "${sha}") {
               ... on Commit {
                 committedDate
+                message
                 author {
                   email
                   name
@@ -378,17 +347,13 @@ export async function fetchCommitStatsGraphQL(
           .join("\n")}
       }
     }
-  `
+  `;
 
   try {
-    const response = await octokit.graphql(query, { owner, repo })
-    const commitStats = Object.values(response.repository) as CommitStats[]
+    const response = await octokit.graphql(query, { owner, repo });
+    const commitStats = Object.values(response.repository) as CommitStats[];
 
-    // Transform the data to match the CommitData structure expected by AuthorMerger
     return commitStats.map((stat, index) => {
-      // Find the corresponding original data to get the message
-      const originalCommit = data.find((commit) => commit.sha === stat.url.split("/").pop())
-
       return {
         html_url: stat.url,
         commit: {
@@ -403,12 +368,13 @@ export async function fetchCommitStatsGraphQL(
           additions: stat.additions,
           deletions: stat.deletions,
           changedFiles: stat.changedFiles,
+          message: stat.message,
         },
-      }
-    })
+      };
+    });
   } catch (e) {
-    console.error("GraphQL Error:", e)
-    throw new Error("Failed to fetch commit details via GraphQL.")
+    console.error("GraphQL Error:", e);
+    throw new Error("Failed to fetch commit details via GraphQL.");
   }
 }
 
@@ -517,8 +483,7 @@ export const fetchPullRequests = cache(
           }
         }),
       );
-      const parsed = parsePullRequests(prsWithReviews);
-      return parsed;
+      return parsePullRequests(prsWithReviews);
     } catch (e) {
       console.log(e);
       return [];
@@ -624,16 +589,11 @@ export async function getMainCommits(
   }
 }
 
-interface GitHubIssue {
-  error?: string;
-  title: string;
-  number: number;
-  url: string;
-}
+
 
 export async function fetchIssues(
-  owner: string,
-  repo: string,
+    owner: string,
+    repo: string,
 ): Promise<GitHubIssue[]> {
   try {
     const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
@@ -641,21 +601,23 @@ export async function fetchIssues(
       repo,
       state: "all",
     });
-    return issues.map((issue) => ({
+
+    // Filtrerer ut pull requests ved å sjekke om issue har pull_request property
+    const realIssues = issues.filter(issue => !issue.pull_request);
+
+    return realIssues.map((issue) => ({
       title: issue.title,
       number: issue.number,
       url: issue.html_url,
+      createdAt: new Date(issue.created_at),
+      closedAt: issue.closed_at ? new Date(issue.closed_at) : null,
     }));
   } catch (e) {
-    console.log("Errir fetching issues:", e);
-    return {
-      error: "GitHub API error: Failed to fetch issues.",
-      title: null,
-      number: null,
-      url: null,
-    };
+    console.log("Error fetching issues:", e);
+    return [];  // Returnerer tom array ved feil istedenfor feilobjekt
   }
 }
+
 
 export default async function fetchMilestones(owner: string, repo: string) {
   try {
@@ -689,8 +651,6 @@ export default async function fetchMilestones(owner: string, repo: string) {
 type UploadResult =
   | { success: true; url?: string; branch?: string }
   | { success: false; error: string };
-
-
 
 export async function uploadReportToRepository(
   owner: string,
@@ -751,7 +711,10 @@ export async function uploadReportToRepository(
         : localPath;
 
       // Resolve it relative to current working directory
-      const absoluteLocalPath = path.resolve(process.cwd(), normalizedLocalPath);
+      const absoluteLocalPath = path.resolve(
+        process.cwd(),
+        normalizedLocalPath,
+      );
       console.log(`Reading image from: ${absoluteLocalPath}`);
 
       // Read file and convert to base64

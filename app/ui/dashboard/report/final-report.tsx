@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { uploadReportToRepository } from "@/app/lib/data/github-api-functions";
 import { Card, CardContent } from "@/components/ui/card";
+import {setReportGenerated} from "@/app/lib/database-functions";
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -70,12 +71,14 @@ export default function FinalReport({
     }
     setIsUploading(true);
 
+    const filename = `${title.replace(/[^a-zA-Z0-9]/g, "-")}.md`;
+
     try {
       const result = await uploadReportToRepository(
         owner,
         repo,
         content,
-        title,
+        filename,
         images,
         "KEKW",
       );
@@ -83,6 +86,9 @@ export default function FinalReport({
         setIsUploaded(true);
         setUploadedUrl(result.url);
         setUploadedBranch(result.branch);
+
+        await setReportGenerated(owner, repo);
+
         toast({
           title: "Report uploaded successfully",
           description: `The report has been uploaded to the repository in branch "${result.branch}"`,

@@ -1,4 +1,3 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Dashboard from "@/app/ui/dashboard/dashboard";
 import React, { Suspense } from "react";
 import { CommitQualityChartSkeleton } from "@/app/ui/skeletons";
@@ -17,13 +16,14 @@ import TestCoverage from "@/app/ui/dashboard/project_info/test-coverage/coverage
 import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wrapper";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
-import { ReportProvider, useReport } from "@/app/contexts/report-context";
-import GenerateReport from "@/app/ui/dashboard/report/generate-report";
 import Link from "next/link";
 import { cn } from "@/app/lib/utils/utils";
 import { lusitana } from "@/app/ui/fonts";
 import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connections-wrapper";
-import { ReportHelperProvider } from "@/app/contexts/report-context-helper";
+import {notFound} from "next/navigation";
+import {checkConnection} from "@/app/lib/data/github-api-functions";
+import LanguageDistributionWrapper from "@/app/ui/dashboard/project_info/language-distribution-wrapper";
+import PullRequestVsIssuesWrapper from "@/app/ui/dashboard/branches/pull-request-vs-issues-wrapper";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -32,68 +32,73 @@ export default async function Page(props: {
   const owner = params.owner;
   const repo = params.repo;
 
+  const check = await checkConnection(owner, repo);
+
+  if (!check) {
+      notFound();
+  }
+
   return (
-
-        <div className="max-w-[2000px] mx-auto py-6">
-          {/*Project subject and group.*/}
-          <header>
-            <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                <Link
-                  href={`https://git.ntnu.no/${owner}/${repo}`}
-                  className={cn(
-                    lusitana.className,
-                    "hover:underline text-blue-600",
-                  )}
-                >
-                  {owner}/{repo} Dashboard
-                </Link>
-              </h1>
-            </div>
-          </header>
-
-          <Dashboard owner={owner} repo={repo}>
-            {{
-              contributorsList: (
-                <Suspense fallback={<div>Loading contributors...</div>}>
-                  <ContributorsList owner={owner} repo={repo} />
-                </Suspense>
-              ),
-              projectInfo: <ProjectInfo owner={owner} repo={repo} />,
-              milestones: <Milestones owner={owner} repo={repo} />,
-              files: <Files owner={owner} repo={repo} />,
-              coverage: <TestCoverage owner={owner} repo={repo} />,
-              commitQuality: (
-                <Suspense fallback={<CommitQualityChartSkeleton />}>
-                  <CommitQualityWrapper owner={owner} repo={repo} />
-                </Suspense>
-              ),
-              commitFrequency: (
-                <CommitFrequencyWrapper owner={owner} repo={repo} />
-              ),
-              commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
-              commitContribution: (
-                <CommitContributionsWrapper owner={owner} repo={repo} />
-              ),
-              branch: <DirectCommitsWrapper owner={owner} repo={repo} />,
-              branchingStrategy: (
-                <BranchConnectionsWrapper owner={owner} repo={repo} />
-              ),
-              pipeline: <PipelineActions owner={owner} repo={repo} />,
-              pullRequestOverview: (
-                <PullRequestsOverviewWrapper owner={owner} repo={repo} />
-              ),
-              pullRequestMembers: (
-                <PullRequestsMembersWrapper owner={owner} repo={repo} />
-              ),
-              pullRequestComments: (
-                <PullRequestsCommentsWrapper owner={owner} repo={repo} />
-              ),
-              pullRequestReviews: (
-                <PullRequestsReviewsWrapper owner={owner} repo={repo} />
-              ),
-            }}
-          </Dashboard>
+    <div className="container mx-auto py-6">
+      {/*Project subject and group.*/}
+      <header>
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <Link
+              href={`https://git.ntnu.no/${owner}/${repo}`}
+              className={cn(
+                lusitana.className,
+                "hover:underline text-blue-600",
+              )}
+            >
+              {owner}/{repo} Dashboard
+            </Link>
+          </h1>
         </div>
+      </header>
+
+      <Dashboard owner={owner} repo={repo}>
+        {{
+          contributorsList: (
+            <Suspense fallback={<div>Loading contributors...</div>}>
+              <ContributorsList owner={owner} repo={repo} />
+            </Suspense>
+          ),
+          projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+          languageDistribution: <LanguageDistributionWrapper owner={owner} repo={repo} />,
+          milestones: <Milestones owner={owner} repo={repo} />,
+          files: <Files owner={owner} repo={repo} />,
+          coverage: <TestCoverage owner={owner} repo={repo} />,
+          commitQuality: (
+            <Suspense fallback={<CommitQualityChartSkeleton />}>
+              <CommitQualityWrapper owner={owner} repo={repo} />
+            </Suspense>
+          ),
+          commitFrequency: <CommitFrequencyWrapper owner={owner} repo={repo} />,
+          commitSize: <CommitSizeWrapper owner={owner} repo={repo} />,
+          commitContribution: (
+            <CommitContributionsWrapper owner={owner} repo={repo} />
+          ),
+          branch: <DirectCommitsWrapper owner={owner} repo={repo} />,
+          branchingStrategy: (
+            <BranchConnectionsWrapper owner={owner} repo={repo} />
+          ),
+            issuesVsPrs: <PullRequestVsIssuesWrapper owner={owner} repo={repo}/>,
+          pipeline: <PipelineActions owner={owner} repo={repo} />,
+          pullRequestOverview: (
+            <PullRequestsOverviewWrapper owner={owner} repo={repo} />
+          ),
+          pullRequestMembers: (
+            <PullRequestsMembersWrapper owner={owner} repo={repo} />
+          ),
+          pullRequestComments: (
+            <PullRequestsCommentsWrapper owner={owner} repo={repo} />
+          ),
+          pullRequestReviews: (
+            <PullRequestsReviewsWrapper owner={owner} repo={repo} />
+          ),
+        }}
+      </Dashboard>
+    </div>
   );
 }

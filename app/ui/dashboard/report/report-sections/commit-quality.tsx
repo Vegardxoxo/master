@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitMessageClassification } from "@/app/ui/courses/columns";
 import { ReportSectionProps } from "@/app/lib/definitions/definitions";
+import { Separator } from "@/components/ui/separator";
 
-export function CommitQualitySection({
-  metrics,
-  include,
-}: ReportSectionProps) {
-  const [qualityScore, setQualityScore] = useState<number>(0);
-
-  useEffect(() => {
-    if (metrics?.qualityScore) {
-      setQualityScore(Number.parseFloat(metrics.qualityScore));
-    }
-  }, [metrics]);
-
+export function CommitQualitySection({ metrics, include }: ReportSectionProps) {
   if (!include || !metrics) {
     return (
       <Card>
@@ -33,46 +20,9 @@ export function CommitQualitySection({
     );
   }
 
-  // Get status icon based on quality status
-  const getStatusIcon = () => {
-    switch (metrics.qualityStatus) {
-      case "good":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "moderate":
-        return <Info className="h-5 w-5 text-blue-500" />;
-      case "poor":
-        return <AlertTriangle className="h-5 w-5 text-amber-500" />;
-      default:
-        return null;
-    }
-  };
-
-  // Get badge variant based on quality status
-  const getBadgeVariant = () => {
-    switch (metrics.qualityStatus) {
-      case "good":
-        return "outline" as const;
-      case "moderate":
-        return "secondary" as const;
-      case "poor":
-        return "destructive" as const;
-      default:
-        return "outline" as const;
-    }
-  };
-
-  // Get color for progress bar
-  const getProgressColor = () => {
-    if (qualityScore >= 7) return "bg-green-500";
-    if (qualityScore >= 4) return "bg-blue-500";
-    return "bg-amber-500";
-  };
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
         <Card className="bg-green-50 dark:bg-green-950">
           <CardHeader>
             <CardTitle className="text-sm text-green-800 dark:text-green-300">
@@ -116,11 +66,12 @@ export function CommitQualitySection({
         </Card>
       </div>
 
+      <Separator />
+
       <GenericDataTable
         data={metrics.justifications}
         columns={commitMessageClassification}
       />
-
     </div>
   );
 }

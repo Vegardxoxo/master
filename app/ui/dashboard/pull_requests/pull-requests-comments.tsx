@@ -38,15 +38,9 @@ import {
 } from "@/components/ui/table";
 import type { PullRequestData } from "@/app/lib/definitions/definitions";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
+import {COLORS} from "@/app/lib/placeholder-data";
 
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-];
+
 export function PullRequestsComments({ data }: { data: PullRequestData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);

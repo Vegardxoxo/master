@@ -42,6 +42,7 @@ import { Button } from "@/app/ui/button";
 import { uploadChartToServer } from "@/app/ui/chart-utils";
 import { Download } from "lucide-react";
 import { transformPullRequestActivityData } from "@/app/lib/utils/pull-requests-utils";
+import {COLORS} from "@/app/lib/placeholder-data";
 
 type DialogData = {
   title: string;
@@ -65,26 +66,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-  "#a65628",
-  "#f781bf",
-  "#999999",
-  "#e41a1c",
-  "#377eb8",
-  "#4daf4a",
-  "#984ea3",
-  "#ff7f00",
-  "#ffff33",
-  "#a6cee3",
-  "#1f78b4",
-  "#b2df8a",
-];
 
 export function PullRequestsMembers({
   data,
@@ -192,7 +173,8 @@ export function PullRequestsMembers({
       prsWithReview: data.prsWithReview,
       prsWithReviewPercentage:
         Math.round((data.prsWithReview / data.totalPRs) * 100) || 0,
-      prsWithoutReviewPercentage: Math.round((data.prsWithoutReview / data.totalPRs) * 100) || 0,
+      prsWithoutReviewPercentage:
+        Math.round((data.prsWithoutReview / data.totalPRs) * 100) || 0,
       prsWithoutReview: data.prsWithoutReview,
       averageCommentsPerPR: data.averageCommentsPerPR,
       labelCounts: data.labelCounts,
@@ -274,7 +256,7 @@ export function PullRequestsMembers({
             </div>
 
             {milestones.length > 1 && (
-              <div className="mb-4">
+              <div className="mb-4 flex justify-end">
                 <Select
                   value={selectedMilestone}
                   onValueChange={setSelectedMilestone}

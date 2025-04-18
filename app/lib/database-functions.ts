@@ -1,5 +1,6 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/app/lib/prisma';
+
 import { auth } from "@/auth";
 import {
   Course,
@@ -11,7 +12,6 @@ import {
   UserCourse,
 } from "@/app/lib/definitions/definitions";
 
-const prisma = new PrismaClient();
 
 /**
  * Fetches all courses the user is enrolled in with their instances
@@ -87,7 +87,8 @@ interface Repo {
   username: string;
   repoName: string;
   url: string;
-  platform: "github" | "gitlab";
+  hasReport: boolean;
+  organization: string;
 }
 
 export async function getRepository(
@@ -135,7 +136,7 @@ export async function getRepositories(courseInstanceId: string): Promise<{
   error?: string;
   success?: boolean;
   message?: string;
-  repositories: Repo[];
+  repositories: Repository[];
 }> {
   try {
     const session = await auth();
@@ -158,13 +159,16 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         username: true,
         repoName: true,
         url: true,
-        platform: true,
+        hasReport: true,
+        organization: true,
+        openIssues: true,
+        updatedAt: true,
       },
     });
 
     return {
       success: true,
-      repositories: repositories as Repo[],
+      repositories: repositories as Repository[],
     };
   } catch (e) {
     console.error("Error fetching repositories:", e);
@@ -472,12 +476,15 @@ export async function getCoverageReport(
   }
 }
 
-
-
 export async function fetchGraphUrl(
   owner: string,
   repo: string,
-  type: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "EXPORT" | "PULL_REQUESTS",
+  type:
+    | "COMMIT_FREQUENCY"
+    | "COMMIT_SIZE"
+    | "CONTRIBUTIONS"
+    | "EXPORT"
+    | "PULL_REQUESTS",
 ): Promise<string> {
   try {
     const result = await findRepositoryByOwnerRepo(owner, repo);
@@ -498,5 +505,53 @@ export async function fetchGraphUrl(
   } catch (e) {
     console.error("Database error: Error fetching graph URL:", e);
     return "";
+  }
+}
+
+export async function setReportGenerated(
+  owner: string,
+  repo: string,
+): Promise<{
+  success: boolean;
+  error?: string;
+  message?: string;
+}> {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user.email) {
+      return {
+        success: false,
+        error: "Not authenticated",
+      };
+    }
+
+    const result = await findRepositoryByOwnerRepo(owner, repo);
+    if (!result.repository) {
+      return {
+        success: false,
+        error: "Repository not found",
+      };
+    }
+
+    // Update the repository record
+    await prisma.repository.update({
+      where: {
+        id: result.repository.id,
+      },
+      data: {
+        hasReport: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Report has been generated for the repository.",
+    };
+  } catch (e) {
+    console.error("Database error: Error updating report status:", e);
+    return {
+      success: false,
+      error: "Failed to update report status",
+    };
   }
 }

@@ -6,6 +6,7 @@ export type repositoryOverview = {
   name: string;
   contributors: string[];
   openIssues: number;
+  hasReport: boolean;
   url: string;
 };
 
@@ -139,46 +140,49 @@ export interface CommitStats {
   additions_deletions_ratio: any;
 }
 
-
-// export type VisibleSections = {
-//   [key: string]:
-//     | boolean
-//     | {
-//         visible: boolean;
-//         [subKey: string]: boolean;
-//       };
-// };
+export type MenuItem = {
+  visible: boolean
+  text: string
+}
 
 export type VisibleSections = {
   overview: {
-    visible: boolean;
-    contributors: boolean;
-    milestones: boolean;
-    info: boolean;
-    files: boolean;
-    coverage: boolean;
-  };
+    visible: boolean
+    text: string
+    contributors: MenuItem
+    distribution: MenuItem
+    milestones: MenuItem
+    info: MenuItem
+    files: MenuItem
+    coverage: MenuItem
+  }
   commits: {
-    visible: boolean;
-    quality: boolean;
-    frequency: boolean;
-    size: boolean;
-    contributions: boolean;
-  };
+    visible: boolean
+    text: string
+    quality: MenuItem
+    frequency: MenuItem
+    size: MenuItem
+    contributions: MenuItem
+  }
   branches: {
-    visible: boolean;
-    to_main: boolean;
-    strategy: boolean;
-  };
-  pipelines: boolean;
+    visible: boolean
+    text: string
+    to_main: MenuItem
+    strategy: MenuItem
+    issuesVsPrs: MenuItem
+  }
+  pipelines: boolean | MenuItem
   pullRequests: {
-    visible: boolean;
-    overview: boolean;
-    members: boolean;
-    comments: boolean;
-    reviews: boolean;
-  };
-};
+    visible: boolean
+    text: string
+    overview: MenuItem
+    members: MenuItem
+    comments: MenuItem
+    reviews: MenuItem
+  }
+}
+
+
 
 export type Review = {
   count: number;
@@ -201,6 +205,7 @@ export type PullRequestData = {
   labelCounts: Record<string, { count: number; color: string }>;
   fastMergedPRs: any[];
   totalComments: number;
+  pullRequests: any[];
 };
 
 export type Repository = {
@@ -208,11 +213,10 @@ export type Repository = {
   username: string;
   repoName: string;
   url: string;
-  platform: string;
-  createdAt: Date;
+  organization: string;
   updatedAt: Date;
-  courseInstanceId: string;
-  githubId: string;
+  hasReport: boolean;
+  openIssues: string
 };
 
 export type FileData = {

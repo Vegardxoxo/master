@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveCoverageReport } from "@/app/lib/server-actions/actions";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");

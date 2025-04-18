@@ -314,6 +314,7 @@ export function parsePullRequests(data: any[]): PullRequestData {
   const labelCounts: Record<string, { count: number; color: string }> = {};
 
   const milestones: Set<string> = new Set();
+  const pullRequests : any[] = data;
 
   data.forEach((pr) => {
     // PRs by member
@@ -412,6 +413,7 @@ export function parsePullRequests(data: any[]): PullRequestData {
     labelCounts,
     fastMergedPRs,
     totalComments,
+    pullRequests
   };
 }
 

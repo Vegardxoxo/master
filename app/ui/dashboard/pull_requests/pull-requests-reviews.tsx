@@ -27,15 +27,9 @@ import {
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 import { useState } from "react";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
+import {COLORS} from "@/app/lib/placeholder-data";
 
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-];
+
 
 export default function PullRequestsReviews({
   data,

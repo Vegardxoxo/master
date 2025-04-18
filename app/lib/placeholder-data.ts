@@ -1,59 +1,8 @@
 // placeholder data
 
 import { Home, Settings } from "lucide-react";
-import {CommitEval, LLMResponse, Payment, repositoryOverview} from "@/app/lib/definitions/definitions";
+import {CommitEval, LLMResponse, Payment, repositoryOverview, VisibleSections} from "@/app/lib/definitions/definitions";
 
-// export const getRepos = [
-//   { owner: "Vegardxoxo", repo: "bachelor_project" },
-//   { owner: "Vegardxoxo", repo: "tail" },
-//   { owner: "Vegardxoxo", repo: "nextjs-blog" },
-//   { owner: "Vegardxoxo", repo: "master" },
-// ];
-
-export const getRepos = () => {
-  const repos: { owner: string; repo: string }[] = [];
-  for (let i = 1; i < 15; i++) {
-    const owner = "IT2810-H24";
-    const repo = `T${i < 10 ? `0${i}` : i}-Project-2`;
-    repos.push({ owner, repo });
-  }
-  return repos;
-};
-
-// export const getRepos = [
-//   { owner: "IT2810-H24", repo: "T01-Project-2" },
-//   { owner: "IT2810-H24", repo: "T02-Project-2" },
-//   { owner: "IT2810-H24", repo: "T03-Project-2" },
-//   { owner: "IT2810-H24", repo: "T04-Project-2" },
-// ];
-
-export const courses = [
-  {
-    name: "WebDev",
-    slug: "webdev",
-  },
-  {
-    name: "ITGK",
-    slug: "itgk",
-  },
-  {
-    name: "Maskinlæring",
-    slug: "Maskinlaering",
-  },
-];
-
-export const links = [
-  {
-    name: "Home",
-    href: "/dashboard",
-    icon: Home,
-  },
-  {
-    name: "About",
-    href: "/about",
-    icon: Settings,
-  },
-];
 
 export async function getDummyModelData(): Promise<LLMResponse[]> {
   return [
@@ -105,237 +54,65 @@ export async function getDummyModelData(): Promise<LLMResponse[]> {
   ];
 }
 
-export async function getData(): Promise<Payment[]> {
-  return [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "A@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "AA@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "c@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "b@example.com",
-    },
-  ];
+
+export const defaultVisibleSections: VisibleSections = {
+  overview: {
+    visible: true,
+    text: "Repository Overview",
+    contributors: { visible: true, text: "Contributors" },
+    distribution: { visible: true, text: "Language Distribution" },
+    milestones: { visible: true, text: "Project Milestones" },
+    info: { visible: true, text: "Repository Information" },
+    files: { visible: true, text: "File Structure" },
+    coverage: { visible: true, text: "Code Coverage" },
+  },
+  commits: {
+    visible: true,
+    text: "Commit Analysis",
+    quality: { visible: true, text: "Commit Message Quality" },
+    frequency: { visible: true, text: "Commit Frequency" },
+    size: { visible: true, text: "Commit Size" },
+    contributions: { visible: true, text: "Contribution Distribution" },
+  },
+  branches: {
+    visible: true,
+    text: "Branching Strategy",
+    to_main: { visible: true, text: "Merges to Main" },
+    strategy: { visible: true, text: "Branch Usage Patterns" },
+    issuesVsPrs: { visible: true, text: "Issues vs. Pull Requests" },
+  },
+  pipelines: {
+    visible: true,
+    text: "CI/CD Pipelines",
+  },
+  pullRequests: {
+    visible: true,
+    text: "Pull Request Analysis",
+    overview: { visible: true, text: "PR Overview" },
+    members: { visible: true, text: "PR by Team Member" },
+    comments: { visible: true, text: "PR Comments" },
+    reviews: { visible: true, text: "PR Review Process" },
+  },
 }
 
-export async function getDummyRepoData(): Promise<repositoryOverview[]> {
-  return [
-    {
-      name: "Repo1",
-      contributors: ["Vegardxoxo", "JohnDoe", "JohnDoe", "JohnDoe"],
-      openIssues: 5,
-      url: "https://github.com/Vegardxoxo/Repo1",
-    },
-    {
-      name: "Repo2",
-      contributors: ["JaneDoe", "Alice"],
-      openIssues: 3,
-      url: "https://github.com/Vegardxoxo/Repo2",
-    },
-    {
-      name: "Repo3",
-      contributors: ["Bob", "Charlie"],
-      openIssues: 8,
-      url: "https://github.com/Vegardxoxo/Repo3",
-    },
-    {
-      name: "Repo4",
-      contributors: ["Dave", "Eve"],
-      openIssues: 2,
-      url: "https://github.com/Vegardxoxo/Repo4",
-    },
-    {
-      name: "Repo5",
-      contributors: ["Frank", "Grace"],
-      openIssues: 7,
-      url: "https://github.com/Vegardxoxo/Repo5",
-    },
-    {
-      name: "Repo6",
-      contributors: ["Heidi", "Ivan"],
-      openIssues: 1,
-      url: "https://github.com/Vegardxoxo/Repo6",
-    },
-    {
-      name: "Repo7",
-      contributors: ["Judy", "Mallory"],
-      openIssues: 4,
-      url: "https://github.com/Vegardxoxo/Repo7",
-    },
-    {
-      name: "Repo8",
-      contributors: ["Niaj", "Olivia"],
-      openIssues: 6,
-      url: "https://github.com/Vegardxoxo/Repo8",
-    },
-    {
-      name: "Repo9",
-      contributors: ["Peggy", "Sybil"],
-      openIssues: 9,
-      url: "https://github.com/Vegardxoxo/Repo9",
-    },
-    {
-      name: "Repo10",
-      contributors: ["Trent", "Victor"],
-      openIssues: 0,
-      url: "https://github.com/Vegardxoxo/Repo10",
-    },
-    {
-      name: "Repo11",
-      contributors: ["Walter", "Xena"],
-      openIssues: 5,
-      url: "https://github.com/Vegardxoxo/Repo11",
-    },
-    {
-      name: "Repo12",
-      contributors: ["Yvonne", "Zara"],
-      openIssues: 3,
-      url: "https://github.com/Vegardxoxo/Repo12",
-    },
-    {
-      name: "Repo13",
-      contributors: ["Adam", "Brian"],
-      openIssues: 8,
-      url: "https://github.com/Vegardxoxo/Repo13",
-    },
-    {
-      name: "Repo14",
-      contributors: ["Cathy", "Derek"],
-      openIssues: 2,
-      url: "https://github.com/Vegardxoxo/Repo14",
-    },
-    {
-      name: "Repo15",
-      contributors: ["Ethan", "Fiona"],
-      openIssues: 7,
-      url: "https://github.com/Vegardxoxo/Repo15",
-    },
-    {
-      name: "Repo16",
-      contributors: ["George", "Hannah"],
-      openIssues: 1,
-      url: "https://github.com/Vegardxoxo/Repo16",
-    },
-    {
-      name: "Repo17",
-      contributors: ["Isaac", "Jack"],
-      openIssues: 4,
-      url: "https://github.com/Vegardxoxo/Repo17",
-    },
-    {
-      name: "Repo18",
-      contributors: ["Karen", "Liam"],
-      openIssues: 6,
-      url: "https://github.com/Vegardxoxo/Repo18",
-    },
-    {
-      name: "Repo19",
-      contributors: ["Mona", "Nate"],
-      openIssues: 9,
-      url: "https://github.com/Vegardxoxo/Repo19",
-    },
-    {
-      name: "Repo20",
-      contributors: ["Oscar", "Paul"],
-      openIssues: 0,
-      url: "https://github.com/Vegardxoxo/Repo20",
-    },
-  ];
-}
-
-
-const obj = {
-    "johanndn@stud.ntnu.no": {
-        "total": 12731,
-        "additions": 8362,
-        "deletions": 4369,
-        "commits": 14,
-        "name": "Johanne Dahl Norland"
-    },
-    "mariuwos@stud.ntnu.no": {
-        "total": 29205,
-        "additions": 24629,
-        "deletions": 4576,
-        "commits": 40,
-        "name": "Marius Waag Østro"
-    },
-    "jennystr@stud.ntnu.no": {
-        "total": 17295,
-        "additions": 12646,
-        "deletions": 4649,
-        "commits": 62,
-        "name": "Jenny Straumbotn"
-    },
-    "johannedn00@gmail.com": {
-        "total": 19998,
-        "additions": 16446,
-        "deletions": 3552,
-        "commits": 40,
-        "name": "johannedn"
-    }
-}
+export const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#82CA9D",
+  "#a65628",
+  "#f781bf",
+  "#999999",
+  "#e41a1c",
+  "#377eb8",
+  "#4daf4a",
+  "#984ea3",
+  "#ff7f00",
+  "#ffff33",
+  "#a6cee3",
+  "#1f78b4",
+  "#b2df8a",
+];
 

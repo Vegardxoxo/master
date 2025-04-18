@@ -4,6 +4,7 @@ export type CommitStats = {
     email: string;
     name: string;
   };
+  message: string;
   additions: number;
   deletions: number;
   changedFiles: number;

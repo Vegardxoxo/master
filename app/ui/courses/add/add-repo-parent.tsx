@@ -18,7 +18,7 @@ export default function AddRepoParent({
       <div className="flex justify-end mb-5 ">
         <Button
           onClick={() => setHidden(!hidden)}
-          className={`min-w-[160px] flex items-center gap-2 ${
+          className={`min-w-[200px] flex items-center gap-2 ${
             hidden
               ? "bg-sky-500 hover:bg-sky-600"
               : "bg-sky-500 hover:bg-sky-600"

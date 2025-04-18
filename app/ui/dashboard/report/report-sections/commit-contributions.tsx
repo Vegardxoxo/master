@@ -22,11 +22,10 @@ export default function CommitContributions({
 }: ReportSectionProps) {
   const { addMetricData } = useReport();
   const [includeImageInMarkdown, setIncludeImageInMarkdown] = useState<boolean>(
-    metrics?.includeImage,
+    metrics?.includeImage || false,
   );
-  console.log("url CONTRIBUTIONS", metrics);
+  console.log(metrics);
 
-  // Update the report context when the checkbox changes
   const handleIncludeImageChange = (checked: boolean) => {
     setIncludeImageInMarkdown(checked);
     if (metrics) {
@@ -37,12 +36,14 @@ export default function CommitContributions({
     }
   };
 
-  if (!include) {
+  if (!include || !metrics) {
     return (
       <Card>
         <CardContent className="pt-6">
           <p className="text-muted-foreground">
-            Commit contribution section is not included in the report.
+            {!include
+              ? "Commit Contributions section is not included in the report."
+              : "Commit Contributions section is not available. Did you generate a chart from the Commit Contributions page?"}
           </p>
         </CardContent>
       </Card>
@@ -103,45 +104,57 @@ export default function CommitContributions({
       </Card>
 
       {/*Average file & changes per commit*/}
-<div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-between">
-        <Card className="overflow-hidden border-slate-200 dark:border-slate-800">
-          <div className="absolute top-0 right-0 h-16 w-16 -mt-4 -mr-4 bg-slate-100 dark:bg-slate-800 rounded-full opacity-70"></div>
-          <CardHeader className="pb-2 relative">
-            <div className="flex items-center gap-2">
-              <GitCommit className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">
-                Group Average Changes per Commit
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex items-end gap-2">
-              <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">10</p>
-              <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">changes</span>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-between">
+          <Card className="overflow-hidden border-slate-200 dark:border-slate-800">
+            <div className="absolute top-0 right-0 h-16 w-16 -mt-4 -mr-4 bg-slate-100 dark:bg-slate-800 rounded-full opacity-70"></div>
+            <CardHeader className="pb-2 relative">
+              <div className="flex items-center gap-2">
+                <GitCommit className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">
+                  Group Average Changes per Commit
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="flex items-end gap-2">
+                <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                  {metrics.groupAverageChanges
+                    ? metrics.groupAverageChanges.toFixed(1)
+                    : "NaN"}
+                </p>
+                <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">
+                  changes
+                </span>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="overflow-hidden border-slate-200 dark:border-slate-800">
-          <div className="absolute top-0 right-0 h-16 w-16 -mt-4 -mr-4 bg-slate-100 dark:bg-slate-800 rounded-full opacity-70"></div>
-          <CardHeader className="pb-2 relative">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">
-                Group Average Files per Commit
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex items-end gap-2">
-              <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">{metrics.average_files_changed}</p>
-              <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">files</span>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="overflow-hidden border-slate-200 dark:border-slate-800">
+            <div className="absolute top-0 right-0 h-16 w-16 -mt-4 -mr-4 bg-slate-100 dark:bg-slate-800 rounded-full opacity-70"></div>
+            <CardHeader className="pb-2 relative">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">
+                  Group Average Files per Commit
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="flex items-end gap-2">
+                <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
+                  {metrics.groupAverageFilesChanged
+                    ? metrics.groupAverageFilesChanged.toFixed(1)
+                    : "NaN"}
+                </p>
+                <span className="text-sm text-slate-600 dark:text-slate-400 pb-1">
+                  files
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
 
       {metrics && metrics.contributors && metrics.contributors.length > 0 && (
         <Card>
@@ -156,7 +169,6 @@ export default function CommitContributions({
           </CardContent>
         </Card>
       )}
-
     </div>
   );
 }

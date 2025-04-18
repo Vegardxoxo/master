@@ -9,11 +9,26 @@ import {
 import Link from "next/link";
 import type { CommitByDate } from "@/app/lib/definitions/definitions";
 
+interface TableData {
+  sha: string;
+  html_url: string;
+  commit: {
+    author: {
+      name: string;
+      email: string;
+      date: string; // ISO 8601 date string
+    };
+    message: string;
+    url: string;
+  };
+}
+
 export default function CommitFrequencyTable({
   data,
 }: {
-  data: CommitByDate[];
+  data: TableData[];
 }) {
+    console.log("CommitByDate", data);
   return (
     <Table>
       <TableHeader>
@@ -24,13 +39,13 @@ export default function CommitFrequencyTable({
         </TableRow>
       </TableHeader>
       <TableBody className="font-semibold text-sm">
-        {data.map((commit, index) => (
+        {data.map((item, index) => (
           <TableRow key={index}>
             <TableCell className={"text-xs md:text-sm"}>
-              {commit.authorName} - {commit.authorEmail}
+              {item.commit.author.name} - {item.commit.author.email}
             </TableCell>
             <TableCell>
-              {new Date(commit.commitDate).toLocaleTimeString("en-GB", {
+              {new Date(item.commit.author.date).toLocaleTimeString("en-GB", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: false,
@@ -39,12 +54,12 @@ export default function CommitFrequencyTable({
             </TableCell>
             <TableCell className="max-w-md truncate">
               <Link
-                href={commit.htmlUrl}
+                href={item.html_url || ""}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-xs md:text-sm"
               >
-                {commit.message}
+                {item.commit.message}
               </Link>
             </TableCell>
           </TableRow>
