@@ -42,6 +42,7 @@ import { Button } from "@/app/ui/button";
 import { uploadChartToServer } from "@/app/ui/chart-utils";
 import { Download } from "lucide-react";
 import { transformPullRequestActivityData } from "@/app/lib/utils/pull-requests-utils";
+import {COLORS} from "@/app/lib/placeholder-data";
 
 type DialogData = {
   title: string;
@@ -65,26 +66,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-  "#a65628",
-  "#f781bf",
-  "#999999",
-  "#e41a1c",
-  "#377eb8",
-  "#4daf4a",
-  "#984ea3",
-  "#ff7f00",
-  "#ffff33",
-  "#a6cee3",
-  "#1f78b4",
-  "#b2df8a",
-];
 
 export function PullRequestsMembers({
   data,

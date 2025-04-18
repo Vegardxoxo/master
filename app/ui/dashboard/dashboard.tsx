@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import GenerateReport from "@/app/ui/dashboard/report/generate-report";
 import { useReport } from "@/app/contexts/report-context";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
   loadDashboardPreferences,
@@ -48,6 +48,7 @@ type DashboardProps = {
   children: {
     contributorsList: React.ReactNode;
     projectInfo: React.ReactNode;
+    languageDistribution: React.ReactNode;
     milestones: React.ReactNode;
     files: React.ReactNode;
     coverage: React.ReactNode;
@@ -252,6 +253,9 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 {isVisible(["overview", "info"]) && children.projectInfo}
               </div>
               <div className={"grid grid-cols-1 gap-6"}>
+                {isVisible(["overview", "distribution"]) && children.languageDistribution}
+              </div>
+              <div className={"grid grid-cols-1 gap-6"}>
                 {isVisible(["overview", "milestones"]) && children.milestones}
                 {isVisible(["overview", "files"]) && children.files}
                 {isVisible(["overview", "coverage"]) && children.coverage}
@@ -380,7 +384,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                       <Button
                         onClick={savePreferences}
                         disabled={saving}
-                        className="w-full bg-green-600 hover:bg-green-700 transition-colors duration-200"
+                        className="w-full transition-colors duration-200"
                       >
                         {saving ? (
                           <>

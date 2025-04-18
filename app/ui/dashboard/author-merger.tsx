@@ -1,12 +1,12 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { User, Mail } from "lucide-react"
+import {Button} from "@/app/ui/button";
 
 interface CommitData {
   sha?: string
@@ -293,10 +293,11 @@ export default function AuthorMerger({ data, onMerge }: AuthorMergerProps) {
               )
             })}
           </div>
+            <Button className="w-full mt-6 flex justify-center items-center" onClick={applyMappings}>
+              Apply Mappings & Continue
+            </Button>
 
-          <Button className="w-full mt-6" onClick={applyMappings}>
-            Apply Mappings & Continue
-          </Button>
+
         </CardContent>
       </Card>
     </div>

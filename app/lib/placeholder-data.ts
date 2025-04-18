@@ -59,7 +59,8 @@ export const defaultVisibleSections: VisibleSections = {
   overview: {
     visible: true,
     text: "Repository Overview",
-    contributors: { visible: true, text: "Contributors & Teams" },
+    contributors: { visible: true, text: "Contributors" },
+    distribution: { visible: true, text: "Language Distribution" },
     milestones: { visible: true, text: "Project Milestones" },
     info: { visible: true, text: "Repository Information" },
     files: { visible: true, text: "File Structure" },
@@ -92,3 +93,25 @@ export const defaultVisibleSections: VisibleSections = {
     reviews: { visible: true, text: "PR Review Process" },
   },
 }
+
+export const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#82CA9D",
+  "#a65628",
+  "#f781bf",
+  "#999999",
+  "#e41a1c",
+  "#377eb8",
+  "#4daf4a",
+  "#984ea3",
+  "#ff7f00",
+  "#ffff33",
+  "#a6cee3",
+  "#1f78b4",
+  "#b2df8a",
+];
+

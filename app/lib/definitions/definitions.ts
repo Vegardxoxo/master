@@ -150,6 +150,7 @@ export type VisibleSections = {
     visible: boolean
     text: string
     contributors: MenuItem
+    distribution: MenuItem
     milestones: MenuItem
     info: MenuItem
     files: MenuItem

@@ -22,6 +22,7 @@ import { lusitana } from "@/app/ui/fonts";
 import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connections-wrapper";
 import {notFound} from "next/navigation";
 import {checkConnection} from "@/app/lib/data/github-api-functions";
+import LanguageDistributionWrapper from "@/app/ui/dashboard/project_info/language-distribution-wrapper";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -63,6 +64,7 @@ export default async function Page(props: {
             </Suspense>
           ),
           projectInfo: <ProjectInfo owner={owner} repo={repo} />,
+          languageDistribution: <LanguageDistributionWrapper owner={owner} repo={repo} />,
           milestones: <Milestones owner={owner} repo={repo} />,
           files: <Files owner={owner} repo={repo} />,
           coverage: <TestCoverage owner={owner} repo={repo} />,

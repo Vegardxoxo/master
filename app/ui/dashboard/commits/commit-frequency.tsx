@@ -15,6 +15,7 @@ import { uploadChartToServer } from "@/app/ui/chart-utils"
 import AuthorMerger from "@/app/ui/dashboard/author-merger"
 import { parseCommitData } from "@/app/lib/utils/commits-utils"
 import {useAuthorConsolidation} from "@/hooks/use-author-consolidation";
+import {COLORS} from "@/app/lib/placeholder-data";
 
 interface CommitFrequencyProps {
   data: CommitData[]
@@ -101,18 +102,7 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
   }
 
   const authorEntries = emailToDisplayName ? Object.entries(emailToDisplayName) : []
-  const colors = [
-    "hsl(152, 80%, 40%)",
-    "hsl(228, 80%, 50%)",
-    "hsl(360, 80%, 50%)",
-    "hsl(48, 80%, 50%)",
-    "hsl(280, 80%, 50%)",
-    "hsl(200, 80%, 40%)",
-    "hsl(32, 80%, 50%)",
-    "hsl(320, 80%, 50%)",
-    "hsl(80, 80%, 40%)",
-    "hsl(180, 80%, 40%)",
-  ]
+
 
   return (
     <>
@@ -170,7 +160,7 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                   <span
                     className="text-sm font-medium"
                     style={{
-                      color: colors[authorEntries.findIndex(([e]) => e === email) % colors.length],
+                      color: COLORS[authorEntries.findIndex(([e]) => e === email) % COLORS.length],
                     }}
                   >
                     {displayName}
@@ -209,10 +199,10 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                       type="monotone"
                       dataKey={email}
                       name={emailToDisplayName[email] || email}
-                      stroke={colors[authorEntries.findIndex(([e]) => e === email) % colors.length]}
+                      stroke={COLORS[authorEntries.findIndex(([e]) => e === email) % COLORS.length]}
                       strokeWidth={2}
                       dot={{
-                        fill: colors[authorEntries.findIndex(([e]) => e === email) % colors.length],
+                        fill: COLORS[authorEntries.findIndex(([e]) => e === email) % COLORS.length],
                         r: 4,
                       }}
                       activeDot={{ r: 8, strokeWidth: 2 }}
@@ -241,7 +231,7 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                           <div
                             className="w-3 h-3 rounded-full"
                             style={{
-                              backgroundColor: colors[authorEntries.findIndex(([e]) => e === email) % colors.length],
+                              backgroundColor: COLORS[authorEntries.findIndex(([e]) => e === email) % COLORS.length],
                             }}
                           />
                           <span className="font-medium">{displayName}</span>

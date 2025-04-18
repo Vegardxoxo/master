@@ -20,14 +20,37 @@ import { cache } from "react";
 import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
 import { CommitStats } from "@/app/lib/definitions/commit-definitions";
 
-const octokit = new Octokit({
-  auth: process.env.TOKEN,
-  baseUrl: "https://git.ntnu.no/api/v3",
-});
+/**
+ * Fetches the languages used in a repository and their byte counts
+ * @param owner - The owner of the repository
+ * @param repo - The name of the repository
+ * @returns An object mapping language names to byte counts
+ */
+export async function getRepoLanguages(
+  owner: string,
+  repo: string
+): Promise<{ [key: string]: number } | null> {
+  try {
+    const response = await octokit.rest.repos.listLanguages({
+      owner,
+      repo,
+    });
 
-// const octokit = new Octokit({
-//   auth: process.env.SUPER_TOKEN,
-// });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching repository languages:", error);
+    return null;
+  }
+}
+
+//const octokit = new Octokit({
+ // auth: process.env.TOKEN,
+  //baseUrl: "https://git.ntnu.no/api/v3",
+//});
+
+ const octokit = new Octokit({
+   auth: process.env.SUPER_TOKEN,
+ });
 
 /**
  * Checks if there is a connection to the repo before displaying the rest of the dashboard.

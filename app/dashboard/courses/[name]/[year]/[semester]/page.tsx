@@ -80,7 +80,6 @@ export default async function CoursePage(props: {
         ) : (
           <div className="mt-12 text-center p-10 border border-dashed rounded-lg bg-gray-50">
             <div className="flex flex-col items-center justify-center space-y-3">
-              <PlusCircle className="h-12 w-12 text-gray-400" />
               <h3 className="text-lg font-medium text-gray-900">
                 No repositories yet
               </h3>

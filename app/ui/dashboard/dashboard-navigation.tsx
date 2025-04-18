@@ -74,7 +74,7 @@ export function DashboardNavigation({ onToggle, onToggleSubsection, visibleSecti
                   <Switch
                     checked={isItemVisible(value)}
                     onCheckedChange={() => onToggleSubsection(section, key)}
-                    className="data-[state=checked]:bg-green-500"
+                    className="data-[state=checked]:bg-blue-500"
                   />
                 </div>
               </li>
