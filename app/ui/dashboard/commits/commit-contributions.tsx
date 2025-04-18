@@ -199,7 +199,7 @@ export default function CommitContributions({ commits, url }: CommitContribution
                 className="h-[600px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 30, right: 40, left: 60, bottom: 80 }}>
+                  <BarChart data={chartData} margin={{ top: 30, right: 40, left: 60, bottom: 80 }}  barSize={chartData.length === 1 ? 200 : undefined}>
                     <XAxis
                       dataKey="name"
                       angle={-45}

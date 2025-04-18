@@ -79,6 +79,7 @@ export const defaultVisibleSections: VisibleSections = {
     text: "Branching Strategy",
     to_main: { visible: true, text: "Merges to Main" },
     strategy: { visible: true, text: "Branch Usage Patterns" },
+    issuesVsPrs: { visible: true, text: "Issues vs. Pull Requests" },
   },
   pipelines: {
     visible: true,

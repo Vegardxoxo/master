@@ -58,6 +58,7 @@ type DashboardProps = {
     commitSize: React.ReactNode;
     branch: React.ReactNode;
     branchingStrategy: React.ReactNode;
+    issuesVsPrs: React.ReactNode;
     pipeline: React.ReactNode;
     pullRequestOverview: React.ReactNode;
     pullRequestMembers: React.ReactNode;
@@ -302,6 +303,7 @@ export default function Dashboard({ owner, repo, children }: DashboardProps) {
                 {isVisible(["branches", "to_main"]) && children.branch}
                 {isVisible(["branches", "strategy"]) &&
                   children.branchingStrategy}
+                {isVisible(["branches", "issuesVsPrs"]) && children.issuesVsPrs}
               </div>
             </CardContent>
           </Card>

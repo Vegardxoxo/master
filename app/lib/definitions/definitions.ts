@@ -169,6 +169,7 @@ export type VisibleSections = {
     text: string
     to_main: MenuItem
     strategy: MenuItem
+    issuesVsPrs: MenuItem
   }
   pipelines: boolean | MenuItem
   pullRequests: {
@@ -204,6 +205,7 @@ export type PullRequestData = {
   labelCounts: Record<string, { count: number; color: string }>;
   fastMergedPRs: any[];
   totalComments: number;
+  pullRequests: any[];
 };
 
 export type Repository = {

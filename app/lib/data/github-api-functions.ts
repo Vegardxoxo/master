@@ -1,24 +1,19 @@
 "use server";
-import { Octokit } from "octokit";
-import { promises as fs } from "fs";
+import {Octokit} from "octokit";
+import {promises as fs} from "fs";
 import * as path from "path";
 import {
-  _Branches,
   Commit,
   CommitData,
   CommitMessageLong,
   PullRequestData,
   repositoryOverview,
 } from "@/app/lib/definitions/definitions";
-import {
-  formatTimestamp,
-  parseCommitStats,
-  parsePullRequests,
-  transformLocalImagePaths,
-} from "@/app/lib/utils/utils";
-import { cache } from "react";
-import { getCommitsOnMain } from "@/app/lib/data/graphql-queries";
-import { CommitStats } from "@/app/lib/definitions/commit-definitions";
+import {parseCommitStats, parsePullRequests, transformLocalImagePaths,} from "@/app/lib/utils/utils";
+import {cache} from "react";
+import {getCommitsOnMain} from "@/app/lib/data/graphql-queries";
+import {CommitStats} from "@/app/lib/definitions/commits";
+import {GitHubIssue} from "@/app/lib/definitions/pull-requests";
 
 /**
  * Fetches the languages used in a repository and their byte counts
@@ -166,28 +161,27 @@ export async function fetchBranches(owner: string, repo: string) {
   }
 }
 
-/**
- * Fetches contributors for the contributor card in the dashboard.
- * @param owner
- * @param repo
- */
 export async function fetchContributors(owner: string, repo: string) {
   try {
     const { data: contributorData } = await octokit.request(
-      "GET /repos/{owner}/{repo}/contributors",
-      {
-        owner,
-        repo,
-      },
+        "GET /repos/{owner}/{repo}/contributors",
+        {
+          owner,
+          repo,
+        },
     );
     return {
-      contributors: contributorData.map((c: any) => c.login),
+      contributors: contributorData.map((c: any) => ({
+        login: c.login,
+        url: c.html_url
+      })),
     };
   } catch (e) {
     console.error("Error fetching contributors:", e);
     throw new Error("Failed to fetch contributors.");
   }
 }
+
 
 /**
  * Fetches general information about the repository.
@@ -489,8 +483,7 @@ export const fetchPullRequests = cache(
           }
         }),
       );
-      const parsed = parsePullRequests(prsWithReviews);
-      return parsed;
+      return parsePullRequests(prsWithReviews);
     } catch (e) {
       console.log(e);
       return [];
@@ -596,16 +589,11 @@ export async function getMainCommits(
   }
 }
 
-interface GitHubIssue {
-  error?: string;
-  title: string;
-  number: number;
-  url: string;
-}
+
 
 export async function fetchIssues(
-  owner: string,
-  repo: string,
+    owner: string,
+    repo: string,
 ): Promise<GitHubIssue[]> {
   try {
     const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
@@ -613,21 +601,23 @@ export async function fetchIssues(
       repo,
       state: "all",
     });
-    return issues.map((issue) => ({
+
+    // Filtrerer ut pull requests ved å sjekke om issue har pull_request property
+    const realIssues = issues.filter(issue => !issue.pull_request);
+
+    return realIssues.map((issue) => ({
       title: issue.title,
       number: issue.number,
       url: issue.html_url,
+      createdAt: new Date(issue.created_at),
+      closedAt: issue.closed_at ? new Date(issue.closed_at) : null,
     }));
   } catch (e) {
-    console.log("Errir fetching issues:", e);
-    return {
-      error: "GitHub API error: Failed to fetch issues.",
-      title: null,
-      number: null,
-      url: null,
-    };
+    console.log("Error fetching issues:", e);
+    return [];  // Returnerer tom array ved feil istedenfor feilobjekt
   }
 }
+
 
 export default async function fetchMilestones(owner: string, repo: string) {
   try {

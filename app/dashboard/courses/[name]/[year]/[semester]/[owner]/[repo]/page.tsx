@@ -23,6 +23,7 @@ import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connect
 import {notFound} from "next/navigation";
 import {checkConnection} from "@/app/lib/data/github-api-functions";
 import LanguageDistributionWrapper from "@/app/ui/dashboard/project_info/language-distribution-wrapper";
+import PullRequestVsIssuesWrapper from "@/app/ui/dashboard/branches/pull-request-vs-issues-wrapper";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -82,6 +83,7 @@ export default async function Page(props: {
           branchingStrategy: (
             <BranchConnectionsWrapper owner={owner} repo={repo} />
           ),
+            issuesVsPrs: <PullRequestVsIssuesWrapper owner={owner} repo={repo}/>,
           pipeline: <PipelineActions owner={owner} repo={repo} />,
           pullRequestOverview: (
             <PullRequestsOverviewWrapper owner={owner} repo={repo} />

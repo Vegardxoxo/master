@@ -202,8 +202,12 @@ export default function CommitSize({ data }: { data: any[] }) {
                   onClick={handleCommitClick}
                   x="committedDate"
                   y="totalChanges"
+                  className={"cursor-pointer"}
                 />
               </ScatterChart>
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                Click on a point to view detailed commit information
+              </div>
             </ResponsiveContainer>
           </ChartContainer>
         </div>
@@ -328,6 +332,7 @@ export default function CommitSize({ data }: { data: any[] }) {
                   onClick={handleCommitClick}
                   x="committedDate"
                   y="changedFiles"
+                  className={"cursor-pointer"}
                 />
               </ScatterChart>
             </ResponsiveContainer>

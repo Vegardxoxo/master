@@ -195,6 +195,7 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                   <Legend />
                   {selectedAuthors.map((email, index) => (
                     <Line
+                        className={"cursor-pointer"}
                       key={email}
                       type="monotone"
                       dataKey={email}
@@ -204,6 +205,7 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                       dot={{
                         fill: COLORS[authorEntries.findIndex(([e]) => e === email) % COLORS.length],
                         r: 4,
+                        cursor: "pointer",
                       }}
                       activeDot={{ r: 8, strokeWidth: 2 }}
                     />
