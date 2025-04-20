@@ -1,7 +1,7 @@
 import CommitFrequency from "@/app/ui/dashboard/commits/commit-frequency";
 import { fetchAllCommits } from "@/app/lib/data/github-api-functions";
 import { parseCommitData } from "@/app/lib/utils/utils";
-import { fetchGraphUrl } from "@/app/lib/database-functions";
+import { fetchGraphUrl } from "@/app/lib/database-functions/database-functions";
 import {CommitData} from "@/app/lib/definitions/definitions";
 
 export default async function CommitFrequencyWrapper({

@@ -1,4 +1,4 @@
-import { getRepository } from "@/app/lib/database-functions";
+import { getRepository } from "@/app/lib/database-functions/database-functions";
 import { UpdateRepositoryForm } from "@/app/ui/courses/add/update-repo";
 import { notFound } from "next/navigation";
 import Link from "next/link";

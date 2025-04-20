@@ -1,4 +1,4 @@
-import {getCourseCatalog, getUserCourses} from "@/app/lib/database-functions";
+import {getCourseCatalog, getUserCourses} from "@/app/lib/database-functions/database-functions";
 import {ModifyCourse} from "@/app/ui/courses/modify/modify-course";
 
 export default async function Page() {

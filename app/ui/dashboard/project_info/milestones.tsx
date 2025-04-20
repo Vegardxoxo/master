@@ -1,4 +1,3 @@
-import fetchMilestones from "@/app/lib/data/github-api-functions";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
 import { Calendar, CheckCircle2, Clock, Target } from "lucide-react";
 import Warning from "@/app/ui/dashboard/alerts/warning";
 import Link from "next/link";
+import {getMilestones} from "@/app/lib/database-functions/repository-data";
 
 export default async function Milestones({
   owner,
@@ -17,7 +17,8 @@ export default async function Milestones({
   owner: string;
   repo: string;
 }) {
-  const milestones = await fetchMilestones(owner, repo);
+  const { milestones} = await getMilestones(owner, repo);
+
   return (
     <Card className="w-full h-full">
       <CardHeader>
@@ -37,7 +38,7 @@ export default async function Milestones({
         ) : (
           <div className="grid grid-cols-2 gap-6">
             {milestones.map((milestone) => (
-              <div key={milestone.id} className="border rounded-lg p-3">
+              <div key={milestone.githubId} className="border rounded-lg p-3">
                 <div className="flex justify-between items-start mb-2">
                   <Link
                     href={milestone.url}

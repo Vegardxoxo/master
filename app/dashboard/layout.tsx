@@ -1,7 +1,7 @@
 import { AppSidebar, CustomTrigger } from "@/app/ui/dashboard/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/auth";
-import { getUserCourses } from "@/app/lib/database-functions";
+import { getUserCourses } from "@/app/lib/database-functions/database-functions";
 
 export default async function Layout({
   children,

@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import Link from "next/link";
-import { fetchContributors } from "@/app/lib/data/github-api-functions";
+import {getContributors} from "@/app/lib/database-functions/repository-data";
 
 export default async function ContributorsList({
   owner,
@@ -10,7 +10,7 @@ export default async function ContributorsList({
   owner: string;
   repo: string;
 }) {
-  const { contributors } = await fetchContributors(owner, repo);
+  const { contributors } = await getContributors(owner, repo);
   console.log("contributors", contributors);
   return (
     <Card className="w-full h-full">

@@ -15,7 +15,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import {uploadReportToRepository} from "@/app/lib/data/github-api-functions";
 import {Card, CardContent} from "@/components/ui/card";
-import {setReportGenerated} from "@/app/lib/database-functions";
+import {setReportGenerated} from "@/app/lib/database-functions/database-functions";
 
 const MDEditor = dynamic(
     () => import("@uiw/react-md-editor").then((mod) => mod.default),

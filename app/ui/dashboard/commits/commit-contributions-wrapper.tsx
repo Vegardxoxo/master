@@ -3,7 +3,7 @@ import {
   fetchCommitStatsGraphQL,
 } from "@/app/lib/data/github-api-functions";
 import CommitContributions from "@/app/ui/dashboard/commits/commit-contributions";
-import { fetchGraphUrl } from "@/app/lib/database-functions";
+import { fetchGraphUrl } from "@/app/lib/database-functions/database-functions";
 import { parseCommitStatsGraphQLEnhanched } from "@/app/lib/utils/email-similarity";
 import {parseCommitData, parseCommitStatsGraphQL} from "@/app/lib/utils/commits-utils";
 

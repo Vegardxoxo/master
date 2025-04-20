@@ -84,22 +84,29 @@ model CourseInstance {
 }
 
 model Repository {
-  id                String            @id @default(uuid())
-  githubId          String
-  username          String
-  repoName          String
-  url               String
-  organization      String            @default("none")
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime
-  openIssues        String            @default("0")
-  members           User[]            @relation("RepositoryMembers")
-  courseInstanceId  String
-  courseInstance    CourseInstance?   @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+  id               String          @id @default(uuid())
+  githubId         String
+  username         String
+  repoName         String
+  url              String
+  organization     String          @default("none")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime
+  openIssues       String          @default("0")
+  members          User[]          @relation("RepositoryMembers")
+  stars            Int
+  forks            Int
+  watchers         Int
+  courseInstanceId String
+  courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+
+  milestones        Milestone[]
+  languages         LanguageDistribution[]
+  contributors      Contributor[]
   coverageReport    CoverageReport[]
   fileSets          FileSet[]
   charts            RepositoryImage[]
-  hasReport         Boolean           @default(false)
+  hasReport         Boolean                @default(false)
   reportGeneratedAt DateTime?
 }
 
@@ -163,5 +170,49 @@ model RepositoryImage {
   updatedAt    DateTime   @updatedAt
 
   @@unique([repositoryId, chartType])
+  @@index([repositoryId])
+}
+
+// ----------------
+model Contributor {
+  id           String     @id @default(uuid())
+  login        String
+  url          String
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([login, repositoryId])
+  @@index([repositoryId])
+}
+
+model LanguageDistribution {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  name         String
+  value        Int
+  percentage   Float
+
+  @@unique([repositoryId, name])
+  @@index([repositoryId])
+}
+
+model Milestone {
+  id           String     @id @default(uuid())
+  githubId     Int
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  title        String
+  description  String
+  state        String
+  closedIssues Int
+  openIssues   Int
+  totalIssues  Int
+  dueDate      DateTime?
+  createdAt    DateTime
+  updatedAt    DateTime
+  url          String
+
+  @@unique([repositoryId, githubId])
   @@index([repositoryId])
 }

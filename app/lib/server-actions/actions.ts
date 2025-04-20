@@ -22,7 +22,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 
 import { prisma } from "@/app/lib/prisma";
-import {defaultVisibleSections} from "@/app/ui/dashboard/dashboard";
+import {updateRepositoryData} from "@/app/lib/database-functions/repository-data";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -94,6 +94,7 @@ export async function createRepository(prevState: any, formData: FormData) {
     }
 
     const repoInfo = await fetchRepository(username, repoName);
+    console.log("repoInfo", repoInfo);
 
     if (!repoInfo.success) {
       return {
@@ -110,6 +111,9 @@ export async function createRepository(prevState: any, formData: FormData) {
         organization: organization,
         openIssues: repoInfo.openIssues!,
         updatedAt: repoInfo.updatedAt!,
+        stars: repoInfo.stars,
+        forks: repoInfo.forks,
+        watchers: repoInfo.watchers,
         courseInstanceId: courseInstanceId,
         members: {
           connect: {
@@ -118,6 +122,8 @@ export async function createRepository(prevState: any, formData: FormData) {
         },
       },
     });
+
+    await updateRepositoryData(repository.username, repository.repoName, repository.id);
 
     // Get the course code for path revalidation
     const courseCode = courseInstance.userCourse.course.code;
@@ -862,4 +868,7 @@ export async function deleteCourseInstance(id: string) {
     return { success: false, error: "Failed to delete course instance." };
   }
 }
+
+
+
 

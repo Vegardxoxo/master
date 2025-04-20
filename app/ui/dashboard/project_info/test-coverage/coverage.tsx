@@ -1,4 +1,4 @@
-import { getCoverageReport } from "@/app/lib/database-functions";
+import { getCoverageReport } from "@/app/lib/database-functions/database-functions";
 import { TestCoverageMetrics } from "@/app/ui/dashboard/project_info/test-coverage/test-coverage-metrics";
 import { FileCoverageTable } from "@/app/ui/dashboard/project_info/test-coverage/coverage-table";
 import Warning from "@/app/ui/dashboard/alerts/warning";

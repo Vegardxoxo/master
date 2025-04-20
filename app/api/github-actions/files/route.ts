@@ -1,6 +1,6 @@
 import {updateRepositoryFiles} from "@/app/lib/server-actions/actions";
 import {NextRequest, NextResponse} from "next/server";
-import {findRepositoryByGithubId} from "@/app/lib/database-functions";
+import {findRepositoryByGithubId} from "@/app/lib/database-functions/database-functions";
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");

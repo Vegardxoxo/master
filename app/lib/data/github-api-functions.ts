@@ -24,7 +24,7 @@ import {GitHubIssue} from "@/app/lib/definitions/pull-requests";
 export async function getRepoLanguages(
   owner: string,
   repo: string
-): Promise<{ [key: string]: number } | null> {
+): Promise<{ [key: string]: number }> {
   try {
     const response = await octokit.rest.repos.listLanguages({
       owner,
@@ -240,7 +240,7 @@ export async function fetchAllCommits(
           date: item.commit.author?.date || "Unknown",
         },
         message: item.commit.message,
-        url: item.commit.url,
+        // url: item.commit.url,
       },
     }));
   } catch (e) {
@@ -255,6 +255,9 @@ interface GithubRepoOverview {
   url?: string;
   openIssues?: string;
   updatedAt?: string;
+  stars?: number;
+  forks?: number;
+  watchers?: number;
   success: boolean;
   error?: string;
 }
@@ -277,6 +280,9 @@ export async function fetchRepository(
       url: repoData.html_url,
       openIssues: repoData.open_issues_count.toString(),
       updatedAt: repoData.updated_at,
+      stars: repoData.stargazers_count,
+      forks: repoData.forks_count,
+      watchers: repoData.watchers_count,
       success: true,
     };
   } catch (e) {
