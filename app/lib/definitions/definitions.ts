@@ -271,6 +271,8 @@ export interface ReportSectionProps {
 
 export interface CommitData {
   sha?: string;
+  branch: string;
+  associatedPullRequests: boolean;
   html_url?: string;
   commit: {
     author: {

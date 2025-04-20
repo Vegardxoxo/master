@@ -1,5 +1,5 @@
-import { fetchPullRequests } from "@/app/lib/data/github-api-functions";
-import { PullRequestsComments } from "./pull-requests-comments";
+import {PullRequestsComments} from "./pull-requests-comments";
+import {getPullRequests} from "@/app/lib/database-functions/repository-data";
 
 export default async function PullRequestsCommentsWrapper({
   owner,
@@ -8,10 +8,10 @@ export default async function PullRequestsCommentsWrapper({
   owner: string;
   repo: string;
 }) {
-  const pullRequestData = await fetchPullRequests(owner, repo, "all");
+  const {data, success} = await getPullRequests(owner, repo);
   return (
     <div className="space-y-8">
-      <PullRequestsComments data={pullRequestData} />
+      <PullRequestsComments data={data} />
     </div>
   );
 }

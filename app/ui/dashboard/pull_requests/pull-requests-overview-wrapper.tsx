@@ -1,5 +1,5 @@
-import { fetchPullRequests } from "@/app/lib/data/github-api-functions";
 import PullRequestsOverview from "@/app/ui/dashboard/pull_requests/pull-requests-overview";
+import {getPullRequests} from "@/app/lib/database-functions/repository-data";
 
 export default async function PullRequestsOverviewWrapper({
   owner,
@@ -8,6 +8,6 @@ export default async function PullRequestsOverviewWrapper({
   owner: string;
   repo: string;
 }) {
-  const data = await fetchPullRequests(owner, repo, "all");
+  const {data, success} = await getPullRequests(owner, repo);
   return <PullRequestsOverview data={data} />;
 }

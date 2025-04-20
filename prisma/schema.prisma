@@ -100,6 +100,7 @@ model Repository {
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
 
+  pullRequests      PullRequest[]
   commits           Commit[]
   milestones        Milestone[]
   languages         LanguageDistribution[]
@@ -232,4 +233,16 @@ model Commit {
   deletions    Int
   changedFiles Int
   createdAt    DateTime   @default(now())
+}
+
+model PullRequest {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  state        String
+  data         Json
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, state])
 }

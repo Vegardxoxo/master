@@ -395,7 +395,6 @@ export function parsePullRequests(data: any[]): PullRequestData {
     return false;
   });
 
-  // collect all milestones in an array
 
   return {
     totalPRs,

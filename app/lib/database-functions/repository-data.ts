@@ -1,6 +1,6 @@
 import fetchMilestones, {
     fetchAllCommits,
-    fetchContributors,
+    fetchContributors, fetchPullRequests,
     getRepoLanguages
 } from "@/app/lib/data/github-api-functions";
 import {prisma} from "@/app/lib/prisma";
@@ -129,17 +129,19 @@ export async function getContributors(owner: string, repo: string) {
 
 export async function updateRepositoryData(owner: string, repo: string, repoId: string) {
     try {
-        await storeContributors(owner, repo, repoId);
-        await storeLanguageDistribution(owner, repo, repoId);
-        await storeMilestones(owner, repo, repoId);
-        await storeCommits(owner, repo, repoId);
-        return { success: true };
+        await Promise.all([
+            storeContributors(owner, repo, repoId),
+            storeLanguageDistribution(owner, repo, repoId),
+            storeMilestones(owner, repo, repoId),
+            storeCommits(owner, repo, repoId),
+            storePullRequests(owner, repo, repoId)
+        ]);
+        return {success: true};
     } catch (e) {
         console.error("Error updating repository data:", e);
-        return { success: false, error: "Failed to update repository data." };
+        return {success: false, error: "Failed to update repository data."};
     }
 }
-
 
 
 export async function getRepoInfo(owner: string, repo: string) {
@@ -317,5 +319,52 @@ export async function getCommits(owner: string, repo: string) {
     } catch (e) {
         console.error("Error fetching commits:", e);
         return { success: false, commits: undefined, error: "Failed to fetch commits." };
+    }
+}
+
+export async function storePullRequests(owner: string, repo: string, repoId: string) {
+    try {
+        const state = "all";
+        const data = await fetchPullRequests(owner, repo, state);
+
+        await prisma.pullRequest.upsert({
+            where: { repositoryId_state: { repositoryId: repoId, state } },
+            update: { data },
+            create: { repositoryId: repoId, state, data },
+        });
+
+        return { success: true };
+    } catch (e) {
+        console.error("Failed to store pull requests:", e);
+        return { success: false, error: "Failed to store pull requests." };
+    }
+}
+
+export async function getPullRequests(owner: string, repo: string) {
+    try {
+        const result = await findRepositoryByOwnerRepo(owner, repo);
+        if (!result.success || !result.repository) {
+            return { success: false, error: result.error };
+        }
+        const repoId = result.repository.id;
+
+        // Attempt to fetch cached pull requests from the database
+        const prRecord = await prisma.pullRequest.findUnique({
+            where: {
+                repositoryId_state: {
+                    repositoryId: repoId,
+                    state: "all",
+                },
+            },
+        });
+
+        if (prRecord && prRecord.data) {
+            return { success: true, data: prRecord.data };
+        } else {
+            return { success: false, error: "No pull requests found in database for this repository." };
+        }
+    } catch (e) {
+        console.error("Failed to get pull requests:", e);
+        return { success: false, error: "Failed to get pull requests." };
     }
 }

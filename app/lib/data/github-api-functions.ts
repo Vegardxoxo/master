@@ -346,82 +346,69 @@ export async function fetchAllCommits(
 }
 
 
-// Cache key generator
-const getPullRequestsCacheKey = (
-  owner: string,
-  repo: string,
-  state: "open" | "closed" | "all",
-) => `pull-requests:${owner}:${repo}:${state}`;
-
 /**
  * Fetches the list of pull requests for a given repository.
  *
  * @param {string} owner - The username or organization name of the repository owner.
  * @param {string} repo - The name of the repository.
  * @param state
- * @return {Promise<Array>} A promise that resolves to an array of pull request objects retrieved from the repository. Returns an empty array if an error occurs.
+ * @return {Promise<PullRequestData>} A promise that resolves to a PullRequestData object from the repository. Returns an empty array if an error occurs.
  */
-export const fetchPullRequests = cache(
-  async (
+export const fetchPullRequests = async (
     owner: string,
     repo: string,
     state: "open" | "closed" | "all",
-  ): Promise<PullRequestData> => {
-    const cacheKey = getPullRequestsCacheKey(owner, repo, state);
-    console.log(`Fetching pull requests for ${cacheKey}`);
-    try {
-      const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
-        owner,
-        repo,
-        state,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      });
-      const prsWithReviews = await Promise.all(
+): Promise<PullRequestData> => {
+  try {
+    const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
+      owner,
+      repo,
+      state,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    const prsWithReviews = await Promise.all(
         pullRequests.map(async (pr) => {
           try {
             const reviews = await octokit.paginate(
-              octokit.rest.pulls.listReviews,
-              {
-                owner,
-                repo,
-                pull_number: pr.number,
-                per_page: 100,
-              },
+                octokit.rest.pulls.listReviews,
+                {
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  per_page: 100,
+                },
             );
-
-            // if (reviews.length > 0) console.log(reviews[0].body);
 
             const comments = await octokit.paginate(
-              octokit.rest.issues.listComments,
-              {
-                owner,
-                repo,
-                issue_number: pr.number,
-                per_page: 100,
-              },
+                octokit.rest.issues.listComments,
+                {
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  per_page: 100,
+                },
             );
-            // if (comments.length > 0) console.log("comments", comments[0].body, comments[0].user.login)
 
             const commenters = comments.reduce(
-              (acc, comment) => {
-                if (comment.user && comment.user.login) {
-                  acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
-                }
-                return acc;
-              },
-              {} as Record<string, number>,
+                (acc, comment) => {
+                  if (comment.user && comment.user.login) {
+                    acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
+                  }
+                  return acc;
+                },
+                {} as Record<string, number>,
             );
 
             const reviewers = reviews.reduce(
-              (acc, review) => {
-                if (review.user && review.user.login) {
-                  acc[review.user.login] = (acc[review.user.login] || 0) + 1;
-                }
-                return acc;
-              },
-              {} as Record<string, number>,
+                (acc, review) => {
+                  if (review.user && review.user.login) {
+                    acc[review.user.login] = (acc[review.user.login] || 0) + 1;
+                  }
+                  return acc;
+                },
+                {} as Record<string, number>,
             );
             return {
               number: pr.number,
@@ -438,9 +425,9 @@ export const fetchPullRequests = cache(
               review_comments: reviews.map((review) => review.body).join(", "),
               comments: comments.length,
               linked_issues:
-                typeof pr.body === "string"
-                  ? pr.body.match(/#\d+/g)?.length || 0
-                  : 0,
+                  typeof pr.body === "string"
+                      ? pr.body.match(/#\d+/g)?.length || 0
+                      : 0,
               reviewers,
               commenters,
               labels: pr.labels || [],
@@ -450,14 +437,14 @@ export const fetchPullRequests = cache(
             return [];
           }
         }),
-      );
-      return parsePullRequests(prsWithReviews);
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
-  },
-);
+    );
+    return parsePullRequests(prsWithReviews);
+  } catch (e) {
+    console.log(e);
+    return [] as any;
+  }
+};
+
 
 export async function listWorkflowRuns(owner: string, repo: string) {
   try {
