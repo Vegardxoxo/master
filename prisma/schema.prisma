@@ -100,6 +100,7 @@ model Repository {
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
 
+  commits           Commit[]
   milestones        Milestone[]
   languages         LanguageDistribution[]
   contributors      Contributor[]
@@ -215,4 +216,20 @@ model Milestone {
 
   @@unique([repositoryId, githubId])
   @@index([repositoryId])
+}
+
+model Commit {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  sha          String     @unique
+  authorName   String?
+  authorEmail  String?
+  committedAt  DateTime
+  message      String?
+  url          String?
+  additions    Int
+  deletions    Int
+  changedFiles Int
+  createdAt    DateTime   @default(now())
 }

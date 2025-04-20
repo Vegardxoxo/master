@@ -270,15 +270,18 @@ export interface ReportSectionProps {
 }
 
 export interface CommitData {
-  sha?: string
-  html_url?: string
+  sha?: string;
+  html_url?: string;
   commit: {
     author: {
-      name: string
-      email: string
-      date?: string
-    }
-    message?: string
-    url?: string
-  }
+      name: string;
+      email: string;
+      date?: string;
+    };
+    message: string;
+    url: string;
+  };
+  additions: number;
+  deletions: number;
+  changedFiles: number;
 }

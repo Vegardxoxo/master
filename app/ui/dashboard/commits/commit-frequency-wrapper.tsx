@@ -1,8 +1,9 @@
 import CommitFrequency from "@/app/ui/dashboard/commits/commit-frequency";
-import { fetchAllCommits } from "@/app/lib/data/github-api-functions";
+import { fetchCommitSHAs } from "@/app/lib/data/github-api-functions";
 import { parseCommitData } from "@/app/lib/utils/utils";
 import { fetchGraphUrl } from "@/app/lib/database-functions/database-functions";
 import {CommitData} from "@/app/lib/definitions/definitions";
+import {getCommits} from "@/app/lib/database-functions/repository-data";
 
 export default async function CommitFrequencyWrapper({
   owner,
@@ -11,8 +12,10 @@ export default async function CommitFrequencyWrapper({
   owner: string;
   repo: string;
 }) {
-  const commitData = await fetchAllCommits(owner, repo);
   const image_url = await fetchGraphUrl(owner, repo, "COMMIT_FREQUENCY");
-
-  return <CommitFrequency data={commitData} image_url={image_url} />;
+  const {commits, success, error} = await getCommits(owner, repo);
+  if (!success && error) {
+    return <h1> {error}</h1>
+  }
+  return <CommitFrequency data={commits} image_url={image_url} />;
 }

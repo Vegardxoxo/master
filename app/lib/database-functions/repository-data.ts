@@ -1,4 +1,8 @@
-import fetchMilestones, {fetchContributors, getRepoLanguages} from "@/app/lib/data/github-api-functions";
+import fetchMilestones, {
+    fetchAllCommits,
+    fetchContributors,
+    getRepoLanguages
+} from "@/app/lib/data/github-api-functions";
 import {prisma} from "@/app/lib/prisma";
 import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
 import {formatLanguageData} from "@/app/lib/utils/language-distribution-utils";
@@ -128,6 +132,7 @@ export async function updateRepositoryData(owner: string, repo: string, repoId: 
         await storeContributors(owner, repo, repoId);
         await storeLanguageDistribution(owner, repo, repoId);
         await storeMilestones(owner, repo, repoId);
+        await storeCommits(owner, repo, repoId);
         return { success: true };
     } catch (e) {
         console.error("Error updating repository data:", e);
@@ -243,3 +248,74 @@ export async function getMilestones(owner: string, repo: string) {
     }
 }
 
+export async function storeCommits(owner: string, repo: string, repoId: string) {
+    try {
+        const commits = await fetchAllCommits(owner, repo);
+        const operations = commits.map(commit => {
+            const sha = commit.sha ?? commit.html_url?.split("/").pop() ?? "";
+            return prisma.commit.upsert({
+                where: { sha },
+                update: {
+                    authorName: commit.commit.author.name,
+                    authorEmail: commit.commit.author.email,
+                    committedAt: commit.commit.author.date
+                        ? new Date(commit.commit.author.date)
+                        : undefined,
+                    message: commit.commit.message,
+                    url: commit.html_url ?? commit.commit.url,
+                    additions: commit.additions,
+                    deletions: commit.deletions,
+                    changedFiles: commit.changedFiles,
+                    repositoryId: repoId,
+                },
+                create: {
+                    sha,
+                    authorName: commit.commit.author.name,
+                    authorEmail: commit.commit.author.email,
+                    committedAt: commit.commit.author.date
+                        ? new Date(commit.commit.author.date)
+                        : new Date(),
+                    message: commit.commit.message,
+                    url: commit.html_url ?? commit.commit.url,
+                    additions: commit.additions,
+                    deletions: commit.deletions,
+                    changedFiles: commit.changedFiles,
+                    repositoryId: repoId,
+                },
+            });
+        });
+
+
+
+        await prisma.$transaction(operations);
+    }
+    catch (e) {
+        console.error("Error storing commits:", e);
+        return { success: false, error: "Failed to store commits." };
+
+
+    }
+}
+
+export async function getCommits(owner: string, repo: string) {
+    try {
+        const result = await findRepositoryByOwnerRepo(owner, repo);
+        if (!result.success || !result.repository) {
+            return { success: false, error: result.error };
+        }
+        const repoId = result.repository.id;
+
+        console.time(`fetch-commits-${repoId}`);
+        const commits = await prisma.commit.findMany({
+            where: { repositoryId: repoId },
+            orderBy: { committedAt: 'desc' },
+        });
+        console.timeEnd(`fetch-commits-${repoId}`);
+
+        console.log("fetched from local database");
+        return { success: true, commits };
+    } catch (e) {
+        console.error("Error fetching commits:", e);
+        return { success: false, commits: undefined, error: "Failed to fetch commits." };
+    }
+}

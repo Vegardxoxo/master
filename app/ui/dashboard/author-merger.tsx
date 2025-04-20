@@ -6,20 +6,22 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { User, Mail } from "lucide-react"
-import {Button} from "@/app/ui/button";
+import { Button } from "@/app/ui/button"
 
+// Updated interface to match the new data format
 interface CommitData {
-  sha?: string
-  html_url?: string
-  commit: {
-    author: {
-      name: string
-      email: string
-      date?: string
-    }
-    message?: string
-    url?: string
-  }
+  id: string
+  repositoryId: string
+  sha: string
+  authorName: string
+  authorEmail: string
+  committedAt: string
+  message: string
+  url: string
+  additions: number
+  deletions: number
+  changedFiles: number
+  createdAt: string
 }
 
 interface Author {
@@ -31,11 +33,13 @@ interface AuthorMappings {
   [key: string]: Author
 }
 
+// Updated function to extract unique authors from the new data format
 export function extractUniqueAuthors(commits: CommitData[]): Author[] {
   const uniqueAuthors = new Map<string, Author>()
 
   commits.forEach((commit) => {
-    const { name, email } = commit.commit.author
+    const name = commit.authorName
+    const email = commit.authorEmail
     const key = `${name}|${email}`
 
     if (!uniqueAuthors.has(key)) {
@@ -88,21 +92,17 @@ export default function AuthorMerger({ data, onMerge }: AuthorMergerProps) {
 
   // Apply the mappings to the commit data
   const applyMappings = () => {
+    // Updated to work with the new data format
     const updatedCommits = commitData.map((commit) => {
-      const originalAuthor = commit.commit.author
-      const key = `${originalAuthor.name}|${originalAuthor.email}`
-      const mappedAuthor = authorMappings[key] || originalAuthor
+      const originalName = commit.authorName
+      const originalEmail = commit.authorEmail
+      const key = `${originalName}|${originalEmail}`
+      const mappedAuthor = authorMappings[key] || { name: originalName, email: originalEmail }
 
       return {
         ...commit,
-        commit: {
-          ...commit.commit,
-          author: {
-            ...originalAuthor,
-            name: mappedAuthor.name,
-            email: mappedAuthor.email,
-          },
-        },
+        authorName: mappedAuthor.name,
+        authorEmail: mappedAuthor.email,
       }
     })
 
@@ -196,110 +196,108 @@ export default function AuthorMerger({ data, onMerge }: AuthorMergerProps) {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Author Identity Consolidation</h1>
-      <p className="text-muted-foreground mb-4">
-        Consolidate different author identities before proceeding to the visualization. Authors mapped to the same
-        identity will share the same color when multiple authors are mapped to that identity.
-      </p>
+      <div className="container mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">Author Identity Consolidation</h1>
+        <p className="text-muted-foreground mb-4">
+          Consolidate different author identities before proceeding to the visualization. Authors mapped to the same
+          identity will share the same color when multiple authors are mapped to that identity.
+        </p>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Author Mappings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {uniqueAuthors.map((author, index) => {
-              const isMapped = isMappedToDifferent(author)
-              const targetIdentity = getTargetIdentity(author)
-              const colorClass = getColorForAuthor(author)
+        <Card>
+          <CardHeader>
+            <CardTitle>Author Mappings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {uniqueAuthors.map((author, index) => {
+                const isMapped = isMappedToDifferent(author)
+                const targetIdentity = getTargetIdentity(author)
+                const colorClass = getColorForAuthor(author)
 
-              return (
-                <div key={`${author.name}|${author.email}`} className={`p-3 border rounded-md ${colorClass}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">{author.name}</span>
-                    </div>
+                return (
+                    <div key={`${author.name}|${author.email}`} className={`p-3 border rounded-md ${colorClass}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">{author.name}</span>
+                        </div>
 
-                    {isMapped && (
-                      <Badge variant="outline" className="text-xs">
-                        Mapped
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5 mb-3 text-xs text-muted-foreground">
-                    <Mail className="h-3.5 w-3.5" />
-                    <span>{author.email}</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor={`name-${index}`} className="text-xs mb-1 block">
-                        Map to Name:
-                      </Label>
-                      <Input
-                        id={`name-${index}`}
-                        size={1}
-                        className="h-8 text-sm"
-                        defaultValue={author.name}
-                        onChange={(e) =>
-                          updateAuthorMapping(
-                            author.name,
-                            author.email,
-                            e.target.value,
-                            authorMappings[`${author.name}|${author.email}`]?.email || author.email,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`email-${index}`} className="text-xs mb-1 block">
-                        Map to Email:
-                      </Label>
-                      <Input
-                        id={`email-${index}`}
-                        size={1}
-                        className="h-8 text-sm"
-                        defaultValue={author.email}
-                        onChange={(e) =>
-                          updateAuthorMapping(
-                            author.name,
-                            author.email,
-                            authorMappings[`${author.name}|${author.email}`]?.name || author.name,
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  {isMapped && (
-                    <div className="mt-2 pt-2 border-t text-xs">
-                      <div className="font-medium">Mapped to:</div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <User className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{targetIdentity?.name}</span>
+                        {isMapped && (
+                            <Badge variant="outline" className="text-xs">
+                              Mapped
+                            </Badge>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground">
-                        <Mail className="h-3 w-3" />
-                        <span>{targetIdentity?.email}</span>
+
+                      <div className="flex items-center gap-1.5 mb-3 text-xs text-muted-foreground">
+                        <Mail className="h-3.5 w-3.5" />
+                        <span>{author.email}</span>
                       </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor={`name-${index}`} className="text-xs mb-1 block">
+                            Map to Name:
+                          </Label>
+                          <Input
+                              id={`name-${index}`}
+                              size={1}
+                              className="h-8 text-sm"
+                              defaultValue={author.name}
+                              onChange={(e) =>
+                                  updateAuthorMapping(
+                                      author.name,
+                                      author.email,
+                                      e.target.value,
+                                      authorMappings[`${author.name}|${author.email}`]?.email || author.email,
+                                  )
+                              }
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor={`email-${index}`} className="text-xs mb-1 block">
+                            Map to Email:
+                          </Label>
+                          <Input
+                              id={`email-${index}`}
+                              size={1}
+                              className="h-8 text-sm"
+                              defaultValue={author.email}
+                              onChange={(e) =>
+                                  updateAuthorMapping(
+                                      author.name,
+                                      author.email,
+                                      authorMappings[`${author.name}|${author.email}`]?.name || author.name,
+                                      e.target.value,
+                                  )
+                              }
+                          />
+                        </div>
+                      </div>
+
+                      {isMapped && (
+                          <div className="mt-2 pt-2 border-t text-xs">
+                            <div className="font-medium">Mapped to:</div>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <User className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>{targetIdentity?.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              <span>{targetIdentity?.email}</span>
+                            </div>
+                          </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
             <Button className="w-full mt-6 flex justify-center items-center" onClick={applyMappings}>
               Apply Mappings & Continue
             </Button>
-
-
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
   )
 }
