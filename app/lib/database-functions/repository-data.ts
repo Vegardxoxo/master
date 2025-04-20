@@ -293,12 +293,10 @@ export async function getCommits(owner: string, repo: string) {
         }
         const repoId = result.repository.id;
 
-        console.time(`fetch-commits-${repoId}`);
         const commits = await prisma.commit.findMany({
             where: { repositoryId: repoId },
             orderBy: { committedAt: 'desc' },
         });
-        console.timeEnd(`fetch-commits-${repoId}`);
 
         console.log("fetched from local database");
         return { success: true, commits };

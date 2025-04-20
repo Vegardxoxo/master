@@ -2,15 +2,7 @@ import {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useToast} from "@/hooks/use-toast";
-import {
-    Eye,
-    FileText,
-    Upload,
-    Loader2,
-    Check,
-    ExternalLink,
-    GitBranch,
-} from "lucide-react";
+import {Check, ExternalLink, Eye, FileText, GitBranch, Loader2, Upload,} from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {uploadReportToRepository} from "@/app/lib/data/github-api-functions";

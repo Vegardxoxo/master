@@ -13,6 +13,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 import {fetchContributors} from "@/app/lib/data/github-api-functions";
 import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
+import {revalidatePath} from "next/cache";
 
 
 /**
@@ -461,44 +462,66 @@ export async function fetchGraphUrl(
 }
 
 export async function setReportGenerated(
-  owner: string,
-  repo: string,
+    owner: string,
+    repo: string
 ): Promise<{
   success: boolean;
   error?: string;
   message?: string;
 }> {
   try {
+    // 1) Authentication
     const session = await auth();
-    if (!session || !session.user || !session.user.email) {
-      return {
-        success: false,
-        error: "Not authenticated",
-      };
+    if (!session?.user?.email) {
+      return { success: false, error: "Not authenticated" };
     }
 
-    const result = await findRepositoryByOwnerRepo(owner, repo);
-    if (!result.repository) {
-      return {
-        success: false,
-        error: "Repository not found",
-      };
-    }
-
-    // Update the repository record
-    await prisma.repository.update({
-      where: {
-        id: result.repository.id,
+    // 2) Fetch the repo, including its courseInstance → userCourse → course
+    const repository = await prisma.repository.findFirst({
+      where: { username: owner, repoName: repo },
+      include: {
+        courseInstance: {
+          include: {
+            userCourse: {
+              include: { course: true },
+            },
+          },
+        },
       },
+    });
+
+    if (!repository) {
+      return { success: false, error: "Repository not found" };
+    }
+
+    const ci = repository.courseInstance;
+    if (!ci) {
+      return {
+        success: false,
+        error: "Course instance for this repository is missing",
+      };
+    }
+
+    // 3) Mark the report generated
+    await prisma.repository.update({
+      where: { id: repository.id },
       data: {
         hasReport: true,
         reportGeneratedAt: new Date(),
       },
     });
 
+    // 4) Pull out the course code, year & semester
+    const courseCode = ci.userCourse.course.code;
+    const year = ci.year;
+    const semester = ci.semester.toLowerCase(); // e.g. "spring" or "autumn"
+
+    // 5) Trigger ISR revalidation
+    revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);
+
     return {
       success: true,
-      message: "Report has been generated for the repository.",
+      message: "Report has been generated and dashboard revalidated.",
     };
   } catch (e) {
     console.error("Database error: Error updating report status:", e);
