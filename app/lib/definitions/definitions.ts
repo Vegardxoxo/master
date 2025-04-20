@@ -52,6 +52,7 @@ export type Commit = {
   message: string;
   date: string | null;
   url: string;
+  branch: string
 };
 
 export type _Branches = {
@@ -286,4 +287,17 @@ export interface CommitData {
   additions: number;
   deletions: number;
   changedFiles: number;
+}
+
+export interface GithubRepoOverview {
+  id?: string;
+  name?: string;
+  url?: string;
+  openIssues?: string;
+  updatedAt?: string;
+  stars?: number;
+  forks?: number;
+  watchers?: number;
+  success: boolean;
+  error?: string;
 }

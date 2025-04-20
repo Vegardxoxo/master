@@ -100,6 +100,10 @@ model Repository {
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
 
+  workflowRuns      WorkflowRuns[]
+  issues            Issue[]
+  branches          Branch[]
+  commitMain        CommitMain[]
   pullRequests      PullRequest[]
   commits           Commit[]
   milestones        Milestone[]
@@ -235,6 +239,21 @@ model Commit {
   createdAt    DateTime   @default(now())
 }
 
+model CommitMain {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  sha          String
+  author       String
+  date         DateTime   @default(now())
+  url          String
+  branch       String
+  message      String
+
+  @@unique([repositoryId, sha])
+  @@index([repositoryId, date])
+}
+
 model PullRequest {
   id           String     @id @default(uuid())
   repositoryId String
@@ -245,4 +264,45 @@ model PullRequest {
   updatedAt    DateTime   @updatedAt
 
   @@unique([repositoryId, state])
+}
+
+model Branch {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, name])
+}
+
+model Issue {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  title        String
+  number       String
+  url          String?
+  createdAt    DateTime   @default(now())
+  closedAt     DateTime?
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, number])
+}
+
+model WorkflowRuns {
+  id             String     @id @default(uuid())
+  repositoryId   String
+  repository     Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  githubRunId    BigInt
+  name           String
+  status         String
+  conclusion     String
+  created_at     DateTime
+  updated_at     DateTime
+  run_started_at DateTime
+  run_number     Int
+
+  @@unique([repositoryId, githubRunId])
 }

@@ -1,18 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { CheckCircle, XCircle, Clock, Activity } from "lucide-react";
-import { listWorkflowRuns } from "@/app/lib/data/github-api-functions";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Activity, CheckCircle, Clock, XCircle} from "lucide-react";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from "@/components/ui/tooltip";
+import {getWorkflowRuns} from "@/app/lib/database-functions/repository-data";
 
 // Helper function to format time in a human-readable way
 function formatTime(seconds: number): string {
@@ -35,7 +24,7 @@ export default async function WorkflowRunsInfo({
   owner: string;
   repo: string;
 }) {
-  const runs = await listWorkflowRuns(owner, repo);
+  const runs = await getWorkflowRuns(owner, repo);
 
   if (!runs) {
     return (

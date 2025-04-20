@@ -1,5 +1,5 @@
 export interface GitHubIssue {
-    error?: string;
+    id?: string;
     title: string;
     number: number;
     url: string;

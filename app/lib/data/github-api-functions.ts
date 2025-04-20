@@ -5,15 +5,24 @@ import * as path from "path";
 import {
   Commit,
   CommitData,
-  CommitMessageLong,
+  GithubRepoOverview,
   PullRequestData,
   repositoryOverview,
 } from "@/app/lib/definitions/definitions";
-import {parseCommitStats, parsePullRequests, transformLocalImagePaths,} from "@/app/lib/utils/utils";
-import {cache} from "react";
+import {parsePullRequests, transformLocalImagePaths,} from "@/app/lib/utils/utils";
 import {getCommitsOnMain} from "@/app/lib/data/graphql-queries";
 import {CommitStats} from "@/app/lib/definitions/commits";
 import {GitHubIssue} from "@/app/lib/definitions/pull-requests";
+
+// const octokit = new Octokit({
+//  auth: process.env.TOKEN,
+//   baseUrl: "https://git.ntnu.no/api/v3",
+// });
+
+const octokit = new Octokit({
+  auth: process.env.SUPER_TOKEN,
+});
+
 
 /**
  * Fetches the languages used in a repository and their byte counts
@@ -38,14 +47,7 @@ export async function getRepoLanguages(
   }
 }
 
-//const octokit = new Octokit({
- // auth: process.env.TOKEN,
-  //baseUrl: "https://git.ntnu.no/api/v3",
-//});
 
- const octokit = new Octokit({
-   auth: process.env.SUPER_TOKEN,
- });
 
 /**
  * Checks if there is a connection to the repo before displaying the rest of the dashboard.
@@ -78,67 +80,6 @@ export async function checkConnection(
   }
 }
 
-/**
- * Fetches an overview about the projects. Data is used to render data tables.
- * @param owner
- * @param repo
- */
-export async function fetchRepoOverview(
-  owner: string,
-  repo: string,
-): Promise<{ data: repositoryOverview; error: string | null }> {
-  try {
-    const repoInfo = await octokit.request("GET /repos/{owner}/{repo}", {
-      owner,
-      repo,
-    });
-
-    const contributorsRes = await octokit.request(
-      "GET /repos/{owner}/{repo}/contributors",
-      {
-        owner,
-        repo,
-      },
-    );
-
-    const issuesRes = await octokit.request(
-      "GET /repos/{owner}/{repo}/issues",
-      {
-        owner,
-        repo,
-        state: "open",
-      },
-    );
-
-    return {
-      data: {
-        owner: repoInfo.data.owner.login,
-        name: repoInfo.data.name,
-        contributors: contributorsRes.data
-          .map((c) => c.login)
-          .filter((login): login is string => !!login),
-        openIssues: issuesRes.data.length,
-        url: repoInfo.data.html_url,
-      },
-      error: null,
-    };
-  } catch (err) {
-    console.error("Error fetching repo data via REST:", err);
-    return {
-      data: {
-        contributors: [],
-        name: repo,
-        openIssues: 0,
-        owner: owner,
-        url: "",
-      },
-      error:
-        err instanceof Error && "status" in err && (err as any).status === 404
-          ? `Repository ${owner}/${repo} not found. Please check if the repository URL is correct.`
-          : `Failed to fetch data for ${owner}/${repo}. Please try again later.`,
-    };
-  }
-}
 
 /**
  * Lists branches in a repository.
@@ -154,7 +95,9 @@ export async function fetchBranches(owner: string, repo: string) {
         repo,
       },
     );
-    return branchesData;
+    return branchesData.map((b: any) => ({
+      name: b.name
+    }))
   } catch (e) {
     console.error("Error fetching branches:", e);
     throw new Error("Failed to fetch branches.");
@@ -237,18 +180,7 @@ export async function fetchCommitSHAs(
   }
 }
 
-interface GithubRepoOverview {
-  id?: string;
-  name?: string;
-  url?: string;
-  openIssues?: string;
-  updatedAt?: string;
-  stars?: number;
-  forks?: number;
-  watchers?: number;
-  success: boolean;
-  error?: string;
-}
+
 
 export async function fetchRepository(
   owner: string,
@@ -446,7 +378,7 @@ export const fetchPullRequests = async (
 };
 
 
-export async function listWorkflowRuns(owner: string, repo: string) {
+export async function fetchWorkflowRuns(owner: string, repo: string) {
   try {
     // Use Octokit's paginate method to automatically handle pagination
     const runs = await octokit.paginate(
@@ -523,6 +455,7 @@ export async function getMainCommits(
               date: commit.author.date,
               url: commit.commitUrl,
               sha: commit.oid,
+                branch,
             }));
           } else {
             console.log(`No direct commits found in branch '${branch}'`);
@@ -557,7 +490,6 @@ export async function fetchIssues(
       state: "all",
     });
 
-    // Filtrerer ut pull requests ved å sjekke om issue har pull_request property
     const realIssues = issues.filter(issue => !issue.pull_request);
 
     return realIssues.map((issue) => ({
@@ -569,7 +501,7 @@ export async function fetchIssues(
     }));
   } catch (e) {
     console.log("Error fetching issues:", e);
-    return [];  // Returnerer tom array ved feil istedenfor feilobjekt
+    return [];
   }
 }
 
