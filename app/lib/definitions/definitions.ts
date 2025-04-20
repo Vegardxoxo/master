@@ -216,6 +216,7 @@ export type Repository = {
   organization: string;
   updatedAt: Date;
   hasReport: boolean;
+  reportGeneratedAt: Date;
   openIssues: string
 };
 

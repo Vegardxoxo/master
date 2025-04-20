@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Button as Button2 } from "@/app/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -185,9 +186,9 @@ export function AddCourseInstance({
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button2 type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Adding..." : "Add"}
-            </Button>
+            </Button2>
           </DialogFooter>
         </form>
       </DialogContent>

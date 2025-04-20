@@ -615,12 +615,6 @@ export default function GenerateReport({
           <CardContent className="p-0 overflow-auto flex-grow">
             <MarkdownPreview markdown={getMarkdown()} title="" />
           </CardContent>
-         <CardFooter className="bg-slate-50 border-t p-4 flex justify-center flex-shrink-0">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Preview updates automatically as you edit
-            </div>
-          </CardFooter>
         </Card>
       </div>
     </div>

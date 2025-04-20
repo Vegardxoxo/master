@@ -69,7 +69,7 @@ export function UpdateRepositoryForm({
     <Card className="w-[350px]">
       <form action={handleSubmit}>
         <CardHeader>
-          <CardTitle>Update Repository</CardTitle>
+          <CardTitle className={"text-2xl font-bold"}>Update Repository</CardTitle>
           <CardDescription>Edit the repository details.</CardDescription>
         </CardHeader>
 

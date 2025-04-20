@@ -111,7 +111,6 @@ export async function getRepository(
         username: true,
         repoName: true,
         url: true,
-        platform: true,
       },
     });
     if (!repo) {
@@ -160,6 +159,7 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         repoName: true,
         url: true,
         hasReport: true,
+        reportGeneratedAt: true,
         organization: true,
         openIssues: true,
         updatedAt: true,
@@ -191,7 +191,7 @@ export async function getCourseInstance(
 }> {
   try {
     const session = await auth();
-    if (!session || !session.user || !session.user.email) {
+    if (!session || !session.user || !session.user.id) {
       return {
         error: "Not authenticated",
         courseInstance: null,
@@ -540,6 +540,7 @@ export async function setReportGenerated(
       },
       data: {
         hasReport: true,
+        reportGeneratedAt: new Date(),
       },
     });
 

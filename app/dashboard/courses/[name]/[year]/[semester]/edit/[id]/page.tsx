@@ -74,12 +74,7 @@ export default async function Page(props: {
           Back to repositories
         </Link>
 
-        {/* Page header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">
-            Edit Repository
-          </h1>
-        </div>
+ 
 
         {/* Form */}
         <div className="flex justify-center">
