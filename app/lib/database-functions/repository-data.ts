@@ -1,6 +1,12 @@
 import fetchMilestones, {
-    fetchAllCommits, fetchBranches,
-    fetchContributors, fetchIssues, fetchPullRequests, fetchWorkflowRuns, getMainCommits,
+    fetchAllCommits,
+    fetchBranches,
+    fetchContributors,
+    fetchIssues,
+    fetchPullRequests,
+    fetchRepository,
+    fetchWorkflowRuns,
+    getMainCommits,
     getRepoLanguages
 } from "@/app/lib/data/github-api-functions";
 import {prisma} from "@/app/lib/prisma";
@@ -36,19 +42,23 @@ export async function storeLanguageDistribution(owner: string, repo: string, rep
 
         await prisma.$transaction(operations);
 
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Error fetching language distribution:", e);
-        return { success: false, error: "Failed to fetch language distribution." };
+        return {success: false, error: "Failed to fetch language distribution."};
     }
 }
 
-export async function getLanguageDistribution(owner: string, repo: string): Promise<{success: boolean; languages: any | undefined; error?: string;}> {
+export async function getLanguageDistribution(owner: string, repo: string): Promise<{
+    success: boolean;
+    languages: any | undefined;
+    error?: string;
+}> {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
 
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
 
         const languages = await prisma.languageDistribution.findMany({
@@ -66,10 +76,10 @@ export async function getLanguageDistribution(owner: string, repo: string): Prom
         });
 
         console.log("fetched from local database", languages);
-        return { success: true, languages };
+        return {success: true, languages};
     } catch (e) {
         console.error("Error fetching language distribution:", e);
-        return { success: false, languages: undefined,  error: "Failed to fetch language distribution." };
+        return {success: false, languages: undefined, error: "Failed to fetch language distribution."};
     }
 }
 
@@ -85,7 +95,7 @@ export async function storeContributors(owner: string, repo: string, repoId: str
                         repositoryId: repoId,
                     },
                 },
-                update: { url: contributor.url },
+                update: {url: contributor.url},
                 create: {
                     login: contributor.login,
                     url: contributor.url,
@@ -95,11 +105,11 @@ export async function storeContributors(owner: string, repo: string, repoId: str
         ));
 
         await prisma.$transaction(operation);
-        return { success: true, contributors };
+        return {success: true, contributors};
 
     } catch (e) {
         console.error("Error storing contributors:", e);
-        return { success: false, error: "Failed to store contributors." };
+        return {success: false, error: "Failed to store contributors."};
     }
 }
 
@@ -108,7 +118,7 @@ export async function getContributors(owner: string, repo: string) {
         const result = await findRepositoryByOwnerRepo(owner, repo);
 
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
 
         const contributors = await prisma.contributor.findMany({
@@ -121,13 +131,12 @@ export async function getContributors(owner: string, repo: string) {
             },
         });
         console.log("fetched from local database", contributors)
-        return { success: true, contributors };
+        return {success: true, contributors};
     } catch (e) {
         console.error("Error fetching contributors:", e);
-        return { success: false, error: "Failed to fetch contributors." };
+        return {success: false, error: "Failed to fetch contributors."};
     }
 }
-
 
 
 export async function getRepoInfo(owner: string, repo: string) {
@@ -135,10 +144,10 @@ export async function getRepoInfo(owner: string, repo: string) {
         const result = await findRepositoryByOwnerRepo(owner, repo);
 
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
 
-        const { stars, openIssues, forks, watchers, repoName, updatedAt } = result.repository;
+        const {stars, openIssues, forks, watchers, repoName, updatedAt, url} = result.repository;
 
         return {
             success: true,
@@ -149,11 +158,12 @@ export async function getRepoInfo(owner: string, repo: string) {
                 forks,
                 watchers,
                 name: repoName,
+                url
             }
         };
     } catch (e) {
         console.error("Error fetching repository info:", e);
-        return { success: false, error: "Failed to fetch repository info." };
+        return {success: false, error: "Failed to fetch repository info."};
     }
 }
 
@@ -198,10 +208,10 @@ export async function storeMilestones(owner: string, repo: string, repoId: strin
             })
         );
         await prisma.$transaction(operations);
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Error storing milestones:", e);
-        return { success: false, error: "Failed to store milestones." };
+        return {success: false, error: "Failed to store milestones."};
     }
 }
 
@@ -209,12 +219,12 @@ export async function getMilestones(owner: string, repo: string) {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
         const milestones = await prisma.milestone.findMany({
-            where: { repositoryId: repoId },
-            orderBy: { dueDate: 'asc' },
+            where: {repositoryId: repoId},
+            orderBy: {dueDate: 'asc'},
             select: {
                 githubId: true,
                 title: true,
@@ -229,10 +239,10 @@ export async function getMilestones(owner: string, repo: string) {
                 url: true,
             }
         });
-        return { success: true, milestones };
+        return {success: true, milestones};
     } catch (e) {
         console.error("Error fetching milestones:", e);
-        return { success: false, milestones: undefined, error: "Failed to fetch milestones." };
+        return {success: false, milestones: undefined, error: "Failed to fetch milestones."};
     }
 }
 
@@ -242,7 +252,7 @@ export async function storeCommits(owner: string, repo: string, repoId: string) 
         const operations = commits.map(commit => {
             const sha = commit.sha ?? commit.html_url?.split("/").pop() ?? "";
             return prisma.commit.upsert({
-                where: { sha },
+                where: {sha},
                 update: {
                     authorName: commit.commit.author.name,
                     authorEmail: commit.commit.author.email,
@@ -274,12 +284,10 @@ export async function storeCommits(owner: string, repo: string, repoId: string) 
         });
 
 
-
         await prisma.$transaction(operations);
-    }
-    catch (e) {
+    } catch (e) {
         console.error("Error storing commits:", e);
-        return { success: false, error: "Failed to store commits." };
+        return {success: false, error: "Failed to store commits."};
 
 
     }
@@ -289,20 +297,20 @@ export async function getCommits(owner: string, repo: string) {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
 
         const commits = await prisma.commit.findMany({
-            where: { repositoryId: repoId },
-            orderBy: { committedAt: 'desc' },
+            where: {repositoryId: repoId},
+            orderBy: {committedAt: 'desc'},
         });
 
         console.log("fetched from local database");
-        return { success: true, commits };
+        return {success: true, commits};
     } catch (e) {
         console.error("Error fetching commits:", e);
-        return { success: false, commits: undefined, error: "Failed to fetch commits." };
+        return {success: false, commits: undefined, error: "Failed to fetch commits."};
     }
 }
 
@@ -312,15 +320,15 @@ export async function storePullRequests(owner: string, repo: string, repoId: str
         const data = await fetchPullRequests(owner, repo, state);
 
         await prisma.pullRequest.upsert({
-            where: { repositoryId_state: { repositoryId: repoId, state } },
-            update: { data },
-            create: { repositoryId: repoId, state, data },
+            where: {repositoryId_state: {repositoryId: repoId, state}},
+            update: {data},
+            create: {repositoryId: repoId, state, data},
         });
 
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Failed to store pull requests:", e);
-        return { success: false, error: "Failed to store pull requests." };
+        return {success: false, error: "Failed to store pull requests."};
     }
 }
 
@@ -328,7 +336,7 @@ export async function getPullRequests(owner: string, repo: string) {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
 
@@ -342,13 +350,13 @@ export async function getPullRequests(owner: string, repo: string) {
         });
 
         if (prRecord && prRecord.data) {
-            return { success: true, data: prRecord.data };
+            return {success: true, data: prRecord.data};
         } else {
-            return { success: false, error: "No pull requests found in database for this repository." };
+            return {success: false, error: "No pull requests found in database for this repository."};
         }
     } catch (e) {
         console.error("Failed to get pull requests:", e);
-        return { success: false, error: "Failed to get pull requests." };
+        return {success: false, error: "Failed to get pull requests."};
     }
 }
 
@@ -399,19 +407,19 @@ export async function getDirectCommits(owner: string, repo: string) {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
 
         const commits = await prisma.commitMain.findMany({
-            where: { repositoryId: repoId },
-            orderBy: { date: "desc" },
+            where: {repositoryId: repoId},
+            orderBy: {date: "desc"},
         });
 
-        return { success: true, commits };
+        return {success: true, commits};
     } catch (e) {
         console.error("Error fetching commits:", e);
-        return { success: false, commits: undefined, error: "Failed to fetch commits." };
+        return {success: false, commits: undefined, error: "Failed to fetch commits."};
     }
 }
 
@@ -440,7 +448,7 @@ export async function storeBranches(owner: string, repo: string, repoId: string)
         // Execute all upserts atomically
         await prisma.$transaction(upserts);
 
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Failed to store branches in a transaction:", e);
         throw e;
@@ -451,19 +459,19 @@ export async function getBranches(owner: string, repo: string) {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
 
         const branches = await prisma.branch.findMany({
-            where: { repositoryId: repoId },
-            orderBy: { name: "asc" },
+            where: {repositoryId: repoId},
+            orderBy: {name: "asc"},
         });
 
-        return { success: true, branches };
+        return {success: true, branches};
     } catch (e) {
         console.error("Error fetching branches:", e);
-        return { success: false, error: "Internal server error" };
+        return {success: false, error: "Internal server error"};
     }
 }
 
@@ -472,7 +480,7 @@ export async function storeIssues(owner: string, repo: string, repoId: string) {
         const issues = await fetchIssues(owner, repo);
 
         if (!issues.length) {
-            return { success: true, message: "No issues to store." };
+            return {success: true, message: "No issues to store."};
         }
 
         const operations = issues.map((issue: GitHubIssue) =>
@@ -504,71 +512,76 @@ export async function storeIssues(owner: string, repo: string, repoId: string) {
 
         await prisma.$transaction(operations);
 
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Error storing issues:", e);
-        return { success: false, error: "Internal server error" };
+        return {success: false, error: "Internal server error"};
     }
 }
 
-export async function getIssues(owner: string, repo: string): Promise<{issues: GitHubIssue[] | undefined; success: boolean; error?: string;}> {
+export async function getIssues(owner: string, repo: string): Promise<{
+    issues: GitHubIssue[] | undefined;
+    success: boolean;
+    error?: string;
+}> {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
-            return { success: false, error: result.error };
+            return {success: false, error: result.error};
         }
         const repoId = result.repository.id;
 
         const issues = await prisma.issue.findMany({
-            where: { repositoryId: repoId },
-            orderBy: { number: "asc" },
+            where: {repositoryId: repoId},
+            orderBy: {number: "asc"},
         });
 
-        return { success: true, issues };
+        return {success: true, issues};
     } catch (e) {
         console.error("Error fetching issues:", e);
-        return { success: false, error: "Internal server error", issues: undefined };
+        return {success: false, error: "Internal server error", issues: undefined};
     }
 }
 
 export async function storeWorkFlowRuns(owner: string, repo: string, repoId: string) {
     try {
-        const { workflow_runs } = await fetchWorkflowRuns(owner, repo);
+        const {workflow_runs} = await fetchWorkflowRuns(owner, repo);
 
         const upserts = workflow_runs.map(run =>
             prisma.workflowRuns.upsert({
                 where: {
                     repositoryId_githubRunId: {
                         repositoryId: repoId,
-                        githubRunId: run.id,
+                        githubRunId: BigInt(run.id), // Cast to BigInt
                     },
                 },
                 update: {
-                    name: run.name,
-                    status: run.status,
-                    conclusion: run.conclusion,
-                    created_at: new Date(run.created_at),
-                    updated_at: new Date(run.updated_at),
-                    run_started_at: new Date(run.run_started_at),
-                    run_number: run.run_number,
+                    name: run.name ?? "unknown",
+                    status: run.status ?? "unknown",
+                    conclusion: run.conclusion ?? "",
+                    createdAt: new Date(run.created_at),
+                    updatedAt: new Date(run.updated_at),
+                    runStartedAt: new Date(run.run_started_at),
+                    runNumber: run.run_number ?? 0,
                 },
                 create: {
                     repositoryId: repoId,
-                    githubRunId: run.id,
-                    name: run.name,
-                    status: run.status,
-                    conclusion: run.conclusion,
-                    created_at: new Date(run.created_at),
-                    updated_at: new Date(run.updated_at),
-                    run_started_at: new Date(run.run_started_at),
-                    run_number: run.run_number,
+                    githubRunId: BigInt(run.id),
+                    name: run.name ?? "unknown",
+                    status: run.status ?? "unknown",
+                    conclusion: run.conclusion ?? "",
+                    createdAt: new Date(run.created_at),
+                    updatedAt: new Date(run.updated_at),
+                    runStartedAt: new Date(run.run_started_at),
+                    runNumber: run.run_number ?? 0,
                 },
             })
         );
 
+
         await prisma.$transaction(upserts);
 
-        return { success: true };
+        return {success: true};
     } catch (e) {
         console.error("Failed to store workflow runs:", e);
         throw e;
@@ -576,9 +589,9 @@ export async function storeWorkFlowRuns(owner: string, repo: string, repoId: str
 }
 
 export async function getWorkflowRuns(owner: string, repo: string) {
-    const { success, repository, error } = await findRepositoryByOwnerRepo(owner, repo);
+    const {success, repository, error} = await findRepositoryByOwnerRepo(owner, repo);
     if (!success || !repository) {
-        return { workflow_runs: [], total_count: 0, error: error || "Repository not found" };
+        return {workflow_runs: [], total_count: 0, error: error || "Repository not found"};
     }
 
     const workflow_runs = await prisma.workflowRuns.findMany({
@@ -586,7 +599,7 @@ export async function getWorkflowRuns(owner: string, repo: string) {
             repositoryId: repository.id,
         },
         orderBy: {
-            run_number: "desc",
+            runNumber: "desc",
         },
     });
 
@@ -594,6 +607,36 @@ export async function getWorkflowRuns(owner: string, repo: string) {
         workflow_runs,
         total_count: workflow_runs.length,
     };
+}
+
+
+export async function storeRepositoryMetaData(owner: string, repo: string, repoId: string) {
+    try {
+        const repoInfo = await fetchRepository(owner, repo);
+        if (!repoInfo) return;
+
+        const updateData = {
+            url: repoInfo.url!,
+            githubId: repoInfo.id!,
+            openIssues: repoInfo.openIssues!,
+            updatedAt: repoInfo.updatedAt!,
+            stars: repoInfo.stars,
+            forks: repoInfo.forks,
+            watchers: repoInfo.watchers,
+        };
+
+        await prisma.$transaction(async (prisma) => {
+            await prisma.repository.update({
+                where: {id: repoId},
+                data: updateData,
+            });
+        });
+
+        return {success: true};
+    } catch (e) {
+        console.error("Error storing repository metadata:", e);
+        return {success: false, error: "Failed to store repository metadata."};
+    }
 }
 
 
@@ -609,7 +652,9 @@ export async function updateRepositoryData(owner: string, repo: string, repoId: 
             storeBranches(owner, repo, repoId),
             storeIssues(owner, repo, repoId),
             storeWorkFlowRuns(owner, repo, repoId),
+            storeRepositoryMetaData(owner, repo, repoId)
         ]);
+        console.log("Successfully updated repository data.");
         return {success: true};
     } catch (e) {
         console.error("Error updating repository data:", e);

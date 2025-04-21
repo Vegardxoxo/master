@@ -24,6 +24,8 @@ export default async function CommitContributionsWrapper({
     <CommitContributions
         commits={commits}
         url={image_url}
+        owner={owner}
+        repo={repo}
     />
   );
 }

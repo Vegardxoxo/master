@@ -11,6 +11,8 @@ export default async function TestCoverage({
   repo: string;
 }) {
   const coverage = await getCoverageReport(owner, repo);
+
+  console.log("coverage", coverage);
   if (coverage.error || !coverage.metrics || !coverage.fileData) {
     return (
       <Warning
@@ -39,11 +41,11 @@ export default async function TestCoverage({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 flex flex-col">
+      <div className="flex flex-col gap-6">
+        <div className="w-full">
           <TestCoverageMetrics metrics={coverage.metrics} />
         </div>
-        <div className="lg:col-span-2 flex flex-col">
+        <div className="w-full">
           <FileCoverageTable fileData={coverage.fileData} />
         </div>
       </div>

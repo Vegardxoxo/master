@@ -225,7 +225,9 @@ ${commitContributionsRecommendations}
 
   // Pull Requests Section
   if (includedSections.pullRequests && pullRequests) {
+      console.log("her", pullRequests)
     markdown += `## Pull Requests Analysis
+    
 
 `
 
@@ -279,7 +281,6 @@ ${pullRequestsRecommendations}
 `
     }
   }
-  console.log("her", developmentBranches)
   // Development Branches Section (Branch-Issue Connection)
   if (includedSections.developmentBranches && developmentBranches) {
     markdown += `## Branch-Issue Connection Analysis
@@ -505,7 +506,7 @@ ${additionalNotes}
 
   // Footer
   markdown += `---
-Generated on ${new Date().toLocaleDateString()} by Git Workflow Analysis Tool`
+Generated on ${new Date().toLocaleDateString()} by GitTrack`
 
   return markdown
 }

@@ -93,28 +93,28 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    const repoInfo = await fetchRepository(username, repoName);
-    console.log("repoInfo", repoInfo);
-
-    if (!repoInfo.success) {
-      return {
-        error: `Failed to fetch repository information: ${repoInfo.error}`,
-      };
-    }
+    // const repoInfo = await fetchRepository(username, repoName);
+    //
+    // if (!repoInfo.success) {
+    //   return {
+    //     error: `Failed to fetch repository information: ${repoInfo.error}`,
+    //   };
+    // }
 
     const repository = await prisma.repository.create({
       data: {
         username: username,
         repoName: repoName,
-        url: repoInfo.url!,
-        githubId: repoInfo.id!,
         organization: organization,
-        openIssues: repoInfo.openIssues!,
-        updatedAt: repoInfo.updatedAt!,
-        stars: repoInfo.stars,
-        forks: repoInfo.forks,
-        watchers: repoInfo.watchers,
         courseInstanceId: courseInstanceId,
+        // url: repoInfo.url!,
+        // githubId: repoInfo.id!,
+        // openIssues: repoInfo.openIssues!,
+        // updatedAt: repoInfo.updatedAt!,
+        // stars: repoInfo.stars,
+        // forks: repoInfo.forks,
+        // watchers: repoInfo.watchers,
+
         members: {
           connect: {
             id: session.user.id,
@@ -134,7 +134,7 @@ export async function createRepository(prevState: any, formData: FormData) {
     return {
       success: true,
       repository,
-      message: `Repository ${repoInfo.url} added successfully`,
+      message: `Repository ${repoName} added successfully`,
     };
   } catch (e) {
     console.error("Error adding repository:", e);

@@ -343,7 +343,7 @@ export async function getRepositoryFiles(
 export async function getCoverageReport(
   owner: string,
   repo: string,
-  branch: string = "main",
+  branch: string = "master",
 ): Promise<{
   error?: string;
   success?: boolean;
@@ -360,18 +360,14 @@ export async function getCoverageReport(
       };
     }
 
-    const repository = await prisma.repository.findFirst({
-      where: {
-        username: owner,
-        repoName: repo,
-      },
-    });
+    const result = await findRepositoryByOwnerRepo(owner, repo);
 
-    if (!repository) {
+    if (!result.success || !result.repository) {
       return {
         error: "Repository not found or you don't have access to it",
       };
     }
+    const repository = result.repository;
 
     const coverageReport = await prisma.coverageReport.findFirst({
       where: {
@@ -514,7 +510,7 @@ export async function setReportGenerated(
     // 4) Pull out the course code, year & semester
     const courseCode = ci.userCourse.course.code;
     const year = ci.year;
-    const semester = ci.semester.toLowerCase(); // e.g. "spring" or "autumn"
+    const semester = ci.semester.toLowerCase();
 
     // 5) Trigger ISR revalidation
     revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);

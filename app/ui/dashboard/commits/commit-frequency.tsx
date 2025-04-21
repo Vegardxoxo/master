@@ -19,17 +19,18 @@ import { COLORS } from "@/app/lib/placeholder-data"
 interface CommitFrequencyProps {
   data: any[]
   image_url: string
+  owner: string
+  repo: string
 }
 
-export default function CommitFrequency({ data, image_url }: CommitFrequencyProps) {
+export default function CommitFrequency({ data, image_url, owner, repo }: CommitFrequencyProps) {
   const [selectedAuthors, setSelectedAuthors] = useState(["TOTAL@commits"])
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [imageURL, setImageURL] = useState<string | undefined>(image_url)
-  const { getRepositoryInfo, addMetricData, addImageUrls } = useReport()
-  const info = getRepositoryInfo()
-  const repoId = `${info.owner}/${info.repo}`
+  const {  addMetricData, addImageUrls } = useReport()
+  const repoId = `${owner}/${repo}`
 
   // Use the custom hook for author consolidation
   const { mergedCommits, hasMerged, isLoading, handleMerge, resetMerge } = useAuthorConsolidation(data, repoId)
@@ -130,8 +131,8 @@ export default function CommitFrequency({ data, image_url }: CommitFrequencyProp
                           chartType: "COMMIT_FREQUENCY",
                           chartRef: chartRef,
                           setIsUploading: setIsUploading,
-                          owner: info.owner,
-                          repo: info.repo,
+                          owner: owner,
+                          repo: repo,
                         }).then((r) => {
                           if (typeof r === "string") {
                             setImageURL(r)

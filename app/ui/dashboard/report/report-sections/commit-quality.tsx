@@ -6,6 +6,7 @@ import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Separator } from "@/components/ui/separator";
 
 export function CommitQualitySection({ metrics, include }: ReportSectionProps) {
+
   if (!include || !metrics) {
     return (
       <Card>

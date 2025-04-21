@@ -82,6 +82,7 @@ export function PullRequestsMembers({
   const [selectedMilestone, setSelectedMilestone] = useState<string>("all");
   const chartData = createChartData(data, selectedMembers, selectedMilestone);
   const { addMetricData, getRepositoryInfo, addImageUrls } = useReport();
+
   const info = getRepositoryInfo();
   const chartRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -189,6 +190,8 @@ export function PullRequestsMembers({
     addMetricData("pullRequests", tableData, metrics);
     addImageUrls("pullRequests", [imageURL ? imageURL : ""]);
   }, [data]);
+
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between">

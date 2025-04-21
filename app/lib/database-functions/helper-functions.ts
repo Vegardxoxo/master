@@ -1,10 +1,11 @@
 import {prisma} from "@/app/lib/prisma";
 import {Repository} from "@/app/lib/definitions/definitions";
+import {revalidatePath} from "next/cache";
 
 export async function findRepositoryByGithubId(githubId: string) {
     try {
         const repository = await prisma.repository.findFirst({
-            where: { githubId },
+            where: {githubId},
         });
         return repository;
     } catch (e) {
@@ -51,4 +52,38 @@ export async function findRepositoryByOwnerRepo(
             repository: null,
         };
     }
+}
+
+
+export async function refreshCache(githubId: string): Promise<void> {
+    try {
+        const repo = await prisma.repository.findFirst({
+            where: {githubId},
+            include: {
+                courseInstance: {
+                    include: {
+                        userCourse: {
+                            include: {course: true},
+                        },
+                    },
+                },
+            },
+        })
+
+        if (!repo) return;
+        const ci = repo.courseInstance;
+        if (!ci) return;
+
+
+        const courseCode = ci.userCourse.course.code;
+        const year = ci.year;
+        const semester = ci.semester.toLowerCase();
+        revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);
+        return;
+    } catch (e) {
+        console.error("Error refreshing cache:", e);
+
+    }
+
+
 }

@@ -85,21 +85,23 @@ model CourseInstance {
 
 model Repository {
   id               String          @id @default(uuid())
-  githubId         String
   username         String
-  repoName         String
-  url              String
   organization     String          @default("none")
   createdAt        DateTime        @default(now())
-  updatedAt        DateTime
-  openIssues       String          @default("0")
   members          User[]          @relation("RepositoryMembers")
-  stars            Int
-  forks            Int
-  watchers         Int
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+  // GitHub MetaData
+  repoName         String
+  githubId         String          @default("none")
+  url              String          @default("none")
+  updatedAt        DateTime?
+  openIssues       String          @default("0")
+  stars            Int             @default(0)
+  forks            Int             @default(0)
+  watchers         Int             @default(0)
 
+  // Github data
   workflowRuns      WorkflowRuns[]
   issues            Issue[]
   branches          Branch[]
@@ -292,17 +294,17 @@ model Issue {
 }
 
 model WorkflowRuns {
-  id             String     @id @default(uuid())
-  repositoryId   String
-  repository     Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-  githubRunId    BigInt
-  name           String
-  status         String
-  conclusion     String
-  created_at     DateTime
-  updated_at     DateTime
-  run_started_at DateTime
-  run_number     Int
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  githubRunId  BigInt
+  name         String
+  status       String
+  conclusion   String
+  createdAt    DateTime
+  updatedAt    DateTime
+  runStartedAt DateTime
+  runNumber    Int
 
   @@unique([repositoryId, githubRunId])
 }

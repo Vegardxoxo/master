@@ -32,31 +32,14 @@ export default async function Page(props: {
   const owner = params.owner;
   const repo = params.repo;
 
-  const check = await checkConnection(owner, repo);
+  const found = await checkConnection(owner, repo);
 
-  if (!check) {
+  if (!found) {
       notFound();
   }
 
   return (
     <div className="container mx-auto py-6">
-      {/*Project subject and group.*/}
-      <header>
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            <Link
-              href={`https://git.ntnu.no/${owner}/${repo}`}
-              className={cn(
-                lusitana.className,
-                "hover:underline text-blue-600",
-              )}
-            >
-              {owner}/{repo} Dashboard
-            </Link>
-          </h1>
-        </div>
-      </header>
-
       <Dashboard owner={owner} repo={repo}>
         {{
           contributorsList: (

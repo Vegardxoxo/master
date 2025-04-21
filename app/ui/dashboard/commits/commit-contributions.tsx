@@ -24,9 +24,11 @@ const CustomBar = (props: any) => {
 interface CommitContributionsProps {
   commits: any[]
   url: string | undefined
+  owner: string
+  repo: string
 }
 
-export default function CommitContributions({ commits, url }: CommitContributionsProps) {
+export default function CommitContributions({ commits, url, owner, repo }: CommitContributionsProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [selectedUser, setSelectedUser] = useState<any | null>(null)
   const [imageUrl, setImageUrl] = useState(url)
@@ -40,9 +42,8 @@ export default function CommitContributions({ commits, url }: CommitContribution
   const [projectAverageFilesChanged, setProjectAverageFilesChanged] = useState<number>(0)
 
   // context store
-  const { getRepositoryInfo, addMetricData, addImageUrls } = useReport()
-  const info = getRepositoryInfo()
-  const repoId = `${info.owner}/${info.repo}`
+  const {  addMetricData, addImageUrls } = useReport()
+  const repoId = `${owner}/${repo}`
 
   // Use the custom hook for author consolidation
   const { mergedCommits, hasMerged, isLoading, handleMerge, resetMerge } = useAuthorConsolidation(commits, repoId)
@@ -137,8 +138,8 @@ export default function CommitContributions({ commits, url }: CommitContribution
                           chartType: "CONTRIBUTIONS",
                           chartRef: chartRef,
                           setIsUploading: setIsUploading,
-                          owner: info.owner,
-                          repo: info.repo,
+                          owner: owner,
+                          repo: repo,
                         }).then((r) => {
                           if (typeof r === "string") {
                             setImageUrl(r)

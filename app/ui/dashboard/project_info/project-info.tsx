@@ -1,13 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Star, GitFork, Eye, AlertCircle } from "lucide-react";
-import { fetchProjectInfo } from "@/app/lib/data/github-api-functions";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {AlertCircle, Eye, GitFork, Star} from "lucide-react";
 import {getRepoInfo} from "@/app/lib/database-functions/repository-data";
+import Link from "next/link";
 
 export default async function ProjectInfo({
   owner,
@@ -24,7 +18,10 @@ export default async function ProjectInfo({
     <Card className="w-full h-full">
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-gray-800">
-          {info.name}
+          <Link href={info.url} className={"text-blue-500 hover:underline hover:text-blue-600 hover:cursor-pointer"}>
+            {info.name}
+          </Link>
+
         </CardTitle>
         <CardDescription className="text-sm text-gray-500">
           Last updated: {new Date(info.updatedAt).toLocaleDateString()}

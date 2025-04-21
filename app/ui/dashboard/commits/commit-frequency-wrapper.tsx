@@ -17,5 +17,5 @@ export default async function CommitFrequencyWrapper({
   if (!success && error) {
     return <h1> {error}</h1>
   }
-  return <CommitFrequency data={commits} image_url={image_url} />;
+  return <CommitFrequency data={commits} image_url={image_url} owner={owner} repo={repo} />;
 }
