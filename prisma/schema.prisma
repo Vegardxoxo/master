@@ -308,3 +308,10 @@ model WorkflowRuns {
 
   @@unique([repositoryId, githubRunId])
 }
+
+generator erd {
+  provider    = "prisma-erd-generator"
+  tableOnly   = true
+  ignoreEnums = true
+  theme       = "forest"
+}

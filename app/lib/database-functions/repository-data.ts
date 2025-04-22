@@ -6,7 +6,7 @@ import fetchMilestones, {
     fetchPullRequests,
     fetchRepository,
     fetchWorkflowRuns,
-    getMainCommits,
+    fetchMainCommits,
     getRepoLanguages
 } from "@/app/lib/data/github-api-functions";
 import {prisma} from "@/app/lib/prisma";
@@ -362,7 +362,7 @@ export async function getPullRequests(owner: string, repo: string) {
 
 export async function storeCommitsToMain(owner: string, repo: string, repoId: string) {
     try {
-        const commitsToMain = await getMainCommits(owner, repo);
+        const commitsToMain = await fetchMainCommits(owner, repo);
 
         if (!commitsToMain || commitsToMain.length === 0) {
             console.log("No direct commits to store.");
