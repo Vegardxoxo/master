@@ -45,4 +45,4 @@ next-env.d.ts
 
 .env.local
 .env
-prisma/migrations/
+prisma/migrations/!/.env
