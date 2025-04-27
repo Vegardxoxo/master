@@ -1,21 +1,20 @@
 "use client"
 
-import { useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { GitPullRequest, GitGraphIcon as GitIssue, GitCompare, HelpCircle } from "lucide-react"
+import {useMemo} from "react"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Badge} from "@/components/ui/badge"
+import {GitCompare, GitGraphIcon as GitIssue, GitPullRequest} from "lucide-react"
 import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
     CartesianGrid,
     Legend,
+    Line,
+    LineChart,
     ResponsiveContainer,
     Tooltip as RechartsTooltip,
+    XAxis,
+    YAxis,
 } from "recharts"
-import type { GitHubIssue } from "@/app/lib/definitions/pull-requests"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type {GitHubIssue} from "@/app/lib/definitions/pull-requests"
 import {BestPractices} from "@/app/ui/dashboard/alerts/best-practices";
 
 interface PullRequestVsIssuesProps {

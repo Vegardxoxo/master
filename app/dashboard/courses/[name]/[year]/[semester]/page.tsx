@@ -2,7 +2,7 @@ import AddRepoParent from "@/app/ui/courses/add/add-repo-parent";
 import {
   getCourseInstance,
   getRepositories,
-} from "@/app/lib/database-functions";
+} from "@/app/lib/database-functions/database-functions";
 import { DataTable } from "@/app/ui/courses/tables/overview-table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
 import { PlusCircle } from "lucide-react";

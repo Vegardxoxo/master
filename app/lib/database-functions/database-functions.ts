@@ -11,6 +11,9 @@ import {
   Repository,
   UserCourse,
 } from "@/app/lib/definitions/definitions";
+import {fetchContributors} from "@/app/lib/data/github-api-functions";
+import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
+import {revalidatePath} from "next/cache";
 
 
 /**
@@ -111,7 +114,6 @@ export async function getRepository(
         username: true,
         repoName: true,
         url: true,
-        platform: true,
       },
     });
     if (!repo) {
@@ -160,6 +162,7 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         repoName: true,
         url: true,
         hasReport: true,
+        reportGeneratedAt: true,
         organization: true,
         openIssues: true,
         updatedAt: true,
@@ -191,7 +194,7 @@ export async function getCourseInstance(
 }> {
   try {
     const session = await auth();
-    if (!session || !session.user || !session.user.email) {
+    if (!session || !session.user || !session.user.id) {
       return {
         error: "Not authenticated",
         courseInstance: null,
@@ -258,57 +261,7 @@ export async function getCourseInstance(
   }
 }
 
-export async function findRepositoryByGithubId(githubId: string) {
-  try {
-    const repository = await prisma.repository.findFirst({
-      where: { githubId },
-    });
-    return repository;
-  } catch (e) {
-    return {
-      error: "Database error: Failed to fetch repository.",
-      repository: null,
-    };
-  }
-}
 
-export async function findRepositoryByOwnerRepo(
-  owner: string,
-  repo: string,
-): Promise<{
-  success: boolean;
-  error?: string;
-  repository: Repository | null;
-}> {
-  try {
-    const repository = await prisma.repository.findFirst({
-      where: {
-        username: owner,
-        repoName: repo,
-      },
-    });
-
-    if (!repository) {
-      return {
-        success: false,
-        error: "Repository not found or you don't have access to it.",
-        repository: null,
-      };
-    }
-
-    return {
-      success: true,
-      repository: repository as Repository,
-    };
-  } catch (e) {
-    console.error("Database error: Error fetching repository:", e);
-    return {
-      success: false,
-      error: "Database error: Error fetching repository",
-      repository: null,
-    };
-  }
-}
 
 /**
  * Fetches all files for a specific repository and branch
@@ -390,7 +343,7 @@ export async function getRepositoryFiles(
 export async function getCoverageReport(
   owner: string,
   repo: string,
-  branch: string = "main",
+  branch: string = "master",
 ): Promise<{
   error?: string;
   success?: boolean;
@@ -407,18 +360,14 @@ export async function getCoverageReport(
       };
     }
 
-    const repository = await prisma.repository.findFirst({
-      where: {
-        username: owner,
-        repoName: repo,
-      },
-    });
+    const result = await findRepositoryByOwnerRepo(owner, repo);
 
-    if (!repository) {
+    if (!result.success || !result.repository) {
       return {
         error: "Repository not found or you don't have access to it",
       };
     }
+    const repository = result.repository;
 
     const coverageReport = await prisma.coverageReport.findFirst({
       where: {
@@ -509,43 +458,66 @@ export async function fetchGraphUrl(
 }
 
 export async function setReportGenerated(
-  owner: string,
-  repo: string,
+    owner: string,
+    repo: string
 ): Promise<{
   success: boolean;
   error?: string;
   message?: string;
 }> {
   try {
+    // 1) Authentication
     const session = await auth();
-    if (!session || !session.user || !session.user.email) {
-      return {
-        success: false,
-        error: "Not authenticated",
-      };
+    if (!session?.user?.email) {
+      return { success: false, error: "Not authenticated" };
     }
 
-    const result = await findRepositoryByOwnerRepo(owner, repo);
-    if (!result.repository) {
-      return {
-        success: false,
-        error: "Repository not found",
-      };
-    }
-
-    // Update the repository record
-    await prisma.repository.update({
-      where: {
-        id: result.repository.id,
-      },
-      data: {
-        hasReport: true,
+    // 2) Fetch the repo, including its courseInstance → userCourse → course
+    const repository = await prisma.repository.findFirst({
+      where: { username: owner, repoName: repo },
+      include: {
+        courseInstance: {
+          include: {
+            userCourse: {
+              include: { course: true },
+            },
+          },
+        },
       },
     });
 
+    if (!repository) {
+      return { success: false, error: "Repository not found" };
+    }
+
+    const ci = repository.courseInstance;
+    if (!ci) {
+      return {
+        success: false,
+        error: "Course instance for this repository is missing",
+      };
+    }
+
+    // 3) Mark the report generated
+    await prisma.repository.update({
+      where: { id: repository.id },
+      data: {
+        hasReport: true,
+        reportGeneratedAt: new Date(),
+      },
+    });
+
+    // 4) Pull out the course code, year & semester
+    const courseCode = ci.userCourse.course.code;
+    const year = ci.year;
+    const semester = ci.semester.toLowerCase();
+
+    // 5) Trigger ISR revalidation
+    revalidatePath(`/dashboard/courses/${courseCode}/${year}/${semester}`);
+
     return {
       success: true,
-      message: "Report has been generated for the repository.",
+      message: "Report has been generated and dashboard revalidated.",
     };
   } catch (e) {
     console.error("Database error: Error updating report status:", e);
@@ -555,3 +527,6 @@ export async function setReportGenerated(
     };
   }
 }
+
+
+

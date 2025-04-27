@@ -1,19 +1,18 @@
 // utility functions
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import {type ClassValue, clsx} from "clsx";
+import {twMerge} from "tailwind-merge";
 import Papa from "papaparse";
 import {
-  AuthorFrequency,
   CommitEval,
   CommitMessageLong,
   CommitStats,
-  DayEntry,
   LLMResponse,
   MappedCommitMessage,
-  ParseCommitDataResult,
   PullRequestData,
   Review,
 } from "@/app/lib/definitions/definitions";
+import {promises as fs} from "fs";
+import path from "path";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -395,7 +394,6 @@ export function parsePullRequests(data: any[]): PullRequestData {
     return false;
   });
 
-  // collect all milestones in an array
 
   return {
     totalPRs,
@@ -459,20 +457,24 @@ export function createChartData(
 }
 
 
+
+
+
+
+
+
+
 /**
- * Utility function for replacing local urls with the ones on github
+ * Transforms local image references in markdown to their new repo-relative paths.
  */
 export function transformLocalImagePaths(
-  content: string,
-  replacements: Record<string, string>
+    markdown: string,
+    replacements: Record<string, string>
 ): string {
-  let updated = content;
-
-  for (const [oldPath, newPath] of Object.entries(replacements)) {
-    const escapedOld = oldPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const pattern = new RegExp(`\\]\\(${escapedOld}\\)`, "g");
-    updated = updated.replace(pattern, `](${newPath})`);
-  }
-
-  return updated;
+  return markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+    const rel = replacements[src] || src;
+    return `![${alt}](${rel})`;
+  });
 }
+
+

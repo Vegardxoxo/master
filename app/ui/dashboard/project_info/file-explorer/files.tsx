@@ -1,4 +1,4 @@
-import { getRepositoryFiles } from "@/app/lib/database-functions";
+import { getRepositoryFiles } from "@/app/lib/database-functions/database-functions";
 import { FileExplorer } from "@/app/ui/dashboard/project_info/file-explorer/file-explorer";
 import {
   Card,

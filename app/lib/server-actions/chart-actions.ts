@@ -2,9 +2,9 @@
 import { auth } from "@/auth";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
-import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions";
 
 import { prisma } from '@/app/lib/prisma';
+import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
 
 export async function saveChartImage(
   imageData: string,

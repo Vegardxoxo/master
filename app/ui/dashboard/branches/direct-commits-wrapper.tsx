@@ -1,6 +1,7 @@
-import {getMainCommits} from "@/app/lib/data/github-api-functions";
+import {fetchMainCommits} from "@/app/lib/data/github-api-functions";
 import Good from "@/app/ui/dashboard/alerts/good";
 import DirectCommits from "@/app/ui/dashboard/branches/direct-commits";
+import {getDirectCommits} from "@/app/lib/database-functions/repository-data";
 
 /**
  * Wrapper component for DirectCommits as the main component needs to access a context object.
@@ -16,7 +17,7 @@ export default async function DirectCommitsWrapper({
   owner: string;
   repo: string;
 }) {
-  const commits = await getMainCommits(owner, repo);
+  const {commits} = await getDirectCommits(owner, repo);
 
   if (!commits || commits.length === 0) {
     return <Good message={"Great job! No commits directly to main 👍"} />;

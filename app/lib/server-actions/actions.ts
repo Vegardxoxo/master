@@ -22,7 +22,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 
 import { prisma } from "@/app/lib/prisma";
-import {defaultVisibleSections} from "@/app/ui/dashboard/dashboard";
+import {updateRepositoryData} from "@/app/lib/database-functions/repository-data";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -93,24 +93,28 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    const repoInfo = await fetchRepository(username, repoName);
-
-    if (!repoInfo.success) {
-      return {
-        error: `Failed to fetch repository information: ${repoInfo.error}`,
-      };
-    }
+    // const repoInfo = await fetchRepository(username, repoName);
+    //
+    // if (!repoInfo.success) {
+    //   return {
+    //     error: `Failed to fetch repository information: ${repoInfo.error}`,
+    //   };
+    // }
 
     const repository = await prisma.repository.create({
       data: {
         username: username,
         repoName: repoName,
-        url: repoInfo.url!,
-        githubId: repoInfo.id!,
         organization: organization,
-        openIssues: repoInfo.openIssues!,
-        updatedAt: repoInfo.updatedAt!,
         courseInstanceId: courseInstanceId,
+        // url: repoInfo.url!,
+        // githubId: repoInfo.id!,
+        // openIssues: repoInfo.openIssues!,
+        // updatedAt: repoInfo.updatedAt!,
+        // stars: repoInfo.stars,
+        // forks: repoInfo.forks,
+        // watchers: repoInfo.watchers,
+
         members: {
           connect: {
             id: session.user.id,
@@ -118,6 +122,8 @@ export async function createRepository(prevState: any, formData: FormData) {
         },
       },
     });
+
+    await updateRepositoryData(repository.username, repository.repoName, repository.id);
 
     // Get the course code for path revalidation
     const courseCode = courseInstance.userCourse.course.code;
@@ -128,7 +134,7 @@ export async function createRepository(prevState: any, formData: FormData) {
     return {
       success: true,
       repository,
-      message: `Repository ${repoInfo.url} added successfully`,
+      message: `Repository ${repoName} added successfully`,
     };
   } catch (e) {
     console.error("Error adding repository:", e);
@@ -862,4 +868,7 @@ export async function deleteCourseInstance(id: string) {
     return { success: false, error: "Failed to delete course instance." };
   }
 }
+
+
+
 

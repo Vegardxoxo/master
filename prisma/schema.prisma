@@ -33,12 +33,13 @@ model User {
 }
 
 model DashboardPreference {
-  id           String    @id @default(uuid())
-  userId       String
-  preferences  Json
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  userId      String
+  preferences Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId])
   @@index([userId])
 }
@@ -83,22 +84,38 @@ model CourseInstance {
 }
 
 model Repository {
-  id               String            @id @default(uuid())
-  githubId         String
+  id               String          @id @default(uuid())
   username         String
-  repoName         String
-  url              String
-  organization     String            @default("none")
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime
-  openIssues       String            @default("0")
-  members          User[]            @relation("RepositoryMembers")
+  organization     String          @default("none")
+  createdAt        DateTime        @default(now())
+  members          User[]          @relation("RepositoryMembers")
   courseInstanceId String
-  courseInstance   CourseInstance?   @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
-  coverageReport   CoverageReport[]
-  fileSets         FileSet[]
-  charts           RepositoryImage[]
-  hasReport        Boolean           @default(false)
+  courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+  // GitHub MetaData
+  repoName         String
+  githubId         String          @default("none")
+  url              String          @default("none")
+  updatedAt        DateTime?
+  openIssues       String          @default("0")
+  stars            Int             @default(0)
+  forks            Int             @default(0)
+  watchers         Int             @default(0)
+
+  // Github data
+  workflowRuns      WorkflowRuns[]
+  issues            Issue[]
+  branches          Branch[]
+  commitMain        CommitMain[]
+  pullRequests      PullRequest[]
+  commits           Commit[]
+  milestones        Milestone[]
+  languages         LanguageDistribution[]
+  contributors      Contributor[]
+  coverageReport    CoverageReport[]
+  fileSets          FileSet[]
+  charts            RepositoryImage[]
+  hasReport         Boolean                @default(false)
+  reportGeneratedAt DateTime?
 }
 
 model CoverageReport {
@@ -162,4 +179,139 @@ model RepositoryImage {
 
   @@unique([repositoryId, chartType])
   @@index([repositoryId])
+}
+
+// ----------------
+model Contributor {
+  id           String     @id @default(uuid())
+  login        String
+  url          String
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([login, repositoryId])
+  @@index([repositoryId])
+}
+
+model LanguageDistribution {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  name         String
+  value        Int
+  percentage   Float
+
+  @@unique([repositoryId, name])
+  @@index([repositoryId])
+}
+
+model Milestone {
+  id           String     @id @default(uuid())
+  githubId     Int
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  title        String
+  description  String
+  state        String
+  closedIssues Int
+  openIssues   Int
+  totalIssues  Int
+  dueDate      DateTime?
+  createdAt    DateTime
+  updatedAt    DateTime
+  url          String
+
+  @@unique([repositoryId, githubId])
+  @@index([repositoryId])
+}
+
+model Commit {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  sha          String     @unique
+  authorName   String?
+  authorEmail  String?
+  committedAt  DateTime
+  message      String?
+  url          String?
+  additions    Int
+  deletions    Int
+  changedFiles Int
+  createdAt    DateTime   @default(now())
+}
+
+model CommitMain {
+  id           String     @id @default(uuid())
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repositoryId String
+  sha          String
+  author       String
+  date         DateTime   @default(now())
+  url          String
+  branch       String
+  message      String
+
+  @@unique([repositoryId, sha])
+  @@index([repositoryId, date])
+}
+
+model PullRequest {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  state        String
+  data         Json
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, state])
+}
+
+model Branch {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, name])
+}
+
+model Issue {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  title        String
+  number       String
+  url          String?
+  createdAt    DateTime   @default(now())
+  closedAt     DateTime?
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([repositoryId, number])
+}
+
+model WorkflowRuns {
+  id           String     @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  githubRunId  BigInt
+  name         String
+  status       String
+  conclusion   String
+  createdAt    DateTime
+  updatedAt    DateTime
+  runStartedAt DateTime
+  runNumber    Int
+
+  @@unique([repositoryId, githubRunId])
+}
+
+generator erd {
+  provider    = "prisma-erd-generator"
+  tableOnly   = true
+  ignoreEnums = true
+  theme       = "forest"
 }

@@ -52,6 +52,7 @@ export type Commit = {
   message: string;
   date: string | null;
   url: string;
+  branch: string
 };
 
 export type _Branches = {
@@ -216,6 +217,7 @@ export type Repository = {
   organization: string;
   updatedAt: Date;
   hasReport: boolean;
+  reportGeneratedAt: Date;
   openIssues: string
 };
 
@@ -269,15 +271,33 @@ export interface ReportSectionProps {
 }
 
 export interface CommitData {
-  sha?: string
-  html_url?: string
+  sha?: string;
+  branch: string;
+  associatedPullRequests: boolean;
+  html_url?: string;
   commit: {
     author: {
-      name: string
-      email: string
-      date?: string
-    }
-    message?: string
-    url?: string
-  }
+      name: string;
+      email: string;
+      date?: string;
+    };
+    message: string;
+    url: string;
+  };
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+}
+
+export interface GithubRepoOverview {
+  id?: string;
+  name?: string;
+  url?: string;
+  openIssues?: string;
+  updatedAt?: string;
+  stars?: number;
+  forks?: number;
+  watchers?: number;
+  success: boolean;
+  error?: string;
 }

@@ -11,7 +11,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 import {
   AlertCircle,
-  ArrowUpDown,
+  ArrowUpDown, CheckCircle,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -23,7 +23,7 @@ import {
   GitBranch,
   GitCommit,
   GitPullRequest,
-  MessageSquare,
+  MessageSquare, MinusCircle, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
@@ -52,14 +52,14 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
     header: "Repository Name",
     cell: ({ row }) => {
       return (
-        <Link
-          className={"hover:cursor-pointer hover:underline text-blue-600"}
-          href={row.original.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {row.getValue("repoName")}
-        </Link>
+          <Link
+              className={"hover:cursor-pointer hover:underline text-blue-600"}
+              href={row.original.url}
+              target="_blank"
+              rel="noopener noreferrer"
+          >
+            {row.getValue("repoName")}
+          </Link>
       )
     },
   },
@@ -68,21 +68,21 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
     accessorKey: "openIssues",
     header: ({ column }) => {
       return (
-        <div className={"flex justify-end "}>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-right"
-          >
-            Open Issues
-            <ChevronRight
-              className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
-                "-rotate-90": column.getIsSorted() === "asc",
-                "rotate-90": column.getIsSorted() !== "asc",
-              })}
-            />
-          </Button>
-        </div>
+          <div className={"flex justify-end "}>
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className="text-right"
+            >
+              Open Issues
+              <ChevronRight
+                  className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
+                    "-rotate-90": column.getIsSorted() === "asc",
+                    "rotate-90": column.getIsSorted() !== "asc",
+                  })}
+              />
+            </Button>
+          </div>
       )
     },
     cell: ({ row }) => {
@@ -93,15 +93,15 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
     accessorKey: "updatedAt",
     header: ({ column }) => {
       return (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Updated at
-          <ChevronRight
-            className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
-              "-rotate-90": column.getIsSorted() === "asc",
-              "rotate-90": column.getIsSorted() !== "asc",
-            })}
-          />
-        </Button>
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Updated at
+            <ChevronRight
+                className={clsx("ml-auto transition-transform duration-200 -rotate-90", {
+                  "-rotate-90": column.getIsSorted() === "asc",
+                  "rotate-90": column.getIsSorted() !== "asc",
+                })}
+            />
+          </Button>
       )
     },
     cell: ({ row }) => {
@@ -110,10 +110,10 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
 
       // Format the date to remove the GMT part
       const formattedDate = dateValue
-        ? new Date(dateValue as string).toDateString() +
+          ? new Date(dateValue as string).toDateString() +
           " " +
           new Date(dateValue as string).toTimeString().split(" ")[0]
-        : ""
+          : ""
 
       return <div>{formattedDate}</div>
     },
@@ -126,21 +126,58 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
       const hasReport = row.getValue("hasReport") as boolean
 
       return (
-        <div className="flex items-center">
-          {hasReport ? (
-            <div className="flex items-center">
+          <div className="flex items-center">
+            {hasReport ? (
+                <div className="flex items-center">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <FileText className="w-3.5 h-3.5 mr-1" />
                 Generated
               </span>
-            </div>
-          ) : (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                </div>
+            ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
               <AlertCircle className="w-3.5 h-3.5 mr-1" />
               Not Generated
             </span>
-          )}
-        </div>
+            )}
+          </div>
+      )
+    },
+  },
+
+  {
+    accessorKey: "isUpToDate",
+    header: "Is Up to Date",
+    cell: ({ row }) => {
+      const hasReport = row.getValue("hasReport") as boolean
+      const updatedAt = row.getValue("updatedAt") as Date
+      const reportGeneratedAt = row.original.reportGeneratedAt as Date | null
+
+      // If there's no report, it can't be up to date
+      if (!hasReport || !reportGeneratedAt) {
+        return (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <MinusCircle className="w-3.5 h-3.5 mr-1" />
+            No Report
+          </span>
+        )
+      }
+
+      // Compare dates to see if report is up to date
+      const repoUpdateTime = new Date(updatedAt).getTime()
+      const reportGenTime = new Date(reportGeneratedAt).getTime()
+      const isUpToDate = reportGenTime >= repoUpdateTime
+
+      return isUpToDate ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <CheckCircle className="w-3.5 h-3.5 mr-1" />
+          Up to Date
+        </span>
+      ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <RefreshCw className="w-3.5 h-3.5 mr-1" />
+          Needs Update
+        </span>
       )
     },
   },
@@ -151,12 +188,12 @@ export const repositoryOverviewColumns: ColumnDef<Repository>[] = [
     cell: ({ row }) => {
       const details = row.original
       return (
-        <div className="flex justify-end gap-2">
-          <ViewProject owner={details.username} repo={details.repoName} databaseId={details.id} />
-          <AddToClipboard url={details.url} />
-          <DeleteRepoButton id={details.id} />
-          <UpdateRepository id={details.id} />
-        </div>
+          <div className="flex justify-end gap-2">
+            <ViewProject owner={details.username} repo={details.repoName} databaseId={details.id} />
+            <AddToClipboard url={details.url} />
+            <DeleteRepoButton id={details.id} />
+            <UpdateRepository id={details.id} />
+          </div>
       )
     },
   },
