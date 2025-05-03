@@ -71,7 +71,7 @@ export default function PullRequestsReviews({
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
+                <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick} className={"cursor-pointer"}>
                   {reviewsByMember.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}

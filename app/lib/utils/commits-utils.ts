@@ -166,7 +166,6 @@ export function prepareCommitsData(commits: any[]) {
     };
   }
 
-  // Process the commits data
   const processedData = commits.map((commit) => {
     const committedDate = new Date(commit.committedAt).getTime();
     const totalChanges = commit.additions + commit.deletions;
@@ -175,11 +174,10 @@ export function prepareCommitsData(commits: any[]) {
       ...commit,
       committedDate,
       totalChanges,
-      size: Math.min(Math.log10(totalChanges) * 5, 50), // Size for scatter plot points
+     size: Math.max(20, Math.min(Math.log10(totalChanges + 1) * 10, 50)),
     };
   });
 
-  // Get unique months for filtering
   const months = Array.from(
       new Set(
           processedData.map((commit) => {
@@ -191,7 +189,6 @@ export function prepareCommitsData(commits: any[]) {
       )
   ).sort();
 
-  // Get unique days for reference lines
   const uniqueDays = Array.from(
       new Set(
           processedData.map((commit) => {
@@ -202,7 +199,6 @@ export function prepareCommitsData(commits: any[]) {
       )
   ).sort();
 
-  // Calculate max values for chart scaling
   const maxChanges = Math.max(
       ...processedData.map((commit) => commit.totalChanges)
   );

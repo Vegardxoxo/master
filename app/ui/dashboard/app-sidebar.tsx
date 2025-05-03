@@ -46,7 +46,7 @@ function AddCourseButton() {
             href="/dashboard/courses/add"
             className="hover:bg-sky-500 hover:text-white"
           >
-            Modify Course
+            Add or Remove Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>

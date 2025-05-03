@@ -33,7 +33,6 @@ export const CourseInstanceSchema = z.object({
 
 export const RepositorySchema = z.object({
   courseInstanceId: z.string().min(1, "Course instance ID is required"),
-  organization: z.enum(["ntnu", "none"]).default("none"),
   username: z.string().min(1, "Username is required"), // Change to userName with capital N
   repoName: z.string().min(1, "Repository name is required"),
 });
@@ -41,7 +40,6 @@ export const RepositorySchema = z.object({
 export const UpdateRepositorySchema = z.object({
   id: z.string().min(1, "ID is required"),
   courseInstanceId: z.string().min(1, "Course instance ID is required"),
-  organization: z.enum(["ntnu", "none"]).default("none"),
   username: z.string().min(1, "Username is required"), // Change to userName with capital N
   repoName: z.string().min(1, "Repository name is required"),
 });

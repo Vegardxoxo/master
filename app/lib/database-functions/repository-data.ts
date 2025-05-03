@@ -293,7 +293,17 @@ export async function storeCommits(owner: string, repo: string, repoId: string) 
     }
 }
 
-export async function getCommits(owner: string, repo: string) {
+/**
+ * Fetches a list of commits for a specified repository owned by a given owner.
+ *
+ * @param {string} owner - The owner of the repository.
+ * @param {string} repo - The name of the repository.
+ * @return {Promise<{success: boolean,  commits?: object[]}, error?: string;>} A promise that resolves to an object containing:
+ * - `success`: A boolean indicating if the operation was successful.
+ * - `commits`: An array of commit objects if successful.
+ * - `error`: A string describing the error in case of failure.
+ */
+export async function getCommits(owner: string, repo: string): Promise<{success: boolean; commits?: any[]; error?: string}> {
     try {
         const result = await findRepositoryByOwnerRepo(owner, repo);
         if (!result.success || !result.repository) {
@@ -306,7 +316,6 @@ export async function getCommits(owner: string, repo: string) {
             orderBy: {committedAt: 'desc'},
         });
 
-        console.log("fetched from local database");
         return {success: true, commits};
     } catch (e) {
         console.error("Error fetching commits:", e);

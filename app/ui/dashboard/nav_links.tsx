@@ -7,23 +7,19 @@ import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   BookOpen,
-  Calendar,
   ChevronRight,
   Clock,
+  GitMerge,
   LayoutDashboard,
-  Settings,
-  Users,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AddCourseInstance } from "@/app/ui/courses/add/add-course-instance";
 import { UserCourse } from "@/app/lib/definitions/definitions";
 
 // Define the navigation links
 export const links = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Students", href: "/dashboard/students", icon: Users },
-  { name: "Schedule", href: "/dashboard/schedule", icon: Calendar },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "GitHub Actions", href: "/dashboard/actions", icon: GitMerge },
 ];
 
 /**

@@ -20,10 +20,11 @@ import Link from "next/link";
 import { cn } from "@/app/lib/utils/utils";
 import { lusitana } from "@/app/ui/fonts";
 import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connections-wrapper";
-import {notFound} from "next/navigation";
-import {checkConnection} from "@/app/lib/data/github-api-functions";
+import { notFound } from "next/navigation";
+import { checkConnection } from "@/app/lib/data/github-api-functions";
 import LanguageDistributionWrapper from "@/app/ui/dashboard/project_info/language-distribution-wrapper";
 import PullRequestVsIssuesWrapper from "@/app/ui/dashboard/branches/pull-request-vs-issues-wrapper";
+import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions/helper-functions";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -32,14 +33,26 @@ export default async function Page(props: {
   const owner = params.owner;
   const repo = params.repo;
 
-  const found = await checkConnection(owner, repo);
+  // const url = await checkConnection(owner, repo);
+  //
+  // if (typeof url !== "string") {
+  //   notFound();
+  // }
+const {repository} = await findRepositoryByOwnerRepo(owner, repo);
 
-  if (!found) {
-      notFound();
-  }
 
   return (
     <div className="container mx-auto py-6">
+      <header>
+        <div className="pl-7">
+          <Link
+            className="text-2xl md:text-3xl font-bold text-blue-600 hover:underline"
+            href={repository.url}
+          >
+            {owner}/{repo} Dashboard
+          </Link>
+        </div>
+      </header>
       <Dashboard owner={owner} repo={repo}>
         {{
           contributorsList: (
@@ -48,7 +61,9 @@ export default async function Page(props: {
             </Suspense>
           ),
           projectInfo: <ProjectInfo owner={owner} repo={repo} />,
-          languageDistribution: <LanguageDistributionWrapper owner={owner} repo={repo} />,
+          languageDistribution: (
+            <LanguageDistributionWrapper owner={owner} repo={repo} />
+          ),
           milestones: <Milestones owner={owner} repo={repo} />,
           files: <Files owner={owner} repo={repo} />,
           coverage: <TestCoverage owner={owner} repo={repo} />,
@@ -66,7 +81,7 @@ export default async function Page(props: {
           branchingStrategy: (
             <BranchConnectionsWrapper owner={owner} repo={repo} />
           ),
-            issuesVsPrs: <PullRequestVsIssuesWrapper owner={owner} repo={repo}/>,
+          issuesVsPrs: <PullRequestVsIssuesWrapper owner={owner} repo={repo} />,
           pipeline: <PipelineActions owner={owner} repo={repo} />,
           pullRequestOverview: (
             <PullRequestsOverviewWrapper owner={owner} repo={repo} />

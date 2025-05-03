@@ -34,14 +34,7 @@ export type Course = {
   name: string;
 };
 
-export type CourseSubject = {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  ownerId: string;
-};
+
 
 export type User = {
   id: string;
@@ -94,17 +87,6 @@ export type CommitByDate = {
   commitDate: string;
   message: string;
   htmlUrl: string;
-};
-export type ParseCommitDataResult = {
-  dayEntries: DayEntry[];
-  total: number;
-  emailToDisplayName: Record<string, string>;
-  commitSummary: CommitMessageLong[];
-  commitByDate: CommitByDate[];
-};
-
-export type AuthorFrequency = {
-  [authorName: string]: number;
 };
 
 export type DayEntry = {
@@ -213,12 +195,11 @@ export type Repository = {
   id: string;
   username: string;
   repoName: string;
-  url: string;
-  organization: string;
-  updatedAt: Date;
-  hasReport: boolean;
-  reportGeneratedAt: Date;
-  openIssues: string
+  url?: string;
+  updatedAt?: Date;
+  hasReport?: boolean;
+  reportGeneratedAt?: Date;
+  openIssues?: string
 };
 
 export type FileData = {

@@ -86,11 +86,11 @@ model CourseInstance {
 model Repository {
   id               String          @id @default(uuid())
   username         String
-  organization     String          @default("none")
   createdAt        DateTime        @default(now())
   members          User[]          @relation("RepositoryMembers")
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+
   // GitHub MetaData
   repoName         String
   githubId         String          @default("none")

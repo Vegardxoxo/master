@@ -12,22 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import type { CheckedState } from "@radix-ui/react-checkbox";
 import { createRepository } from "@/app/lib/server-actions/actions";
 import { useActionState } from "react";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {useToast} from "@/hooks/use-toast";
-
+import { useToast } from "@/hooks/use-toast";
 
 export function AddRepositoryForm({
   courseInstanceId,
@@ -39,67 +29,57 @@ export function AddRepositoryForm({
     createRepository,
     undefined,
   );
-  const [organization, setOrganization] = useState<"ntnu" | "none">("none");
   const [username, setUsername] = useState<string>("");
   const [repoName, setRepoName] = useState<string>("");
   const [url, setUrl] = useState<string>("");
-  const [isEditable, setIsEditable] = useState(false);
   const { toast } = useToast();
 
   const isFormValid = username && repoName;
 
   const clear = () => {
-    setOrganization("none");
     setUsername("");
     setRepoName("");
     setUrl("");
-    setIsEditable(false);
   };
 
-  // Reset URL when inputs change
+  // Update URL when inputs change
   useEffect(() => {
     if (username && repoName) {
-      if (organization === "ntnu") {
-        setUrl(`https://git.ntnu.no/${username}/${repoName}`);
-      } else {
-        setUrl(`https://github.com/${username}/${repoName}`);
-      }
+      setUrl(`https://github.com/${username}/${repoName}`);
     } else {
       setUrl("");
     }
-  }, [organization, username, repoName]);
+  }, [username, repoName]);
 
-  // Reset form after successful submission
+  // Handle form state changes with toast notifications
   useEffect(() => {
     if (formState?.success) {
-     clear();
+      toast({
+        title: "Success",
+        description: formState.message || "Repository added successfully!",
+        variant: "success",
+      });
 
+      clear();
 
       setTimeout(() => {
         router.refresh();
       }, 1500);
+    } else if (formState?.error) {
+      toast({
+        title: "Error",
+        description: formState.error,
+        variant: "destructive",
+      });
     }
-  }, [formState, router]);
-
-  function handleCheck(value: CheckedState) {
-    setIsEditable(!!value);
-  }
+  }, [formState, router, toast]);
 
   // Custom form submission handler to ensure all data is properly sent
   const handleSubmit = async (formData: FormData) => {
     formData.append("courseInstanceId", courseInstanceId);
-    formData.set("organization", organization);
     if (username) formData.set("username", username);
     if (repoName) formData.set("repoName", repoName);
-    if (isEditable) {
-      formData.set("url", url);
-    } else {
-      if (organization === "ntnu") {
-        formData.set("url", `https://git.ntnu.no/${username}/${repoName}`);
-      } else {
-        formData.set("url", `https://github.com/${username}/${repoName}`);
-      }
-    }
+    formData.set("url", `https://github.com/${username}/${repoName}`);
 
     return formAction(formData);
   };
@@ -109,33 +89,11 @@ export function AddRepositoryForm({
       <form action={handleSubmit}>
         <CardHeader>
           <CardTitle>Manually Add Repository</CardTitle>
-          <CardDescription>
-            Add a GitHub or NTNU Git repository URL.
-          </CardDescription>
+          <CardDescription>Add a GitHub repository URL.</CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="organization">Organization</Label>
-              <Select
-                name="organization"
-                value={organization}
-                onValueChange={(value: "ntnu" | "none") =>
-                  setOrganization(value)
-                }
-                disabled={isPending}
-              >
-                <SelectTrigger id="organization">
-                  <SelectValue placeholder="Select organization" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="ntnu">NTNU</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="username">Username</Label>
               <Input
@@ -162,46 +120,17 @@ export function AddRepositoryForm({
               />
             </div>
 
-            {username && repoName && (
-              <div className="text-sm text-muted-foreground">
-                <Label htmlFor="preview">Preview</Label>
-                <div className="flex justify-end gap-x-4">
-                  <Checkbox
-                    id="manual-edit"
-                    checked={isEditable}
-                    onCheckedChange={handleCheck}
-                    aria-label="Toggle manual editing"
-                    disabled={isPending}
-                  />
-                  <label htmlFor="manual-edit">Edit</label>
-                </div>
-
-                <Input
-                  id="preview"
-                  name="url"
-                  placeholder="Preview"
-                  value={url}
-                  className="font-mono text-sm"
-                  disabled={!isEditable || isPending}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* Message container with fixed height to prevent layout shifts */}
-            <div className="min-h-[24px]">
-              {formState?.error && (
-                <div className="flex items-center text-red-500 text-sm">
-                  <AlertCircle className="h-4 w-4 mr-2" />
-                  {formState.error}
-                </div>
-              )}
-              {formState?.success && (
-                <div className="flex items-center text-green-500 text-sm">
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  {formState.message || "Repository added successfully!"}
-                </div>
-              )}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="preview">Repository URL</Label>
+              <Input
+                id="preview"
+                name="url"
+                placeholder="https://github.com/username/repository"
+                value={url}
+                className="font-mono text-sm"
+                disabled={true}
+                readOnly
+              />
             </div>
           </div>
         </CardContent>

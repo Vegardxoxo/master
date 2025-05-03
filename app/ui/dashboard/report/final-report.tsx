@@ -125,7 +125,7 @@ export default function FinalReport({
                     variant="default"
                     onClick={handleUpload}
                     disabled={isUploading || isUploaded}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-sky-600 hover:bg-sky-700"
                 >
                     {isUploading ? (
                         <>

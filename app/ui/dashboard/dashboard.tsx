@@ -333,14 +333,6 @@ export default function Dashboard({owner, repo, children}: DashboardProps) {
 
     return (
         <div className="min-h-screen">
-            <header>
-                <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-
-                        {owner}/{repo} Dashboard
-                    </h1>
-                </div>
-            </header>
             <main className="py-6">
                 <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
                     <Tabs defaultValue="overview" className="w-full">

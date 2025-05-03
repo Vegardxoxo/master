@@ -14,6 +14,7 @@ export default async function CommitFrequencyWrapper({
 }) {
   const image_url = await fetchGraphUrl(owner, repo, "COMMIT_FREQUENCY");
   const {commits, success, error} = await getCommits(owner, repo);
+
   if (!success && error) {
     return <h1> {error}</h1>
   }

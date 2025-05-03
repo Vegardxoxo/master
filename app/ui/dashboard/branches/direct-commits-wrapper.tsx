@@ -20,7 +20,7 @@ export default async function DirectCommitsWrapper({
   const {commits} = await getDirectCommits(owner, repo);
 
   if (!commits || commits.length === 0) {
-    return <Good message={"Great job! No commits directly to main 👍"} />;
+    return <Good message={"No commits directly to main 👍"} />;
   }
 
   const authorCount: Record<string, number> = {};

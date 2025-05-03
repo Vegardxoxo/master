@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
 
     // Extract file list
     const fileList = payload.file_list;
-    console.log("fileList", fileList);
 
 
     // Validate file list structure

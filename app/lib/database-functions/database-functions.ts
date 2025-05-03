@@ -85,18 +85,11 @@ export async function getCourseCatalog() {
   }
 }
 
-interface Repo {
-  id: string;
-  username: string;
-  repoName: string;
-  url: string;
-  hasReport: boolean;
-  organization: string;
-}
+
 
 export async function getRepository(
   id: string,
-): Promise<{ error?: string; repository: Repo | null }> {
+): Promise<{ error?: string; repository: Repository | null }> {
   try {
     const session = await auth();
     if (!session || !session.user || !session.user.email) {
@@ -123,7 +116,7 @@ export async function getRepository(
       };
     }
     return {
-      repository: repo as Repo,
+      repository: repo as Repository,
     };
   } catch (e) {
     console.error("Error fetching repository:", e);
@@ -163,7 +156,6 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         url: true,
         hasReport: true,
         reportGeneratedAt: true,
-        organization: true,
         openIssues: true,
         updatedAt: true,
       },

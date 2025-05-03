@@ -19,6 +19,7 @@ export default function CommitSize({ data }: { data: any[] }) {
   const { processedData, months, uniqueDays, maxChanges, maxFileChanges } = useMemo(() => {
     return prepareCommitsData(data)
   }, [data])
+  console.log(processedData)
 
   // Filter data by month for the first chart
   const filteredData = useMemo(() => {
