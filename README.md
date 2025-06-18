@@ -5,13 +5,13 @@
 
 This project uses **PNPM**. To get started:
 
-1. Install the latest version of PNPM globally:
+### 1. Install the latest version of PNPM globally:
 
    ```bash
    npm install -g pnpm@latest-10
    ```
 
-2. Install dependencies:
+### 2. Install dependencies:
 
    ```bash
    pnpm install
@@ -23,9 +23,9 @@ This project uses **PNPM**. To get started:
 
 To generate reports and push changes directly to GitHub repositories, you need a Personal Access Token with write permissions.
 
-1. Go to https://github.com/settings/personal-access-tokens and generate a fine-grained access token.
-2. Make sure it has repository write access for the repositories you intend to use.
-3. Store the token in a `.env` or `.env.local` file at the root of the project.
+### 1. Go to https://github.com/settings/personal-access-tokens and generate a fine-grained access token.
+### 2. Make sure it has repository write access for the repositories you intend to use.
+### 3. Store the token in a `.env` or `.env.local` file at the root of the project.
 
 Example:
 
@@ -83,7 +83,20 @@ pnpm dlx prisma
 pnpm dlx prisma generate
 ```
 
-You're now ready to develop and run the project locally!
+## 🤖 Ollama + DeepSeek Model Setup
 
-````
-pnpm run dev
+This project uses a locally hosted LLM for commit message evaluation.
+
+### 1. Install Ollama
+
+Follow the instructions here: [https://ollama.com/download](https://ollama.com/download)
+
+### 2. Install Open WebUI (optional but recommended)
+
+Use [Open WebUI](https://github.com/open-webui/open-webui) for a better interface:
+### 3. Download the DeepSeek R1 1.5B model
+
+### 4. Create a custom model called `commit-message-analyzer`
+
+Paste in the prompt as found in the appendix in the thesis.
+
