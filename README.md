@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Project Setup Guide
 
-First, run the development server:
+## 📦 Package Manager Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This project uses **PNPM**. To get started:
+
+1. Install the latest version of PNPM globally:
+
+   ```bash
+   npm install -g pnpm@latest-10
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+---
+
+## 🔐 Personal Access Token Setup
+
+To generate reports and push changes directly to GitHub repositories, you need a Personal Access Token with write permissions.
+
+1. Go to https://github.com/settings/personal-access-tokens and generate a fine-grained access token.
+2. Make sure it has repository write access for the repositories you intend to use.
+3. Store the token in a `.env` or `.env.local` file at the root of the project.
+
+Example:
+
+```env
+SUPER_TOKEN=XXX
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/dashboard.tsx`. The page auto-updates as you edit the file.
+## 🛢️ PostgreSQL Database Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses PostgreSQL to store data locally.
 
-## Learn More
+### 1. Install PostgreSQL
 
-To learn more about Next.js, take a look at the following resources:
+Download PostgreSQL from:
+[https://www.postgresql.org/download/](https://www.postgresql.org/download/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+During installation:
+- Create a user (commonly named `postgres`)
+- Set a password and remember it
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Create a Database
 
-## Deploy on Vercel
+After installation, open a terminal or pgAdmin and run:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+CREATE DATABASE your_database_name;
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Configure Environment Variable
+
+In your `.env` file, add:
+
+```env
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/your_database_name
+```
+
+Replace `your_password` and `your_database_name` with your actual credentials.
+
+---
+
+## 🧬 Prisma Setup
+
+### 1. Install Prisma
+
+```bash
+pnpm install prisma --save-dev
+pnpm dlx prisma
+```
+
+### 2. Generate Prisma Client
+
+```bash
+pnpm dlx prisma generate
+```
+
+You're now ready to develop and run the project locally!
+
+````
+pnpm run dev
