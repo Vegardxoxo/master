@@ -52,23 +52,17 @@ model Course {
 }
 
 model UserCourse {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
   userId    String
   courseId  String
-  createdAt DateTime @default(now())
-
-  // References
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  // Course instances (years/semesters) created by this user for this course
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   instances CourseInstance[]
 
-  // Composite unique constraint to prevent duplicate enrollments
   @@unique([userId, courseId])
 }
 
-// Course instance represents a specific year/semester offering
 model CourseInstance {
   id           String       @id @default(uuid())
   year         Int
@@ -86,20 +80,20 @@ model CourseInstance {
 model Repository {
   id               String          @id @default(uuid())
   username         String
-  organization     String          @default("none")
   createdAt        DateTime        @default(now())
   members          User[]          @relation("RepositoryMembers")
   courseInstanceId String
   courseInstance   CourseInstance? @relation(fields: [courseInstanceId], references: [id], onDelete: Cascade)
+
   // GitHub MetaData
-  repoName         String
-  githubId         String          @default("none")
-  url              String          @default("none")
-  updatedAt        DateTime?
-  openIssues       String          @default("0")
-  stars            Int             @default(0)
-  forks            Int             @default(0)
-  watchers         Int             @default(0)
+  repoName   String
+  githubId   String    @default("none")
+  url        String    @default("none")
+  updatedAt  DateTime?
+  openIssues String    @default("0")
+  stars      Int       @default(0)
+  forks      Int       @default(0)
+  watchers   Int       @default(0)
 
   // Github data
   workflowRuns      WorkflowRuns[]
@@ -153,7 +147,7 @@ model FileSet {
   lastUpdated  DateTime   @default(now())
   files        File[]
 
-  @@unique([repositoryId, branch]) // Ensure only one fileset per repository-branch combination
+  @@unique([repositoryId, branch])
 }
 
 model File {
@@ -163,7 +157,7 @@ model File {
   path      String
   extension String
 
-  @@unique([fileSetId, path]) // Ensure file paths are unique within a file set
+  @@unique([fileSetId, path])
   @@index([fileSetId])
 }
 
@@ -181,7 +175,6 @@ model RepositoryImage {
   @@index([repositoryId])
 }
 
-// ----------------
 model Contributor {
   id           String     @id @default(uuid())
   login        String

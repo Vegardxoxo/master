@@ -22,9 +22,12 @@ export async function POST(request: NextRequest) {
     const coverageReport = payload.coverage_report;
 
     if (!repoId) {
-      return NextResponse.json({
-        error: "Missing repository_id in payload"
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Missing repository_id in payload",
+        },
+        { status: 400 },
+      );
     }
 
     // Validate coverage report structure
@@ -102,4 +105,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

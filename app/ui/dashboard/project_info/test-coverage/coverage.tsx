@@ -12,7 +12,6 @@ export default async function TestCoverage({
 }) {
   const coverage = await getCoverageReport(owner, repo);
 
-  console.log("coverage", coverage);
   if (coverage.error || !coverage.metrics || !coverage.fileData) {
     return (
       <Warning

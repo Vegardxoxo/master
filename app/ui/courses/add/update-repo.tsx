@@ -9,21 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import type { CheckedState } from "@radix-ui/react-checkbox";
+import { useActionState, useEffect, useState } from "react";
 import { updateRepository } from "@/app/lib/server-actions/actions";
-import { useActionState } from "react";
-import { CheckCircle2, AlertCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "../../button";
+import { useToast } from "@/hooks/use-toast";
 
 export function UpdateRepositoryForm({
   repository,
@@ -36,32 +25,39 @@ export function UpdateRepositoryForm({
     updateRepository,
     undefined,
   );
-  const [platform, setPlatform] = useState<string>(repository.platform);
   const [username, setUsername] = useState<string>(repository.username);
   const [repoName, setRepoName] = useState<string>(repository.repoName);
   const [url, setUrl] = useState<string>(repository.url);
-  const [isEditable, setIsEditable] = useState(true);
-  const isFormValid = platform && username && repoName;
+  const isFormValid = username && repoName;
+  const { toast } = useToast();
+
+  // Watch for changes in formState and show toast notifications
+  useEffect(() => {
+    if (formState?.success) {
+      toast({
+        title: "Success",
+        description: formState.message || "Repository updated successfully",
+        variant: "success",
+      });
+    } else if (formState?.error) {
+      toast({
+        title: "Error",
+        description: formState.error,
+        variant: "destructive",
+      });
+    }
+  }, [formState, toast]);
 
   useEffect(() => {
-    if (platform && username && repoName) {
-      setUrl(`https://${platform}.com/${username}/${repoName}`);
+    if (username && repoName) {
+      setUrl(`https://github.com/${username}/${repoName}`);
     } else {
       setUrl("");
     }
-  }, [platform, username, repoName]);
-
-  function handleCheck(value: CheckedState) {
-    setIsEditable(!!value);
-  }
+  }, [username, repoName]);
 
   const handleSubmit = async (formData: FormData) => {
-    if (isEditable) {
-      formData.set("url", url);
-    } else {
-      formData.set("url", `https://${platform}.com/${username}/${repoName}`);
-    }
-
+    formData.set("url", `https://github.com/${username}/${repoName}`);
     return formAction(formData);
   };
 
@@ -69,7 +65,9 @@ export function UpdateRepositoryForm({
     <Card className="w-[350px]">
       <form action={handleSubmit}>
         <CardHeader>
-          <CardTitle className={"text-2xl font-bold"}>Update Repository</CardTitle>
+          <CardTitle className={"text-2xl font-bold"}>
+            Update Repository
+          </CardTitle>
           <CardDescription>Edit the repository details.</CardDescription>
         </CardHeader>
 
@@ -86,24 +84,6 @@ export function UpdateRepositoryForm({
                 value={repository.courseInstanceId}
               />
             )}
-
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="platform">Platform</Label>
-              <Select
-                name="platform"
-                value={platform}
-                onValueChange={setPlatform}
-                disabled={isPending}
-              >
-                <SelectTrigger id="platform">
-                  <SelectValue placeholder="Select platform" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="github">GitHub</SelectItem>
-                  <SelectItem value="gitlab">GitLab</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="username">Username</Label>
@@ -129,29 +109,17 @@ export function UpdateRepositoryForm({
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="editURL"
-                checked={isEditable}
-                onCheckedChange={handleCheck}
-                disabled={isPending}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="url">Preview url</Label>
+              <Input
+                id="url"
+                name="url"
+                placeholder="https://github.com/username/repo"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                disabled={true}
               />
-              <Label htmlFor="editURL">I want to edit the URL manually</Label>
             </div>
-
-            {isEditable && (
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="url">Repository URL</Label>
-                <Input
-                  id="url"
-                  name="url"
-                  placeholder="https://github.com/username/repo"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={isPending}
-                />
-              </div>
-            )}
           </div>
         </CardContent>
 
@@ -164,21 +132,19 @@ export function UpdateRepositoryForm({
             {isPending ? "Updating..." : "Update Repository"}
           </Button>
 
-          {formState?.success && (
-            <div className="flex items-center text-green-600">
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              <span>
-                {formState.message || "Repository updated successfully"}
-              </span>
-            </div>
-          )}
+          {/*{formState?.success && (*/}
+          {/*  <div className="flex items-center text-green-600">*/}
+          {/*    <CheckCircle2 className="mr-2 h-4 w-4" />*/}
+          {/*    <span>{formState.message || "Repository updated successfully"}</span>*/}
+          {/*  </div>*/}
+          {/*)}*/}
 
-          {formState?.error && (
-            <div className="flex items-center text-red-600">
-              <AlertCircle className="mr-2 h-4 w-4" />
-              <span>{formState.error}</span>
-            </div>
-          )}
+          {/*{formState?.error && (*/}
+          {/*  <div className="flex items-center text-red-600">*/}
+          {/*    <AlertCircle className="mr-2 h-4 w-4" />*/}
+          {/*    <span>{formState.error}</span>*/}
+          {/*  </div>*/}
+          {/*)}*/}
         </CardFooter>
       </form>
     </Card>

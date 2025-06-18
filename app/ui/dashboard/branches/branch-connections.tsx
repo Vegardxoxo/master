@@ -100,7 +100,10 @@ export default function BranchConnections({
               <span>Branch-Issue Connection Rate</span>
               <span className="font-medium">{linkPercentage}%</span>
             </div>
-            <Progress value={linkPercentage} className="h-2 [&>div]:bg-blue-500" />
+            <Progress
+              value={linkPercentage}
+              className="h-2 [&>div]:bg-blue-500"
+            />
           </div>
 
           {/* Branches Table */}

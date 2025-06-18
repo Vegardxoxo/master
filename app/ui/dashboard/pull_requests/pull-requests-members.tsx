@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  CartesianGrid,
   Legend,
   Line,
   LineChart,
@@ -42,7 +41,7 @@ import { Button } from "@/app/ui/button";
 import { uploadChartToServer } from "@/app/ui/chart-utils";
 import { Download } from "lucide-react";
 import { transformPullRequestActivityData } from "@/app/lib/utils/pull-requests-utils";
-import {COLORS} from "@/app/lib/placeholder-data";
+import { COLORS } from "@/app/lib/placeholder-data";
 
 type DialogData = {
   title: string;
@@ -65,7 +64,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   }
   return null;
 };
-
 
 export function PullRequestsMembers({
   data,
@@ -190,7 +188,6 @@ export function PullRequestsMembers({
     addMetricData("pullRequests", tableData, metrics);
     addImageUrls("pullRequests", [imageURL ? imageURL : ""]);
   }, [data]);
-
 
   return (
     <Card className="w-full">

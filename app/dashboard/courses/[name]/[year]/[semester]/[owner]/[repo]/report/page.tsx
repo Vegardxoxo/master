@@ -10,13 +10,11 @@ import { usePathname, useRouter } from "next/navigation";
 
 export default function Page() {
   const { getReport } = useReportHelper();
-  const {getAllImageUrls, getRepositoryInfo} = useReport();
+  const { getAllImageUrls, getRepositoryInfo } = useReport();
   const info = getRepositoryInfo();
   const pathname = usePathname();
   const router = useRouter();
   const images = getAllImageUrls();
-
-
 
   const handleBackClick = () => {
     const parentPath = pathname.replace(/\/report$/, "");
@@ -48,7 +46,7 @@ export default function Page() {
   }
 
   const { title, content } = report;
-  const {owner, repo} = info;
+  const { owner, repo } = info;
 
   return (
     <div className="container mx-auto py-6">

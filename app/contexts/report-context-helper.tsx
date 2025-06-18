@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import {createContext, useCallback, useContext, useState} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 type ReportData = {
   title: string;
@@ -34,14 +34,18 @@ export function ReportHelperProvider({
         getReport: () => reportData,
         clearReport,
       }}
-    >{children}</ReportContext.Provider>
+    >
+      {children}
+    </ReportContext.Provider>
   );
 }
 
 export function useReportHelper() {
-    const context = useContext(ReportContext);
-    if (context === undefined) {
-        throw new Error("useReportHelper must be used within a ReportHelperProvider");
-    }
-    return context;
+  const context = useContext(ReportContext);
+  if (context === undefined) {
+    throw new Error(
+      "useReportHelper must be used within a ReportHelperProvider",
+    );
+  }
+  return context;
 }

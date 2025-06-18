@@ -29,9 +29,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import UserProfile from "@/app/ui/user-profile";
-import { usePathname } from "next/navigation";
-import {handleSignOut} from "@/app/lib/server-actions/actions";
-import {UserCourse} from "@/app/lib/definitions/definitions";
+import { handleSignOut } from "@/app/lib/server-actions/actions";
+import { UserCourse } from "@/app/lib/definitions/definitions";
 
 function AddCourseButton() {
   return (
@@ -46,7 +45,7 @@ function AddCourseButton() {
             href="/dashboard/courses/add"
             className="hover:bg-sky-500 hover:text-white"
           >
-            Modify Course
+            Add or Remove Course
             <PlusIcon className="h-5 w-5 md:ml-2" />
           </Link>
         </Button>
@@ -55,7 +54,13 @@ function AddCourseButton() {
   );
 }
 
-export function AppSidebar({ user, courses }: { user: any; courses: UserCourse[] }) {
+export function AppSidebar({
+  user,
+  courses,
+}: {
+  user: any;
+  courses: UserCourse[];
+}) {
   return (
     <Sidebar collapsible="offcanvas">
       {/*Header*/}
@@ -94,9 +99,7 @@ export function AppSidebar({ user, courses }: { user: any; courses: UserCourse[]
                 <CollapsibleContent>
                   <SidebarGroupContent>
                     <SidebarMenu>
-                      <Courses
-                        courses={courses}
-                      />
+                      <Courses courses={courses} />
                       <AddCourseButton />
                     </SidebarMenu>
                   </SidebarGroupContent>

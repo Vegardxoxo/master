@@ -1,7 +1,10 @@
-import {extractIssueFromBranchName} from "@/app/ui/dashboard/branches/branches.lib";
+import { extractIssueFromBranchName } from "@/app/ui/dashboard/branches/branches.lib";
 import Warning from "@/app/ui/dashboard/alerts/warning";
 import BranchConnections from "@/app/ui/dashboard/branches/branch-connections";
-import {getBranches, getIssues} from "@/app/lib/database-functions/repository-data";
+import {
+  getBranches,
+  getIssues,
+} from "@/app/lib/database-functions/repository-data";
 
 export default async function BranchConnectionsWrapper({
   owner,
@@ -11,8 +14,8 @@ export default async function BranchConnectionsWrapper({
   repo: string;
 }) {
   // Fetch branches and issues
-  const {branches} = await getBranches(owner, repo);
-  const {issues} = await getIssues(owner, repo);
+  const { branches } = await getBranches(owner, repo);
+  const { issues } = await getIssues(owner, repo);
 
   if (!branches) {
     return (
@@ -32,16 +35,16 @@ export default async function BranchConnectionsWrapper({
   const branchConnections = developmentBranches.map((branch) => {
     const issueNumber = extractIssueFromBranchName(branch.name);
     const linkedIssue = issueNumber
-        ? issues.find((issue) => {
+      ? issues.find((issue) => {
           // Handle both string and number types for issue.number
           const issueNumberAsInt = parseInt(issueNumber);
           return (
-              issue.number === issueNumberAsInt ||
-              issue.number === issueNumber ||
-              `${issue.number}` === issueNumber
+            issue.number === issueNumberAsInt ||
+            issue.number === issueNumber ||
+            `${issue.number}` === issueNumber
           );
         })
-        : null;
+      : null;
 
     return {
       branchName: branch.name,

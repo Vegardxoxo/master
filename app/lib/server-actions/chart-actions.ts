@@ -3,8 +3,8 @@ import { auth } from "@/auth";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
-import { prisma } from '@/app/lib/prisma';
-import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
+import { prisma } from "@/app/lib/prisma";
+import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions/helper-functions";
 
 export async function saveChartImage(
   imageData: string,
@@ -25,10 +25,16 @@ export async function saveChartImage(
         success: false,
       };
     }
-    console.log("chartType", chartType)
+    console.log("chartType", chartType);
     if (
       !chartType ||
-      !["COMMIT_FREQUENCY", "COMMIT_SIZE", "CONTRIBUTIONS", "PULL_REQUESTS", "COMMIT_CHANGED_FILES"].includes(chartType)
+      ![
+        "COMMIT_FREQUENCY",
+        "COMMIT_SIZE",
+        "CONTRIBUTIONS",
+        "PULL_REQUESTS",
+        "COMMIT_CHANGED_FILES",
+      ].includes(chartType)
     ) {
       return {
         success: false,

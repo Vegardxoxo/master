@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from "@/app/lib/prisma";
 
 import { auth } from "@/auth";
 import {
@@ -9,12 +9,10 @@ import {
   FileCoverageData,
   FileSetResult,
   Repository,
-  UserCourse,
+  UserCourse
 } from "@/app/lib/definitions/definitions";
-import {fetchContributors} from "@/app/lib/data/github-api-functions";
-import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
-import {revalidatePath} from "next/cache";
-
+import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions/helper-functions";
+import { revalidatePath } from "next/cache";
 
 /**
  * Fetches all courses the user is enrolled in with their instances
@@ -85,18 +83,9 @@ export async function getCourseCatalog() {
   }
 }
 
-interface Repo {
-  id: string;
-  username: string;
-  repoName: string;
-  url: string;
-  hasReport: boolean;
-  organization: string;
-}
-
 export async function getRepository(
   id: string,
-): Promise<{ error?: string; repository: Repo | null }> {
+): Promise<{ error?: string; repository: Repository | null }> {
   try {
     const session = await auth();
     if (!session || !session.user || !session.user.email) {
@@ -123,7 +112,7 @@ export async function getRepository(
       };
     }
     return {
-      repository: repo as Repo,
+      repository: repo as Repository,
     };
   } catch (e) {
     console.error("Error fetching repository:", e);
@@ -163,7 +152,6 @@ export async function getRepositories(courseInstanceId: string): Promise<{
         url: true,
         hasReport: true,
         reportGeneratedAt: true,
-        organization: true,
         openIssues: true,
         updatedAt: true,
       },
@@ -260,8 +248,6 @@ export async function getCourseInstance(
     };
   }
 }
-
-
 
 /**
  * Fetches all files for a specific repository and branch
@@ -458,8 +444,8 @@ export async function fetchGraphUrl(
 }
 
 export async function setReportGenerated(
-    owner: string,
-    repo: string
+  owner: string,
+  repo: string,
 ): Promise<{
   success: boolean;
   error?: string;
@@ -527,6 +513,3 @@ export async function setReportGenerated(
     };
   }
 }
-
-
-

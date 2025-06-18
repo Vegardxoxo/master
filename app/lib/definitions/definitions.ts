@@ -1,14 +1,4 @@
-import {ReportSectionProps} from "@/app/ui/dashboard/report/report-sections/sensitive-files";
-
-export type repositoryOverview = {
-  databaseId: string;
-  owner: string;
-  name: string;
-  contributors: string[];
-  openIssues: number;
-  hasReport: boolean;
-  url: string;
-};
+import { ReportSectionProps } from "@/app/ui/dashboard/report/report-sections/sensitive-files";
 
 export type UserCourse = {
   id: string;
@@ -34,15 +24,6 @@ export type Course = {
   name: string;
 };
 
-export type CourseSubject = {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  ownerId: string;
-};
-
 export type User = {
   id: string;
   email: string;
@@ -52,64 +33,12 @@ export type Commit = {
   message: string;
   date: string | null;
   url: string;
-  branch: string
-};
-
-export type _Branches = {
-  name: string;
-  commit: {
-    sha: string;
-    url: string;
-  };
-  protected: boolean;
-  protection?: {
-    enabled: boolean;
-    required_status_checks: {
-      enforcement_level: string;
-      contexts: string[];
-      checks: string[];
-    };
-  };
-};
-
-export type MappedCommitMessage = {
-  id: string;
-  commit_message: string;
-};
-
-export type CommitMessageLong = {
-  sha: string;
-  url: string;
-  commit_message: string;
+  branch: string;
 };
 
 export type CommitMessageShort = {
   id: string;
   commit_message: string;
-};
-
-export type CommitByDate = {
-  authorEmail: string;
-  authorName: string;
-  commitDate: string;
-  message: string;
-  htmlUrl: string;
-};
-export type ParseCommitDataResult = {
-  dayEntries: DayEntry[];
-  total: number;
-  emailToDisplayName: Record<string, string>;
-  commitSummary: CommitMessageLong[];
-  commitByDate: CommitByDate[];
-};
-
-export type AuthorFrequency = {
-  [authorName: string]: number;
-};
-
-export type DayEntry = {
-  day: string;
-  [authorName: string]: string | number;
 };
 
 export type CommitEval = {
@@ -126,64 +55,47 @@ export type LLMResponse = {
   reason: string;
 };
 
-export interface CommitStats {
-  total: number;
-  additions: number;
-  deletions: number;
-  commits: number;
-  name: string;
-  biggest_commit: number;
-  biggest_commit_url: string;
-  co_authored_lines: number;
-  average_changes: number;
-  total_files_changed: number;
-  average_files_changed: number;
-  additions_deletions_ratio: any;
-}
-
 export type MenuItem = {
-  visible: boolean
-  text: string
-}
+  visible: boolean;
+  text: string;
+};
 
 export type VisibleSections = {
   overview: {
-    visible: boolean
-    text: string
-    contributors: MenuItem
-    distribution: MenuItem
-    milestones: MenuItem
-    info: MenuItem
-    files: MenuItem
-    coverage: MenuItem
-  }
+    visible: boolean;
+    text: string;
+    contributors: MenuItem;
+    distribution: MenuItem;
+    milestones: MenuItem;
+    info: MenuItem;
+    files: MenuItem;
+    coverage: MenuItem;
+  };
   commits: {
-    visible: boolean
-    text: string
-    quality: MenuItem
-    frequency: MenuItem
-    size: MenuItem
-    contributions: MenuItem
-  }
+    visible: boolean;
+    text: string;
+    quality: MenuItem;
+    frequency: MenuItem;
+    size: MenuItem;
+    contributions: MenuItem;
+  };
   branches: {
-    visible: boolean
-    text: string
-    to_main: MenuItem
-    strategy: MenuItem
-    issuesVsPrs: MenuItem
-  }
-  pipelines: boolean | MenuItem
+    visible: boolean;
+    text: string;
+    to_main: MenuItem;
+    strategy: MenuItem;
+    issuesVsPrs: MenuItem;
+  };
+  pipelines: boolean | MenuItem;
   pullRequests: {
-    visible: boolean
-    text: string
-    overview: MenuItem
-    members: MenuItem
-    comments: MenuItem
-    reviews: MenuItem
-  }
-}
-
-
+    visible: boolean;
+    text: string;
+    overview: MenuItem;
+    members: MenuItem;
+    comments: MenuItem;
+    reviews: MenuItem;
+  };
+};
 
 export type Review = {
   count: number;
@@ -213,12 +125,11 @@ export type Repository = {
   id: string;
   username: string;
   repoName: string;
-  url: string;
-  organization: string;
-  updatedAt: Date;
-  hasReport: boolean;
-  reportGeneratedAt: Date;
-  openIssues: string
+  url?: string;
+  updatedAt?: Date;
+  hasReport?: boolean;
+  reportGeneratedAt?: Date;
+  openIssues?: string;
 };
 
 export type FileData = {

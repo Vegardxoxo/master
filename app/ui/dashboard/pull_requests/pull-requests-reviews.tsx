@@ -1,12 +1,6 @@
 "use client";
 import { PullRequestData } from "@/app/lib/definitions/definitions";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bar,
   BarChart,
@@ -27,9 +21,7 @@ import {
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
 import { useState } from "react";
 import { BestPractices } from "@/app/ui/dashboard/alerts/best-practices";
-import {COLORS} from "@/app/lib/placeholder-data";
-
-
+import { COLORS } from "@/app/lib/placeholder-data";
 
 export default function PullRequestsReviews({
   data,
@@ -71,7 +63,12 @@ export default function PullRequestsReviews({
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="count" fill="#8884d8" onClick={handleDataClick}>
+                <Bar
+                  dataKey="count"
+                  fill="#8884d8"
+                  onClick={handleDataClick}
+                  className={"cursor-pointer"}
+                >
                   {reviewsByMember.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}

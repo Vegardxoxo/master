@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Dynamically import the markdown preview to avoid SSR issues
@@ -41,10 +39,7 @@ export default function MarkdownPreview({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div
-          className=" rounded-md overflow-auto p-4"
-          style={{ height }}
-        >
+        <div className=" rounded-md overflow-auto p-4" style={{ height }}>
           <MDPreview source={markdown} />
         </div>
       </CardContent>

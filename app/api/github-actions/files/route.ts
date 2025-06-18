@@ -1,6 +1,6 @@
-import {updateRepositoryFiles} from "@/app/lib/server-actions/actions";
-import {NextRequest, NextResponse} from "next/server";
-import {findRepositoryByGithubId} from "@/app/lib/database-functions/helper-functions";
+import { updateRepositoryFiles } from "@/app/lib/server-actions/actions";
+import { NextRequest, NextResponse } from "next/server";
+import { findRepositoryByGithubId } from "@/app/lib/database-functions/helper-functions";
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");
@@ -23,12 +23,12 @@ export async function POST(request: NextRequest) {
 
     // Extract file list
     const fileList = payload.file_list;
-    console.log("fileList", fileList);
-
 
     // Validate file list structure
     if (!fileList || !Array.isArray(fileList.files)) {
-      throw new Error("Invalid file list format: Missing or invalid 'files' array");
+      throw new Error(
+        "Invalid file list format: Missing or invalid 'files' array",
+      );
     }
 
     // Find the repository by GitHub ID
@@ -42,20 +42,25 @@ export async function POST(request: NextRequest) {
     const fileCount = fileList.files.length;
 
     // Count files by extension (for response only)
-    const filesByExtension = fileList.files.reduce((acc: Record<string, number>, file: { path: string }) => {
-      const extension = file.path.split('.').pop()?.toLowerCase() || 'no-extension';
-      acc[extension] = (acc[extension] || 0) + 1;
-      return acc;
-    }, {});
+    const filesByExtension = fileList.files.reduce(
+      (acc: Record<string, number>, file: { path: string }) => {
+        const extension =
+          file.path.split(".").pop()?.toLowerCase() || "no-extension";
+        acc[extension] = (acc[extension] || 0) + 1;
+        return acc;
+      },
+      {},
+    );
 
     // Prepare file data for the database
     const fileData = fileList.files.map((file: { path: string }) => {
-      const pathParts = file.path.split('.');
-      const extension = pathParts.length > 1 ? pathParts.pop()?.toLowerCase() || '' : '';
+      const pathParts = file.path.split(".");
+      const extension =
+        pathParts.length > 1 ? pathParts.pop()?.toLowerCase() || "" : "";
 
       return {
         path: file.path,
-        extension: extension || 'no-extension',
+        extension: extension || "no-extension",
       };
     });
 
@@ -64,7 +69,7 @@ export async function POST(request: NextRequest) {
       repository.id,
       branch,
       commit,
-      fileData
+      fileData,
     );
 
     return NextResponse.json({
@@ -77,17 +82,16 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       fileCount,
       filesByExtension,
-      fileSetId: fileSet.id
+      fileSetId: fileSet.id,
     });
-
   } catch (error) {
     console.error("Error processing file list:", error);
     return NextResponse.json(
       {
         error: "Failed to process file list",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

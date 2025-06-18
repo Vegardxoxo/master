@@ -1,18 +1,32 @@
-"use client"
+"use client";
 
-import { useActionState } from "react"
-import Link from "next/link"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Mail, Lock } from "lucide-react"
+import { useActionState } from "react";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Lock, Mail } from "lucide-react";
 
-import { Button } from "@/app/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { createUser } from "@/app/lib/server-actions/actions"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/app/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { createUser } from "@/app/lib/server-actions/actions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z
   .object({
@@ -27,7 +41,7 @@ const formSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
-  })
+  });
 
 export function SignupForm() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -37,13 +51,18 @@ export function SignupForm() {
       password: "",
       confirmPassword: "",
     },
-  })
-  const [formState, formAction, isPending] = useActionState(createUser, undefined)
+  });
+  const [formState, formAction, isPending] = useActionState(
+    createUser,
+    undefined,
+  );
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Create an account
+        </CardTitle>
         <CardDescription className="text-center text-muted-foreground">
           Enter your email and password to get started
         </CardDescription>
@@ -61,7 +80,11 @@ export function SignupForm() {
                     <FormControl>
                       <div className="flex items-center border rounded-md focus-within:ring-1 focus-within:ring-ring">
                         <Mail className="ml-3 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="name@example.com" className="border-0 focus-visible:ring-0" {...field} />
+                        <Input
+                          placeholder="name@example.com"
+                          className="border-0 focus-visible:ring-0"
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -71,7 +94,9 @@ export function SignupForm() {
 
               <div className="space-y-4 pt-2">
                 <div className="border-t pt-4">
-                  <h3 className="text-sm font-medium mb-2">Create a password</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    Create a password
+                  </h3>
                 </div>
                 <FormField
                   control={form.control}
@@ -126,7 +151,9 @@ export function SignupForm() {
 
             {formState?.success && (
               <Alert className="mt-4 bg-green-50 text-green-800 border-green-200">
-                <AlertDescription>Account created successfully! You can now sign in.</AlertDescription>
+                <AlertDescription>
+                  Account created successfully! You can now sign in.
+                </AlertDescription>
               </Alert>
             )}
 
@@ -140,11 +167,14 @@ export function SignupForm() {
       <CardFooter className="flex justify-center border-t p-6">
         <div className="text-sm text-center">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-primary hover:underline">
+          <Link
+            href="/login"
+            className="font-medium text-primary hover:underline"
+          >
             Sign in
           </Link>
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

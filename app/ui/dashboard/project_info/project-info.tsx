@@ -1,6 +1,12 @@
-import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
-import {AlertCircle, Eye, GitFork, Star} from "lucide-react";
-import {getRepoInfo} from "@/app/lib/database-functions/repository-data";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertCircle, Eye, GitFork, Star } from "lucide-react";
+import { getRepoInfo } from "@/app/lib/database-functions/repository-data";
 import Link from "next/link";
 
 export default async function ProjectInfo({
@@ -10,7 +16,7 @@ export default async function ProjectInfo({
   owner: string;
   repo: string;
 }) {
-  const {info, success} = await getRepoInfo(owner, repo);
+  const { info, success } = await getRepoInfo(owner, repo);
   if (!success || !info) {
     return <div>No project info available to display.</div>;
   }
@@ -18,10 +24,14 @@ export default async function ProjectInfo({
     <Card className="w-full h-full">
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-gray-800">
-          <Link href={info.url} className={"text-blue-500 hover:underline hover:text-blue-600 hover:cursor-pointer"}>
+          <Link
+            href={info.url}
+            className={
+              "text-blue-500 hover:underline hover:text-blue-600 hover:cursor-pointer"
+            }
+          >
             {info.name}
           </Link>
-
         </CardTitle>
         <CardDescription className="text-sm text-gray-500">
           Last updated: {new Date(info.updatedAt).toLocaleDateString()}

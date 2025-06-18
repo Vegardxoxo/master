@@ -7,13 +7,11 @@ import {
   CourseInstanceSchema,
   CourseSchema,
   EnrollCourseSchema,
-  preferencesSchema,
   RemoveEnrollmentSchema,
   RepositorySchema,
-  SignupSchema,
   UpdateRepositorySchema,
 } from "@/app/lib/server-actions/zod-schemas";
-import { fetchRepository } from "@/app/lib/data/github-api-functions";
+import { checkConnection } from "@/app/lib/data/github-api-functions";
 import {
   CoverageMetrics,
   FileCoverageData,
@@ -22,7 +20,7 @@ import {
 } from "@/app/lib/definitions/definitions";
 
 import { prisma } from "@/app/lib/prisma";
-import {updateRepositoryData} from "@/app/lib/database-functions/repository-data";
+import { updateRepositoryData } from "@/app/lib/database-functions/repository-data";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -57,7 +55,6 @@ export async function createRepository(prevState: any, formData: FormData) {
       courseInstanceId: formData.get("courseInstanceId"),
       username: formData.get("username"),
       repoName: formData.get("repoName"),
-      organization: formData.get("organization"),
     });
 
     if (!parsedFormData.success) {
@@ -68,8 +65,7 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    const { courseInstanceId, organization, username, repoName } =
-      parsedFormData.data;
+    const { courseInstanceId, username, repoName } = parsedFormData.data;
 
     const courseInstance = await prisma.courseInstance.findFirst({
       where: {
@@ -93,28 +89,35 @@ export async function createRepository(prevState: any, formData: FormData) {
       };
     }
 
-    // const repoInfo = await fetchRepository(username, repoName);
-    //
-    // if (!repoInfo.success) {
-    //   return {
-    //     error: `Failed to fetch repository information: ${repoInfo.error}`,
-    //   };
-    // }
+    const result = await checkConnection(username, repoName);
+    if (typeof result === "boolean") {
+      return {
+        error: `Failed to fetch repository information. Check access token.`,
+      };
+    }
+
+    const existingRepo = await prisma.repository.findFirst({
+      where: {
+        username: username,
+        repoName: repoName,
+        members: {
+          some: {
+            id: session.user.id,
+          },
+        },
+      },
+    });
+    if (existingRepo) {
+      return {
+        error: `Repository ${repoName} already exists in this course.`,
+      };
+    }
 
     const repository = await prisma.repository.create({
       data: {
         username: username,
         repoName: repoName,
-        organization: organization,
         courseInstanceId: courseInstanceId,
-        // url: repoInfo.url!,
-        // githubId: repoInfo.id!,
-        // openIssues: repoInfo.openIssues!,
-        // updatedAt: repoInfo.updatedAt!,
-        // stars: repoInfo.stars,
-        // forks: repoInfo.forks,
-        // watchers: repoInfo.watchers,
-
         members: {
           connect: {
             id: session.user.id,
@@ -123,7 +126,11 @@ export async function createRepository(prevState: any, formData: FormData) {
       },
     });
 
-    await updateRepositoryData(repository.username, repository.repoName, repository.id);
+    await updateRepositoryData(
+      repository.username,
+      repository.repoName,
+      repository.id,
+    );
 
     // Get the course code for path revalidation
     const courseCode = courseInstance.userCourse.course.code;
@@ -349,109 +356,11 @@ export async function addCourseInstance(prevState: any, formData: FormData) {
   }
 }
 
-export async function createCourse(prevState: any, formData: FormData) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return { error: "You must be logged in to create a course" };
-  }
-
-  const parsedFormData = CourseSchema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description"),
-    year: formData.get("year"),
-    semester: formData.get("semester"),
-    courseSubjectId: formData.get("courseSubjectId"),
-  });
-
-  if (!parsedFormData.success) {
-    return { error: "Validation failed. Please check your input." };
-  }
-
-  const { name, description, year, semester, courseSubjectId } =
-    parsedFormData.data;
-
-  try {
-    // If courseSubjectId is provided, create a new instance of an existing subject
-    if (courseSubjectId) {
-      // Check if the subject exists and belongs to the user
-      const existingSubject = await prisma.courseSubject.findFirst({
-        where: {
-          id: courseSubjectId,
-          ownerId: session.user.id,
-        },
-      });
-
-      if (!existingSubject) {
-        return {
-          error:
-            "Course subject not found or you don't have permission to add instances to it.",
-        };
-      }
-
-      // Check if an instance with the same year and semester already exists
-      const existingInstance = await prisma.courseInstance.findFirst({
-        where: {
-          subjectId: courseSubjectId,
-          year,
-          semester,
-        },
-      });
-
-      if (existingInstance) {
-        return {
-          error: `An instance of this course for ${semester} ${year} already exists.`,
-        };
-      }
-
-      // Create a new course instance
-      const newInstance = await prisma.courseInstance.create({
-        data: {
-          year,
-          semester,
-          isActive: true,
-          subjectId: courseSubjectId,
-        },
-      });
-
-      revalidatePath("/dashboard/courses");
-      return { success: true, instance: newInstance };
-    }
-    // If no courseSubjectId, create a new course subject and its first instance
-    else {
-      // Create a new course subject
-      const newSubject = await prisma.courseSubject.create({
-        data: {
-          name,
-          description,
-          ownerId: session.user.id,
-          // Create the first instance of this course
-          courseInstances: {
-            create: {
-              year,
-              semester,
-              isActive: true,
-            },
-          },
-        },
-        include: {
-          courseInstances: true,
-        },
-      });
-
-      revalidatePath("/dashboard/courses");
-      return { success: true, subject: newSubject };
-    }
-  } catch (error) {
-    console.error("Error creating course:", error);
-    return { error: "Failed to create course. Please try again." };
-  }
-}
 
 export async function createUser(prevState: any, formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
-  const hashedPassword = await bcrypt.hash(password, 10)
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
     // Create the user first
@@ -461,7 +370,7 @@ export async function createUser(prevState: any, formData: FormData) {
         email,
         password: hashedPassword,
       },
-    })
+    });
 
     // Create default dashboard preferences with hardcoded values
     await prisma.dashboardPreference.create({
@@ -505,15 +414,14 @@ export async function createUser(prevState: any, formData: FormData) {
           },
         },
       },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error creating user:", error)
-    return { error: "Failed to create user. Please try again." }
+    console.error("Error creating user:", error);
+    return { error: "Failed to create user. Please try again." };
   }
 }
-
 
 export async function handleSignOut() {
   await signOut({ redirectTo: "/" });
@@ -602,7 +510,6 @@ export async function updateRepository(
       courseInstanceId: formData.get("courseInstanceId"),
       username: formData.get("username"),
       repoName: formData.get("repoName"),
-      organization: formData.get("organization"),
     });
 
     if (!parsedFormData.success) {
@@ -612,8 +519,7 @@ export async function updateRepository(
       };
     }
 
-    const { courseInstanceId, username, repoName, organization, id } =
-      parsedFormData.data;
+    const { courseInstanceId, username, repoName, id } = parsedFormData.data;
 
     const courseInstance = await prisma.courseInstance.findFirst({
       where: {
@@ -644,9 +550,18 @@ export async function updateRepository(
       data: {
         username: username,
         repoName: repoName,
-        organization: organization,
       },
     });
+
+    const result = await updateRepositoryData(username, repoName, id);
+    if (!result.success) {
+      console.error("Error updating repository data:", result.error);
+      return {
+        error: "Failed to update repository data. Please try again.",
+        success: false,
+      };
+    }
+
     return {
       success: true,
       message: `Repository updated successfully`,
@@ -683,33 +598,29 @@ export async function saveCoverageReport(
     // Use the internal ID for all subsequent operations
     const internalRepoId = repository.id;
 
-    // Check if there's an existing coverage report for this repository and branch
     const existingReport = await prisma.coverageReport.findFirst({
       where: {
         repositoryId: internalRepoId,
-        branch: branch, // Use the branch from the parameter
+        branch: branch,
       },
     });
 
     let savedCoverageReport;
 
     if (existingReport) {
-      // Update the existing report
-      // First delete all related file coverages
       await prisma.fileCoverage.deleteMany({
         where: {
           coverageReportId: existingReport.id,
         },
       });
 
-      // Then update the report itself
       savedCoverageReport = await prisma.coverageReport.update({
         where: {
           id: existingReport.id,
         },
         data: {
           commit,
-          branch, // Update branch in case it changed
+          branch,
           timestamp: new Date(),
           statements: metrics.statements,
           branches: metrics.branches,
@@ -731,12 +642,11 @@ export async function saveCoverageReport(
         },
       });
     } else {
-      // Create a new coverage report
       savedCoverageReport = await prisma.coverageReport.create({
         data: {
           repositoryId: internalRepoId,
           commit,
-          branch: branch, // Use the provided branch name
+          branch: branch,
           statements: metrics.statements,
           branches: metrics.branches,
           functions: metrics.functions,
@@ -761,7 +671,7 @@ export async function saveCoverageReport(
     return {
       success: true,
       coverageReport: savedCoverageReport,
-      repository: repository, // Include the repository info in the result
+      repository: repository,
     };
   } catch (error) {
     console.error("Error saving coverage report:", error);
@@ -775,9 +685,7 @@ export async function updateRepositoryFiles(
   commit: string,
   fileData: FileData[],
 ): Promise<FileSetResult> {
-  // The transaction already knows the repository exists since we're passing its ID
   return await prisma.$transaction(async (prisma) => {
-    // Try to find an existing file set for this repository and branch
     const existingFileSet = await prisma.fileSet.findFirst({
       where: {
         repositoryId: repositoryId,
@@ -786,14 +694,12 @@ export async function updateRepositoryFiles(
     });
 
     if (existingFileSet) {
-      // Delete all existing files in this file set
       await prisma.file.deleteMany({
         where: {
           fileSetId: existingFileSet.id,
         },
       });
 
-      // Update the existing file set
       return await prisma.fileSet.update({
         where: {
           id: existingFileSet.id,
@@ -810,7 +716,6 @@ export async function updateRepositoryFiles(
         },
       });
     } else {
-      // Create a new file set
       return await prisma.fileSet.create({
         data: {
           repositoryId: repositoryId,
@@ -868,7 +773,3 @@ export async function deleteCourseInstance(id: string) {
     return { success: false, error: "Failed to delete course instance." };
   }
 }
-
-
-
-

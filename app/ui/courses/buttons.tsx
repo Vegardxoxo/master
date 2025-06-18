@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { useState } from "react";
-import {toast, useToast} from "@/hooks/use-toast";
+import { toast, useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,

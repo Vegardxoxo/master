@@ -1,15 +1,15 @@
 import {
-  FileText,
-  FileCode,
-  FileJson,
-  FileImage,
+  AlertTriangle,
+  Database,
   File,
+  FileCode,
+  FileImage,
+  FileJson,
+  FileText,
+  FileType,
   Folder,
   FolderOpen,
-  FileType,
-  AlertTriangle,
   Lock,
-  Database,
 } from "lucide-react";
 
 const sensitivePatterns = [

@@ -1,24 +1,16 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
+  Cell,
   Legend,
+  ResponsiveContainer,
   Scatter,
   ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
   ZAxis,
-  Cell,
-  BarChart,
-  Bar,
 } from "recharts";
 import { useState } from "react";
 import {
@@ -28,39 +20,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import type { PullRequestData } from "@/app/lib/definitions/definitions";
 import PullRequestsMembersTable from "@/app/ui/dashboard/pull_requests/pull-requests-members-table";
-import {COLORS} from "@/app/lib/placeholder-data";
-
+import { COLORS } from "@/app/lib/placeholder-data";
 
 export function PullRequestsComments({ data }: { data: PullRequestData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<any[] | null>(null);
 
-  const handleDataClick = (data: any) => {
-    setSelectedMetric(data.name);
-    setSelectedData(
-      data.reviewsByMember ? data.reviewsByMember[data.name].prs : data.prs,
-    );
-    setIsDialogOpen(true);
-  };
 
   const commentsByMembers = Object.entries(data.commentsByMembers || {}).map(
     ([name, count]) => ({ name, count }),
   );
-
-
-
-
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -78,7 +50,6 @@ export function PullRequestsComments({ data }: { data: PullRequestData }) {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Pull Request Comments</CardTitle>
-
       </CardHeader>
 
       <CardContent>
@@ -116,7 +87,9 @@ export function PullRequestsComments({ data }: { data: PullRequestData }) {
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
-          ): <div>No comments have been made so far.</div>}
+          ) : (
+            <div>No comments have been made so far.</div>
+          )}
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

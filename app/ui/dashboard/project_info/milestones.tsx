@@ -8,7 +8,7 @@ import {
 import { Calendar, CheckCircle2, Clock, Target } from "lucide-react";
 import Warning from "@/app/ui/dashboard/alerts/warning";
 import Link from "next/link";
-import {getMilestones} from "@/app/lib/database-functions/repository-data";
+import { getMilestones } from "@/app/lib/database-functions/repository-data";
 
 export default async function Milestones({
   owner,
@@ -17,7 +17,7 @@ export default async function Milestones({
   owner: string;
   repo: string;
 }) {
-  const { milestones} = await getMilestones(owner, repo);
+  const { milestones } = await getMilestones(owner, repo);
 
   return (
     <Card className="w-full h-full">

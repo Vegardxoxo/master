@@ -1,21 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FileText } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Dynamically import the markdown editor to avoid SSR issues
-const MDEditor = dynamic(() => import("@uiw/react-md-editor").then((mod) => mod.default), { ssr: false })
+const MDEditor = dynamic(
+  () => import("@uiw/react-md-editor").then((mod) => mod.default),
+  { ssr: false },
+);
 
 interface MarkdownEditorProps {
-  value: string
-  onChange: (value: string | undefined) => void
-  title?: string
-  previewMode?: "live" | "edit" | "preview"
-  height?: number
+  value: string;
+  onChange: (value: string | undefined) => void;
+  title?: string;
+  previewMode?: "live" | "edit" | "preview";
+  height?: number;
 }
 
 export default function MarkdownEditor({
@@ -25,24 +28,24 @@ export default function MarkdownEditor({
   previewMode = "live",
   height = 400,
 }: MarkdownEditorProps) {
-  const { toast } = useToast()
-  const [mounted, setMounted] = useState(false)
+  const { toast } = useToast();
+  const [mounted, setMounted] = useState(false);
 
   // Handle SSR
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(value)
+    navigator.clipboard.writeText(value);
     toast({
       title: "Copied to clipboard",
       description: "The markdown content has been copied to your clipboard.",
-    })
-  }
+    });
+  };
 
   if (!mounted) {
-    return null
+    return null;
   }
 
   return (
@@ -66,6 +69,5 @@ export default function MarkdownEditor({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-
