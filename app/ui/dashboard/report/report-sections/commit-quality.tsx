@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GenericDataTable } from "@/app/ui/courses/tables/generic-data-table";
 import { commitMessageClassification } from "@/app/ui/courses/columns";
@@ -6,7 +5,6 @@ import { ReportSectionProps } from "@/app/lib/definitions/definitions";
 import { Separator } from "@/components/ui/separator";
 
 export function CommitQualitySection({ metrics, include }: ReportSectionProps) {
-
   if (!include || !metrics) {
     return (
       <Card>

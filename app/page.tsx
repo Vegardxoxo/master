@@ -1,7 +1,7 @@
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import Image from "next/image";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
   return (
@@ -52,17 +52,24 @@ export default function LandingPage() {
         {/* Login/Signup Buttons */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/login">
-            <Button size="lg" className="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 px-8">
+            <Button
+              size="lg"
+              className="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 px-8"
+            >
               Log in
             </Button>
           </Link>
           <Link href="/signup">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto px-8">
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto px-8"
+            >
               Sign up
             </Button>
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }

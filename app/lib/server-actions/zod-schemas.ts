@@ -1,10 +1,4 @@
 import { z } from "zod";
-
-export const SignupSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
 export const CourseSchema = z.object({
   name: z.string().min(1, "Course name is required"),
   description: z.string().optional(),
@@ -44,7 +38,6 @@ export const UpdateRepositorySchema = z.object({
   repoName: z.string().min(1, "Repository name is required"),
 });
 
-
 export const preferencesSchema = z.object({
   preferences: z.any(),
-})
+});

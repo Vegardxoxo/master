@@ -1,5 +1,5 @@
-import {PullRequestsComments} from "./pull-requests-comments";
-import {getPullRequests} from "@/app/lib/database-functions/repository-data";
+import { PullRequestsComments } from "./pull-requests-comments";
+import { getPullRequests } from "@/app/lib/database-functions/repository-data";
 
 export default async function PullRequestsCommentsWrapper({
   owner,
@@ -8,7 +8,7 @@ export default async function PullRequestsCommentsWrapper({
   owner: string;
   repo: string;
 }) {
-  const {data, success} = await getPullRequests(owner, repo);
+  const { data, success } = await getPullRequests(owner, repo);
   return (
     <div className="space-y-8">
       <PullRequestsComments data={data} />

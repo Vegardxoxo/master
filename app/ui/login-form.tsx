@@ -12,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { AtSign, Key, AlertCircle, ArrowRight } from "lucide-react";
-import {Button} from "@/app/ui/button";
+import { AlertCircle, ArrowRight, AtSign, Key } from "lucide-react";
+import { Button } from "@/app/ui/button";
 import Link from "next/link";
 
 export default function LoginForm() {
@@ -25,7 +25,9 @@ export default function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-lg transition-all duration-300 hover:shadow-xl">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Welcome back
+        </CardTitle>
         <CardDescription className={"text-center"}>
           Please log in to your account to continue
         </CardDescription>

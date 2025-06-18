@@ -1,5 +1,3 @@
-import { getModels } from "@/app/lib/model";
-
 export default async function Page() {
   // const models = await getModels();
   // console.log(models);

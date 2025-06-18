@@ -5,7 +5,7 @@ interface WarningProps {
   message: string;
 }
 
-export default function Warning({title, message}: WarningProps) {
+export default function Warning({ title, message }: WarningProps) {
   return (
     <div className="p-6 border-b border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 rounded-t-lg">
       <div className="flex items-start gap-3">

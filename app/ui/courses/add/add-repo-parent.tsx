@@ -1,15 +1,15 @@
-"use client"
-import { AddRepositoryForm } from "@/app/ui/courses/add/add-repo-manually"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Plus, X } from "lucide-react"
+"use client";
+import { AddRepositoryForm } from "@/app/ui/courses/add/add-repo-manually";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, X } from "lucide-react";
 
 export default function AddRepoParent({
   courseInstanceId,
 }: {
-  courseInstanceId: string
+  courseInstanceId: string;
 }) {
-  const [hidden, setHidden] = useState<boolean>(true)
+  const [hidden, setHidden] = useState<boolean>(true);
 
   return (
     <div className="flex flex-col">
@@ -41,5 +41,5 @@ export default function AddRepoParent({
         )}
       </div>
     </div>
-  )
+  );
 }

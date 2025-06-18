@@ -1,4 +1,11 @@
-import { GitBranch, FileCode, GitPullRequest, Shield, Zap, RefreshCw } from "lucide-react"
+import {
+  FileCode,
+  GitBranch,
+  GitPullRequest,
+  RefreshCw,
+  Shield,
+  Zap,
+} from "lucide-react";
 
 export default function Home() {
   return (
@@ -15,9 +22,10 @@ export default function Home() {
 
       <div className="mb-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-sm">
         <p className="text-gray-800 leading-relaxed">
-          GitTrack leverages GitHub Actions to automatically receive key metrics and updates from student repositories.
-          This is achieved by setting up custom workflows in each student repository that are triggered on push and
-          pull_request events to the main or master branch.
+          GitTrack leverages GitHub Actions to automatically receive key metrics
+          and updates from student repositories. This is achieved by setting up
+          custom workflows in each student repository that are triggered on push
+          and pull_request events to the main or master branch.
         </p>
       </div>
 
@@ -36,7 +44,9 @@ export default function Home() {
             </div>
             <h3 className="font-bold">list_files.yml</h3>
           </div>
-          <p className="text-gray-600">Lists all committed files in the repository</p>
+          <p className="text-gray-600">
+            Lists all committed files in the repository
+          </p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -46,7 +56,9 @@ export default function Home() {
             </div>
             <h3 className="font-bold">notify_updates.yml</h3>
           </div>
-          <p className="text-gray-600">Signals that new updates are available</p>
+          <p className="text-gray-600">
+            Signals that new updates are available
+          </p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -56,7 +68,9 @@ export default function Home() {
             </div>
             <h3 className="font-bold">upload_coverage.yml</h3>
           </div>
-          <p className="text-gray-600">Sends test coverage data to the application</p>
+          <p className="text-gray-600">
+            Sends test coverage data to the application
+          </p>
         </div>
       </div>
 
@@ -69,19 +83,24 @@ export default function Home() {
         </div>
         <div className="p-8">
           <p className="mb-6 text-gray-800 leading-relaxed">
-            The <code>upload_coverage.yml</code> workflow begins by checking out the repository using the{" "}
-            <code>checkout@v4</code> action. It then sets up a Node.js environment via <code>setup-node@v4</code>,
-            followed by installing project dependencies with <code>npm install</code>.
+            The <code>upload_coverage.yml</code> workflow begins by checking out
+            the repository using the <code>checkout@v4</code> action. It then
+            sets up a Node.js environment via <code>setup-node@v4</code>,
+            followed by installing project dependencies with{" "}
+            <code>npm install</code>.
           </p>
           <p className="mb-4 text-gray-800 leading-relaxed">
             After building the project, tests are run using the command{" "}
-            <code>npm test -- --coverage --coverageReporters="json-summary"</code>, which generates a Jest coverage
-            summary report.
+            <code>
+              npm test -- --coverage --coverageReporters="json-summary"
+            </code>
+            , which generates a Jest coverage summary report.
           </p>
           <p className="text-gray-800 leading-relaxed">
-            Finally, a custom script is executed to format this data into a JSON payload, which is sent to GitTrack's{" "}
-            <code>/coverage</code> endpoint. The backend parses, stores, and displays the resulting data in the
-            dashboard.
+            Finally, a custom script is executed to format this data into a JSON
+            payload, which is sent to GitTrack's <code>/coverage</code>{" "}
+            endpoint. The backend parses, stores, and displays the resulting
+            data in the dashboard.
           </p>
         </div>
       </div>
@@ -95,15 +114,19 @@ export default function Home() {
         </div>
         <div className="p-8">
           <p className="mb-6 text-gray-800 leading-relaxed">
-            The <code>list_files.yml</code> workflow also uses the <code>checkout</code> action but skips the install
-            and build steps. Instead, it runs a custom script to generate a JSON-formatted list of files in the
-            repository.
+            The <code>list_files.yml</code> workflow also uses the{" "}
+            <code>checkout</code> action but skips the install and build steps.
+            Instead, it runs a custom script to generate a JSON-formatted list
+            of files in the repository.
           </p>
           <p className="text-gray-800 leading-relaxed">
-            Since GitTrack primarily analyzes projects from a web development course, special handling is included to
-            avoid listing thousands of subfolders under <code>node_modules</code> in the case this is not included in
-            git ignore. Instead, this folder is summarized as a single entry. The resulting file list is then sent to
-            GitTrack's <code>/files</code> API route, where it is parsed, stored, and visualized.
+            Since GitTrack primarily analyzes projects from a web development
+            course, special handling is included to avoid listing thousands of
+            subfolders under <code>node_modules</code> in the case this is not
+            included in git ignore. Instead, this folder is summarized as a
+            single entry. The resulting file list is then sent to GitTrack's{" "}
+            <code>/files</code> API route, where it is parsed, stored, and
+            visualized.
           </p>
         </div>
       </div>
@@ -117,10 +140,11 @@ export default function Home() {
         </div>
         <div className="p-8">
           <p className="text-gray-800 leading-relaxed">
-            The final action, <code>notify_updates.yml</code>, sends a lightweight payload to the{" "}
-            <code>/alert-update</code> route, indicating that new changes have been pushed. This event triggers a
-            backend function that fetches and updates relevant data for the repository such as recent commits and pull
-            requests.
+            The final action, <code>notify_updates.yml</code>, sends a
+            lightweight payload to the <code>/alert-update</code> route,
+            indicating that new changes have been pushed. This event triggers a
+            backend function that fetches and updates relevant data for the
+            repository such as recent commits and pull requests.
           </p>
         </div>
       </div>
@@ -134,12 +158,15 @@ export default function Home() {
         </div>
         <div className="p-8">
           <p className="text-gray-800 leading-relaxed">
-            All workflows rely on two repository secrets defined in each student repository: <code>API_ENDPOINT</code>{" "}
-            and <code>WEBHOOK_SECRET</code>. These values ensure that payloads are sent to the correct URL and can be
-            verified securely by the GitTrack backend.
+            All workflows rely on two repository secrets defined in each student
+            repository: <code>API_ENDPOINT</code> and{" "}
+            <code>WEBHOOK_SECRET</code>. These values ensure that payloads are
+            sent to the correct URL and can be verified securely by the GitTrack
+            backend.
           </p>
           <p className="mt-6 text-gray-800 leading-relaxed">
-            Secrets are encrypted and never exposed in the repository, providing a secure and reliable integration.
+            Secrets are encrypted and never exposed in the repository, providing
+            a secure and reliable integration.
           </p>
         </div>
       </div>
@@ -150,7 +177,9 @@ export default function Home() {
           Benefits
         </h2>
 
-        <p className="mb-6 text-gray-800">This architecture yields several benefits:</p>
+        <p className="mb-6 text-gray-800">
+          This architecture yields several benefits:
+        </p>
 
         <ul className="space-y-5">
           <li className="flex items-start">
@@ -158,7 +187,8 @@ export default function Home() {
               <Zap className="h-4 w-4 text-blue-600" />
             </div>
             <span className="leading-relaxed">
-              It enables the collection of metrics that are not accessible through GitHub's APIs such as test coverage.
+              It enables the collection of metrics that are not accessible
+              through GitHub's APIs such as test coverage.
             </span>
           </li>
           <li className="flex items-start">
@@ -166,8 +196,9 @@ export default function Home() {
               <Zap className="h-4 w-4 text-blue-600" />
             </div>
             <span className="leading-relaxed">
-              It avoids regularly polling GitHub's API to fetch data by instead relying on a push-based model that
-              updates GitTrack only when new data is available.
+              It avoids regularly polling GitHub's API to fetch data by instead
+              relying on a push-based model that updates GitTrack only when new
+              data is available.
             </span>
           </li>
           <li className="flex items-start">
@@ -175,7 +206,8 @@ export default function Home() {
               <Zap className="h-4 w-4 text-blue-600" />
             </div>
             <span className="leading-relaxed">
-              It allows the dashboard to stay continuously and automatically updated without any manual input.
+              It allows the dashboard to stay continuously and automatically
+              updated without any manual input.
             </span>
           </li>
         </ul>
@@ -185,5 +217,5 @@ export default function Home() {
         <p>GitTrack GitHub Actions Documentation</p>
       </footer>
     </div>
-  )
+  );
 }

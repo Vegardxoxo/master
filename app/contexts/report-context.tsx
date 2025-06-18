@@ -1,10 +1,10 @@
 "use client";
 import {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
   useState,
-  useCallback,
-  type ReactNode,
 } from "react";
 
 type MetricData = {
@@ -34,7 +34,9 @@ type ReportContextType = {
 const ReportContext = createContext<ReportContextType | undefined>(undefined);
 
 export function ReportProvider({ children }: { children: ReactNode }) {
-  const [metricsData, setMetricsData] = useState<Record<string, MetricData>>({});
+  const [metricsData, setMetricsData] = useState<Record<string, MetricData>>(
+    {},
+  );
   const [repositoryInfo, setRepositoryInfoState] = useState<
     RepositoryInfo | undefined
   >(undefined);
@@ -62,15 +64,12 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     [metricsData],
   );
 
-  const addImageUrls = useCallback(
-    (key: string, imageUrls: string[]) => {
-      setImageData((prev) => ({
-        ...prev,
-        [key]: imageUrls,
-      }));
-    },
-    [],
-  );
+  const addImageUrls = useCallback((key: string, imageUrls: string[]) => {
+    setImageData((prev) => ({
+      ...prev,
+      [key]: imageUrls,
+    }));
+  }, []);
 
   // Get stored image URLs for a given key
   const getImageUrls = useCallback(

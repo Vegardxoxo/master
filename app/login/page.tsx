@@ -1,11 +1,11 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import LoginForm from "@/app/ui/login-form"
+import type { Metadata } from "next";
+import LoginForm from "@/app/ui/login-form";
 
 export const metadata: Metadata = {
   title: "Login | GitHub Student Dashboard",
-  description: "Login to access the GitHub student repository monitoring dashboard",
-}
+  description:
+    "Login to access the GitHub student repository monitoring dashboard",
+};
 
 export default function LoginPage() {
   return (
@@ -14,6 +14,5 @@ export default function LoginPage() {
         <LoginForm />
       </div>
     </div>
-  )
+  );
 }
-

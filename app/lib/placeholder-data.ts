@@ -1,59 +1,79 @@
 // placeholder data
 
-import { Home, Settings } from "lucide-react";
-import {CommitEval, LLMResponse, Payment, repositoryOverview, VisibleSections} from "@/app/lib/definitions/definitions";
-
+import {
+  LLMResponse,
+  VisibleSections,
+} from "@/app/lib/definitions/definitions";
 
 export async function getDummyModelData(): Promise<LLMResponse[]> {
   return [
     {
-      url: "https://github.com/IT2810-H24/T01-Project-2/commit/a1b2c3",
+      url: "a1b2c3",
       commit_message:
         "Set up project structure and added initial configuration",
-      category: "Excellent",
-      reason: "Clear and descriptive message reflecting the changes made",
+      category: "Good",
+      reason:
+        "Clearly states what was done but does not explain the motivation or give specifics about the configuration.",
     },
     {
-      url: "https://github.com/IT2810-H24/T02-Project-2/commit/d4e5f6",
+      url: "d4e5f6",
       commit_message: "Implemented user authentication feature",
       category: "Good",
       reason:
-        "Descriptive but could include more specifics about the implementation",
+        "Describes the main change (adding authentication), yet lacks detail on scope, methods, or rationale.",
     },
     {
-      url: "https://github.com/IT2810-H24/T03-Project-2/commit/g7h8i9",
+      url: "g7h8i9",
       commit_message: "Fixed issue with login validation",
-      category: "Needs Improvement",
-      reason: "Message lacks detail about the specific problem and solution",
-    },
-    {
-      url: "https://github.com/IT2810-H24/T04-Project-2/commit/j1k2l3",
-      commit_message: "Refactored API calls for better performance",
-      category: "Good",
-      reason: "Message is clear but could provide a more detailed context",
-    },
-    {
-      url: "https://github.com/IT2810-H24/T05-Project-2/commit/m4n5o6",
-      commit_message: "Added detailed contributor guidelines in README",
-      category: "Excellent",
-      reason: "Very clear and helpful for future collaborators",
-    },
-    {
-      url: "https://github.com/IT2810-H24/T06-Project-2/commit/p7q8r9",
-      commit_message: "Optimized database queries for faster response times",
       category: "Good",
       reason:
-        "Message is descriptive but could specify what optimizations were made",
+        "Indicates a bug fix and its context (login validation) but omits the underlying cause or approach taken.",
     },
     {
-      url: "https://github.com/IT2810-H24/T07-Project-2/commit/s1t2u3",
-      commit_message: "Fixed typo in error messages displayed to users",
+      url: "j1k2l3",
+      commit_message:
+        "Refactored API calls for better performance. Resolves #23",
+      category: "Excellent",
+      reason:
+        "Specifies what was refactored, why (better performance), and links to the related issue.",
+    },
+    {
+      url: "m4n5o6",
+      commit_message: "Added detailed contributor guidelines in README",
+      category: "Excellent",
+      reason:
+        "Explains what changed (README guidelines) and implicitly why (to guide contributors), providing sufficient clarity and context.",
+    },
+    {
+      url: "p7q8r9",
+      commit_message: "changes",
       category: "Needs Improvement",
-      reason: "Message is accurate but too trivial for a single commit",
+      reason:
+        "Extremely vague; offers no insight into what was changed or why.",
+    },
+    {
+      url: "s1t2u3",
+      commit_message: "fix stuff",
+      category: "Needs Improvement",
+      reason:
+        "Provides neither detail about the problem nor the fix; lacks context entirely.",
+    },
+    {
+      url: "s1t2u3",
+      commit_message: "progress",
+      category: "Needs Improvement",
+      reason:
+        "Generic and uninformative; does not describe what progress was made.",
+    },
+    {
+      url: "s1t2u3",
+      commit_message: "FINALLY WORKING",
+      category: "Needs Improvement",
+      reason:
+        "Emotional statement without technical detail; fails to explain what is working or how.",
     },
   ];
 }
-
 
 export const defaultVisibleSections: VisibleSections = {
   overview: {
@@ -93,7 +113,7 @@ export const defaultVisibleSections: VisibleSections = {
     comments: { visible: true, text: "PR Comments" },
     reviews: { visible: true, text: "PR Review Process" },
   },
-}
+};
 
 export const COLORS = [
   "#0088FE",
@@ -115,4 +135,3 @@ export const COLORS = [
   "#1f78b4",
   "#b2df8a",
 ];
-

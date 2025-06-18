@@ -1,27 +1,35 @@
-"use client"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useState, useEffect } from "react"
-import { updateRepository } from "@/app/lib/server-actions/actions"
-import { useActionState } from "react"
-import { CheckCircle2, AlertCircle } from "lucide-react"
-import { Button } from "../../button"
-import { useToast } from "@/hooks/use-toast"
+"use client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useActionState, useEffect, useState } from "react";
+import { updateRepository } from "@/app/lib/server-actions/actions";
+import { Button } from "../../button";
+import { useToast } from "@/hooks/use-toast";
 
 export function UpdateRepositoryForm({
   repository,
   repositoryId,
 }: {
-  repository: any
-  repositoryId: string
+  repository: any;
+  repositoryId: string;
 }) {
-  const [formState, formAction, isPending] = useActionState(updateRepository, undefined)
-  const [username, setUsername] = useState<string>(repository.username)
-  const [repoName, setRepoName] = useState<string>(repository.repoName)
-  const [url, setUrl] = useState<string>(repository.url)
-  const isFormValid = username && repoName
-  const { toast } = useToast()
+  const [formState, formAction, isPending] = useActionState(
+    updateRepository,
+    undefined,
+  );
+  const [username, setUsername] = useState<string>(repository.username);
+  const [repoName, setRepoName] = useState<string>(repository.repoName);
+  const [url, setUrl] = useState<string>(repository.url);
+  const isFormValid = username && repoName;
+  const { toast } = useToast();
 
   // Watch for changes in formState and show toast notifications
   useEffect(() => {
@@ -30,34 +38,36 @@ export function UpdateRepositoryForm({
         title: "Success",
         description: formState.message || "Repository updated successfully",
         variant: "success",
-      })
+      });
     } else if (formState?.error) {
       toast({
         title: "Error",
         description: formState.error,
         variant: "destructive",
-      })
+      });
     }
-  }, [formState, toast])
+  }, [formState, toast]);
 
   useEffect(() => {
     if (username && repoName) {
-      setUrl(`https://github.com/${username}/${repoName}`)
+      setUrl(`https://github.com/${username}/${repoName}`);
     } else {
-      setUrl("")
+      setUrl("");
     }
-  }, [username, repoName])
+  }, [username, repoName]);
 
   const handleSubmit = async (formData: FormData) => {
-    formData.set("url", `https://github.com/${username}/${repoName}`)
-    return formAction(formData)
-  }
+    formData.set("url", `https://github.com/${username}/${repoName}`);
+    return formAction(formData);
+  };
 
   return (
     <Card className="w-[350px]">
       <form action={handleSubmit}>
         <CardHeader>
-          <CardTitle className={"text-2xl font-bold"}>Update Repository</CardTitle>
+          <CardTitle className={"text-2xl font-bold"}>
+            Update Repository
+          </CardTitle>
           <CardDescription>Edit the repository details.</CardDescription>
         </CardHeader>
 
@@ -68,7 +78,11 @@ export function UpdateRepositoryForm({
 
             {/* Hidden field for course instance ID */}
             {repository.courseInstanceId && (
-              <input type="hidden" name="courseInstanceId" value={repository.courseInstanceId} />
+              <input
+                type="hidden"
+                name="courseInstanceId"
+                value={repository.courseInstanceId}
+              />
             )}
 
             <div className="flex flex-col space-y-1.5">
@@ -110,7 +124,11 @@ export function UpdateRepositoryForm({
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={!isFormValid || isPending}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!isFormValid || isPending}
+          >
             {isPending ? "Updating..." : "Update Repository"}
           </Button>
 
@@ -130,5 +148,5 @@ export function UpdateRepositoryForm({
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

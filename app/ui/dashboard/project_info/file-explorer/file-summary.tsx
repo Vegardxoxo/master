@@ -1,4 +1,4 @@
-import { Lock, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Lock } from "lucide-react";
 import { isSensitiveFile, isWarningFile } from "./file-icon";
 import { useReport } from "@/app/contexts/report-context";
 import { useEffect } from "react";

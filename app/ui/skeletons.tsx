@@ -1,8 +1,8 @@
 // Loading animation
-import {Skeleton} from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const shimmer =
-  'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
+  "before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent";
 
 export function CardSkeleton() {
   return (
@@ -19,8 +19,6 @@ export function CardSkeleton() {
     </div>
   );
 }
-
-
 
 export default function DashboardSkeleton() {
   return (
@@ -45,19 +43,19 @@ export function CommitQualityChartSkeleton() {
       <div className="h-[200px] relative">
         <Skeleton className="h-full  rounded-full" /> {/* Pie chart skeleton */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Skeleton className="h-2/3 w-2/3 rounded-full" /> {/* Inner circle skeleton */}
+          <Skeleton className="h-2/3 w-2/3 rounded-full" />{" "}
+          {/* Inner circle skeleton */}
         </div>
       </div>
       <div className="flex justify-center gap-4 mt-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-center">
-            <Skeleton className="h-4 w-4 rounded-full mr-2" /> {/* Legend color dot */}
+            <Skeleton className="h-4 w-4 rounded-full mr-2" />{" "}
+            {/* Legend color dot */}
             <Skeleton className="h-4 w-16" /> {/* Legend text */}
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
-
-

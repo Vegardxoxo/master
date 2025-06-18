@@ -17,14 +17,11 @@ import PipelineActions from "@/app/ui/dashboard/pipeline/pipeline-actions";
 import DirectCommitsWrapper from "@/app/ui/dashboard/branches/direct-commits-wrapper";
 import Milestones from "@/app/ui/dashboard/project_info/milestones";
 import Link from "next/link";
-import { cn } from "@/app/lib/utils/utils";
-import { lusitana } from "@/app/ui/fonts";
 import BranchConnectionsWrapper from "@/app/ui/dashboard/branches/branch-connections-wrapper";
-import { notFound } from "next/navigation";
-import { checkConnection } from "@/app/lib/data/github-api-functions";
 import LanguageDistributionWrapper from "@/app/ui/dashboard/project_info/language-distribution-wrapper";
 import PullRequestVsIssuesWrapper from "@/app/ui/dashboard/branches/pull-request-vs-issues-wrapper";
 import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions/helper-functions";
+import { notFound } from "next/navigation";
 
 export default async function Page(props: {
   params: Promise<{ owner: string; repo: string }>;
@@ -33,13 +30,11 @@ export default async function Page(props: {
   const owner = params.owner;
   const repo = params.repo;
 
-  // const url = await checkConnection(owner, repo);
-  //
-  // if (typeof url !== "string") {
-  //   notFound();
-  // }
-const {repository} = await findRepositoryByOwnerRepo(owner, repo);
+  const { repository, success } = await findRepositoryByOwnerRepo(owner, repo);
 
+  if (!success && !repository) {
+    notFound();
+  }
 
   return (
     <div className="container mx-auto py-6">

@@ -1,40 +1,17 @@
 import { saveChartImage } from "@/app/lib/server-actions/chart-actions";
 import { toast } from "@/hooks/use-toast";
 
-export const exportChart = async (
-  chartRef: any,
-  setIsExporting: (value: boolean) => void,
-  filename: string,
-) => {
-  console.log("Exporting chart...");
-  if (!chartRef.current) return;
-  setIsExporting(true);
-
-  try {
-    const html2canvas = (await import("html2canvas")).default;
-    const canvas = await html2canvas(chartRef.current, {
-      backgroundColor: "#ffff",
-      scale: 2,
-      logging: false,
-    });
-
-    const link = document.createElement("a");
-    link.download = `${filename}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    setIsExporting(false);
-  }
-};
-
 type UploadChartProps = {
   chartRef: any;
   setIsUploading: (value: boolean) => void;
   owner: string;
   repo: string;
-  chartType: "COMMIT_FREQUENCY" | "COMMIT_SIZE" | "CONTRIBUTIONS" | "PULL_REQUESTS" | "COMMIT_CHANGED_FILES";
+  chartType:
+    | "COMMIT_FREQUENCY"
+    | "COMMIT_SIZE"
+    | "CONTRIBUTIONS"
+    | "PULL_REQUESTS"
+    | "COMMIT_CHANGED_FILES";
 };
 
 export const uploadChartToServer = async ({

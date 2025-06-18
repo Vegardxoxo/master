@@ -261,32 +261,35 @@ const codes = [
 
 // drop duplicates
 const courses = Array.from(
-    new Map(codes.map(course => [course.code, course])).values()
+  new Map(codes.map((course) => [course.code, course])).values(),
 );
 
-import {prisma} from '@/app/lib/prisma';
-
+import { prisma } from "@/app/lib/prisma";
 
 async function main() {
-  console.log(`Starting to insert ${courses.length} unique courses into the database...`);
+  console.log(
+    `Starting to insert ${courses.length} unique courses into the database...`,
+  );
 
   // Use createMany for bulk insertion with skipDuplicates to handle any existing courses
   const result = await prisma.course.createMany({
-    data: courses.map(course => ({
+    data: courses.map((course) => ({
       code: course.code,
-      name: course.name
+      name: course.name,
     })),
     skipDuplicates: true, // Skip records that already exist in the database
   });
 
-  console.log(`Successfully inserted ${result.count} new courses into the database.`);
+  console.log(
+    `Successfully inserted ${result.count} new courses into the database.`,
+  );
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

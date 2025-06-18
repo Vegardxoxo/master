@@ -22,7 +22,7 @@ import { GitHubIssue } from "@/app/lib/definitions/pull-requests";
 // });
 
 const octokit = new Octokit({
-    auth: process.env.SUPER_TOKEN,
+  auth: process.env.SUPER_TOKEN,
 });
 
 /**

@@ -5,7 +5,6 @@ import {
 } from "@/app/lib/database-functions/database-functions";
 import { DataTable } from "@/app/ui/courses/tables/overview-table";
 import { repositoryOverviewColumns } from "@/app/ui/courses/columns";
-import { PlusCircle } from "lucide-react";
 import { DeleteCourseInstance } from "@/app/ui/courses/buttons";
 
 interface pageProps {
@@ -65,10 +64,11 @@ export default async function CoursePage(props: {
             {semesterDisplay} {year}
           </h2>
         </div>
-        <div className={"flex justify-end mb-2"}>  <DeleteCourseInstance id={courseInstance.id} /></div>
+        <div className={"flex justify-end mb-2"}>
+          <DeleteCourseInstance id={courseInstance.id} />
+        </div>
 
-
-          <AddRepoParent courseInstanceId={courseInstance.id} />
+        <AddRepoParent courseInstanceId={courseInstance.id} />
 
         {hasRepositories ? (
           <div className="mt-8">

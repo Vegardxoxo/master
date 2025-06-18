@@ -35,7 +35,10 @@ export default function DirectCommits({
 }: DirectCommitsProps) {
   const { addMetricData, getRepositoryInfo } = useReport();
   useEffect(() => {
-    addMetricData("directCommits", commits.length, [sortedAuthors, authorCount]);
+    addMetricData("directCommits", commits.length, [
+      sortedAuthors,
+      authorCount,
+    ]);
   }, [commits, sortedAuthors, authorCount]);
 
   return (

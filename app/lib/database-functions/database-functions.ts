@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from "@/app/lib/prisma";
 
 import { auth } from "@/auth";
 import {
@@ -9,12 +9,10 @@ import {
   FileCoverageData,
   FileSetResult,
   Repository,
-  UserCourse,
+  UserCourse
 } from "@/app/lib/definitions/definitions";
-import {fetchContributors} from "@/app/lib/data/github-api-functions";
-import {findRepositoryByOwnerRepo} from "@/app/lib/database-functions/helper-functions";
-import {revalidatePath} from "next/cache";
-
+import { findRepositoryByOwnerRepo } from "@/app/lib/database-functions/helper-functions";
+import { revalidatePath } from "next/cache";
 
 /**
  * Fetches all courses the user is enrolled in with their instances
@@ -84,8 +82,6 @@ export async function getCourseCatalog() {
     };
   }
 }
-
-
 
 export async function getRepository(
   id: string,
@@ -252,8 +248,6 @@ export async function getCourseInstance(
     };
   }
 }
-
-
 
 /**
  * Fetches all files for a specific repository and branch
@@ -450,8 +444,8 @@ export async function fetchGraphUrl(
 }
 
 export async function setReportGenerated(
-    owner: string,
-    repo: string
+  owner: string,
+  repo: string,
 ): Promise<{
   success: boolean;
   error?: string;
@@ -519,6 +513,3 @@ export async function setReportGenerated(
     };
   }
 }
-
-
-

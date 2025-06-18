@@ -1,15 +1,12 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { useActionState } from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import { enrollInCourse } from "@/app/lib/server-actions/actions";
 import type { Course, UserCourse } from "@/app/lib/definitions/definitions";
-import {Search, CheckCircle2, AlertCircle, ArrowLeft} from "lucide-react";
+import { AlertCircle, CheckCircle2, Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {Button} from "@/app/ui/button";
-import {Button as Button2} from "@/components/ui/button"
-import {usePathname, useRouter} from "next/navigation";
+import { Button } from "@/app/ui/button";
 
 interface AddCourseProps {
   courses: Course[];
@@ -29,7 +26,6 @@ export function AddCourse({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
 
   const availableCourses = courses.filter(
     (course) => !enrolledCourseIds.includes(course.id),
@@ -67,7 +63,6 @@ export function AddCourse({
     },
     [selectedCourse, enrolledCourseIds, formAction],
   );
-
 
   return (
     <div>

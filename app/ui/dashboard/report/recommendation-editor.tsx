@@ -1,15 +1,21 @@
-"use client"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+"use client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 interface RecommendationEditorProps {
-  value: string
-  onChange: (value: string) => void
-  title: string
-  description?: string
-  sectionId: string
-  onFocus?: (sectionId: string) => void
-  height?: number
+  value: string;
+  onChange: (value: string) => void;
+  title: string;
+  description?: string;
+  sectionId: string;
+  onFocus?: (sectionId: string) => void;
+  height?: number;
 }
 
 export default function RecommendationEditor({
@@ -22,9 +28,9 @@ export default function RecommendationEditor({
 }: RecommendationEditorProps) {
   const handleFocus = () => {
     if (onFocus) {
-      onFocus(sectionId)
+      onFocus(sectionId);
     }
-  }
+  };
 
   return (
     <Card>
@@ -42,6 +48,5 @@ export default function RecommendationEditor({
         />
       </CardContent>
     </Card>
-  )
+  );
 }
-
